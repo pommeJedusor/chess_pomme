@@ -98,6 +98,8 @@ ws_server.on('connection', function(socket) {
 					socket_games[game.player_1] = undefined;
 					socket_games[game.player_2] = undefined;
 					id_games[game.id] = undefined;
+					game.player_1.close();
+					game.player_2.close();
 				}
 			}else socket.send("E:C'est au tour de l'autre joueur");
 		}
