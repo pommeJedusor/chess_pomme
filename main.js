@@ -97,7 +97,7 @@ ws_server.on('connection', function(socket) {
 				const current_player = [game.player_1, game.player_2][player_turn-1];
 				game.moves.push(move);
 				//update the timer of the current player
-				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves[game.moves.length-3].timestamp;
+				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves[game.moves.length-2].timestamp;
 				console.log(game.player_1.total_timestamp/1000);
 				console.log(game.player_2.total_timestamp/1000);
 				game.player_1.socket.send(msg);
