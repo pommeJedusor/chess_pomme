@@ -74,32 +74,41 @@ ws_server.on('connection', function(socket) {
 			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
-				let game = new Game.Game(socket, id);
+				let player = new Game.Player(socket, 60000);
+				let game = new Game.Game(player, id);
 				socket_games[socket_id] = game;
 				id_games[game.id] = game;
 			}else if (id_games[id].player_2===undefined){
 				console.log("player 2 join the game");
 				let game = id_games[id]
-				game.player_2 = socket;
+				let player = new Game.Player(socket, 60000);
+				game.player_2 = player;
 				socket_games[socket_id] = game;
 			}else {
 				socket.send("E:la partie est déjà complète");
 			}
 		}else{
 			let game = socket_games[socket_id];
-			if (game===undefined)socket.send("E:vous n'avez rejoint aucune partie");
-			else if (game.player_2===undefined)socket.send("E:l'autre joueur n'as pas encore rejoint la partie");
-			else if ((game.player_1===socket && game.moves.length%2==0) || (game.player_2===socket && game.moves.length%2==1)){
-				game.moves.push(msg);
-				game.player_1.send(msg);
-				game.player_2.send(msg);
+			if (game===undefined){socket.send("E:vous n'avez rejoint aucune partie");return}
+			const player_turn = game.moves.length%2+1;
+			if (game.player_2===undefined)socket.send("E:l'autre joueur n'as pas encore rejoint la partie");
+			else if ((game.player_1.socket===socket && player_turn===1) || (game.player_2.socket===socket && player_turn===2)){
+				const move = new Game.Move(msg, Date.now(), player_turn);
+				const current_player = [game.player_1, game.player_2][player_turn-1];
+				game.moves.push(move);
+				//update the timer of the current player
+				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves[game.moves.length-3].timestamp;
+				console.log(game.player_1.total_timestamp/1000);
+				console.log(game.player_2.total_timestamp/1000);
+				game.player_1.socket.send(msg);
+				game.player_2.socket.send(msg);
 				console.log("recieve: " + msg);
 				if (msg[msg.length-1]==="#"){
 					socket_games[game.player_1] = undefined;
 					socket_games[game.player_2] = undefined;
 					id_games[game.id] = undefined;
-					game.player_1.close();
-					game.player_2.close();
+					game.player_1.socket.close();
+					game.player_2.socket.close();
 				}
 			}else socket.send("E:C'est au tour de l'autre joueur");
 		}

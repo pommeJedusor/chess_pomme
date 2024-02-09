@@ -7,4 +7,19 @@
             this.moves = [];
         }
     }
+    
+    module.exports.Move = class Move{
+        constructor(move, timestamp, player){
+            this.player = player;
+            this.move = move;
+            this.timestamp = timestamp;
+        }
+    }
+
+    module.exports.Player = class Player{
+        constructor(socket, total_timestamp){
+            this.socket = socket;
+            this.total_timestamp = total_timestamp;
+        }
+    }
 }());
