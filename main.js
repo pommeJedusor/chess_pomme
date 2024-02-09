@@ -64,27 +64,32 @@ const ws_server = new WebSocket.Server({
 let sockets = [];
 ws_server.on('connection', function(socket) {
 	sockets.push(socket);
+	const socket_id = Math.floor(Math.random()*1000000)
 
 	socket.on('message', function(msg) {
 		msg = msg.toString();
+		console.log("socket id: "+socket_id);
 		if (/ID:\d*$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
 			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
 				let game = new Game.Game(socket, id);
-				socket_games[socket] = game;
+				socket_games[socket_id] = game;
 				id_games[game.id] = game;
 			}else if (id_games[id].player_2===undefined){
 				console.log("player 2 join the game");
 				let game = id_games[id]
 				game.player_2 = socket;
-				socket_games[socket] = game;
+				socket_games[socket_id] = game;
+			}else {
+				socket.send("E:la partie est déjà complète");
 			}
 		}else{
-			let game = socket_games[socket];
-			if (game===undefined || game.player_2===undefined)return;
-			if ((game.player_1===socket && game.moves.length%2==0) || (game.player_2===socket && game.moves.length%2==1)){
+			let game = socket_games[socket_id];
+			if (game===undefined)socket.send("E:vous n'avez rejoint aucune partie");
+			else if (game.player_2===undefined)socket.send("E:l'autre joueur n'as pas encore rejoint la partie");
+			else if ((game.player_1===socket && game.moves.length%2==0) || (game.player_2===socket && game.moves.length%2==1)){
 				game.moves.push(msg);
 				game.player_1.send(msg);
 				game.player_2.send(msg);
@@ -94,7 +99,7 @@ ws_server.on('connection', function(socket) {
 					socket_games[game.player_2] = undefined;
 					id_games[game.id] = undefined;
 				}
-			}
+			}else socket.send("E:C'est au tour de l'autre joueur");
 		}
 	});
 

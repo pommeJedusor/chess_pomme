@@ -10,6 +10,19 @@ ws.onopen = () => {
 
 ws.onmessage = (event) => {
     console.log("recieve: "+event.data);
+    //remove last error message
+    const last_error = document.querySelector(".error");
+    if (last_error)last_error.remove();
+
+    //if error
+    if (/^E:/.test(event.data)){
+        const error_box = document.createElement("p");
+        error_box.classList.add("error");
+        const main = document.querySelector("main");
+        error_box.textContent = event.data.replace(/^E:/, "");
+        main.insertAdjacentElement('beforeend', error_box);
+        return;
+    }
     const new_move = document.createElement("div");
     const moves = document.getElementById("moves");
 
