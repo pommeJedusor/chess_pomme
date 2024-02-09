@@ -16,7 +16,14 @@ const server = http.createServer(function (req, res){
 			return
 		case "/js/chess.js":
 			fs.readFile("./js/chess.js",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/html'});
+				res.writeHead(200, {'Content-Type':'text/javascript'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/css/style.css":
+			fs.readFile("./css/style.css",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/css'});
 				res.write(data);
 				res.end()
 			})
@@ -47,7 +54,8 @@ ws_server.on('connection', function(socket) {
 
 	socket.on('message', function(msg) {
 		console.log("recieve: " + msg);
-		socket.send("pomme " + msg);
+		socket.send(msg.toString());
+		socket.send("e6");
 	});
 
 	socket.on('close', function() {

@@ -1,0 +1,7 @@
+#moves {
+    display: flex;
+    flex-wrap: wrap;
+}
+.move {
+    width: 50%;
+}
