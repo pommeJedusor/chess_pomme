@@ -1,15 +1,42 @@
 const http = require('http');
 const fs = require('fs');
 const WebSocket = require('ws');
+
+const Game = require("./Game");
+
 const port = 8080;
+
+let socket_games = [];
+let id_games = [];
 
 const server = http.createServer(function (req, res){
 	const url = req.url;
-	console.log(url);
-	switch (url){
+	console.log(url.replace(/\?.*/gm, ""));
+	switch (url.replace(/\?.*/gm, "")){
 		case "/":
 			fs.readFile("./html/index.html",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/html'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/game":
+			fs.readFile("./html/game.html",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/html'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/js/chess.js":
+			fs.readFile("./js/chess.js",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/javascript'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/css/style.css":
+			fs.readFile("./css/style.css",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/css'});
 				res.write(data);
 				res.end()
 			})
@@ -37,12 +64,58 @@ const ws_server = new WebSocket.Server({
 let sockets = [];
 ws_server.on('connection', function(socket) {
 	sockets.push(socket);
+	const socket_id = Math.floor(Math.random()*1000000)
 
 	socket.on('message', function(msg) {
-		socket.send(msg);
+		msg = msg.toString();
+		console.log("socket id: "+socket_id);
+		if (/ID:\d*$/.test(msg)){
+			const id = msg.match(/(?<=ID:)\d*$/)[0];
+			console.log();
+			if (id_games[id]===undefined){
+				console.log("player 1 create the game");
+				let player = new Game.Player(socket, 60000);
+				let game = new Game.Game(player, id);
+				socket_games[socket_id] = game;
+				id_games[game.id] = game;
+			}else if (id_games[id].player_2===undefined){
+				console.log("player 2 join the game");
+				let game = id_games[id]
+				let player = new Game.Player(socket, 60000);
+				game.player_2 = player;
+				socket_games[socket_id] = game;
+			}else {
+				socket.send("E:la partie est déjà complète");
+			}
+		}else{
+			let game = socket_games[socket_id];
+			if (game===undefined){socket.send("E:vous n'avez rejoint aucune partie");return}
+			const player_turn = game.moves.length%2+1;
+			if (game.player_2===undefined)socket.send("E:l'autre joueur n'as pas encore rejoint la partie");
+			else if ((game.player_1.socket===socket && player_turn===1) || (game.player_2.socket===socket && player_turn===2)){
+				const move = new Game.Move(msg, Date.now(), player_turn);
+				const current_player = [game.player_1, game.player_2][player_turn-1];
+				game.moves.push(move);
+				//update the timer of the current player
+				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves[game.moves.length-2].timestamp;
+				console.log(game.player_1.total_timestamp/1000);
+				console.log(game.player_2.total_timestamp/1000);
+				game.player_1.socket.send(msg);
+				game.player_2.socket.send(msg);
+				console.log("recieve: " + msg);
+				if (msg[msg.length-1]==="#"){
+					socket_games[game.player_1] = undefined;
+					socket_games[game.player_2] = undefined;
+					id_games[game.id] = undefined;
+					game.player_1.socket.close();
+					game.player_2.socket.close();
+				}
+			}else socket.send("E:C'est au tour de l'autre joueur");
+		}
 	});
 
 	socket.on('close', function() {
+		console.log("socket closed");
 		sockets = sockets.filter(s => s !== socket);
 	});
 });
