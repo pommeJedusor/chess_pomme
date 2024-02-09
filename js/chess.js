@@ -1,4 +1,4 @@
-ws = new WebSocket('ws://localhost:3000')
+ws = new WebSocket(location.href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
 
 ws.onopen = () => {
     console.log("WebSocket connection opened");
