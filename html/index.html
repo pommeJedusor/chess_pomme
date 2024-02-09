@@ -4,32 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <script type="text/javascript" src="../js/chess.js"></script>
 </head>
 <body>
     <h1>Home</h1>
-    <script>
-        ws = new WebSocket('ws://localhost:3000')
-        // Listen to the open event, which indicates the connection is established
-        ws.onopen = () => {
-            console.log("WebSocket connection opened");
-            // Send a message to the server
-            ws.send("Hello");
-        };
-
-        // Listen to the message event, which contains the data received from the server
-        ws.onmessage = (event) => {
-            console.log("server:", event.data);
-        };
-
-        // Listen to the close event, which indicates the connection is closed
-        ws.onclose = (event) => {
-            console.log("WebSocket connection closed");
-        };
-
-        // Listen to the error event, which indicates there is an error with the connection
-        ws.onerror = (error) => {
-            console.error("WebSocket error:", error);
-        };
-    </script>
+    <form id="chess_form" onsubmit="event.preventDefault(); send_move();">
+        <input type="text" name="move" id="move">
+        <input type="submit">
+    </form>
 </body>
 </html>
