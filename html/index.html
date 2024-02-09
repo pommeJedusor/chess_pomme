@@ -4,18 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <script type="text/javascript" src="../js/chess.js"></script>
 </head>
 <body>
     <h1>Home</h1>
-    <main>
-        <form id="chess_form" onsubmit="event.preventDefault(); send_move();">
-            <input type="text" name="move_text" id="move_text">
-            <input type="submit">
-        </form>
-        <div id="moves">
-        </div>
-    </main>
+    <form id="game_form" method="get" action="./game">
+        <input type="text" name="id_game" id="id_game">
+        <input type="submit">
+    </form>
 </body>
 </html>

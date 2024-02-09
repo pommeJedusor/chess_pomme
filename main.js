@@ -1,14 +1,27 @@
 const http = require('http');
 const fs = require('fs');
 const WebSocket = require('ws');
+
+const Game = require("./Game");
+
 const port = 8080;
+
+let socket_games = [];
+let id_games = [];
 
 const server = http.createServer(function (req, res){
 	const url = req.url;
-	console.log(url);
-	switch (url){
+	console.log(url.replace(/\?.*/gm, ""));
+	switch (url.replace(/\?.*/gm, "")){
 		case "/":
 			fs.readFile("./html/index.html",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/html'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/game":
+			fs.readFile("./html/game.html",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/html'});
 				res.write(data);
 				res.end()
@@ -53,9 +66,29 @@ ws_server.on('connection', function(socket) {
 	sockets.push(socket);
 
 	socket.on('message', function(msg) {
-		console.log("recieve: " + msg);
-		socket.send(msg.toString());
-		socket.send("e6");
+		msg = msg.toString();
+		if (/ID:\d*$/.test(msg)){
+			const id = msg.match(/(?<=ID:)\d*$/)[0];
+			console.log();
+			if (id_games[id]===undefined){
+				console.log("player 1 create the game");
+				let game = new Game.Game(socket, id);
+				socket_games[socket] = game;
+				id_games[game.id] = game;
+			}else if (id_games[id].player_2===undefined){
+				console.log("player 2 join the game");
+				let game = id_games[id]
+				game.player_2 = socket;
+				socket_games[socket] = game;
+			}
+		}else{
+			let game = socket_games[socket];
+			if (game===undefined || (game.player_1!=socket && game.player_2!=socket))return;
+			game.moves.push(msg);
+			game.player_1.send(msg);
+			game.player_2.send(msg);
+			console.log("recieve: " + msg);
+		}
 	});
 
 	socket.on('close', function() {

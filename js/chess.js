@@ -2,13 +2,20 @@ ws = new WebSocket('ws://localhost:3000')
 
 ws.onopen = () => {
     console.log("WebSocket connection opened");
+    const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
+    if (!match_result)return
+    ws.send("ID:"+match_result[0])
+    
 };
 
 ws.onmessage = (event) => {
     console.log("recieve: "+event.data);
     const new_move = document.createElement("div");
     const moves = document.getElementById("moves");
-    new_move.textContent = event.data;
+
+    if (moves.childElementCount%2===0)new_move.textContent = moves.childElementCount/2+1 + ". " + event.data;
+    else new_move.textContent = event.data;
+
     new_move.classList.add("move")
     moves.appendChild(new_move);
 };
