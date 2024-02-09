@@ -83,11 +83,18 @@ ws_server.on('connection', function(socket) {
 			}
 		}else{
 			let game = socket_games[socket];
-			if (game===undefined || (game.player_1!=socket && game.player_2!=socket))return;
-			game.moves.push(msg);
-			game.player_1.send(msg);
-			game.player_2.send(msg);
-			console.log("recieve: " + msg);
+			if (game===undefined || game.player_2===undefined)return;
+			if ((game.player_1===socket && game.moves.length%2==0) || (game.player_2===socket && game.moves.length%2==1)){
+				game.moves.push(msg);
+				game.player_1.send(msg);
+				game.player_2.send(msg);
+				console.log("recieve: " + msg);
+				if (msg[msg.length-1]==="#"){
+					socket_games[game.player_1] = undefined;
+					socket_games[game.player_2] = undefined;
+					id_games[game.id] = undefined;
+				}
+			}
 		}
 	});
 
