@@ -23,6 +23,17 @@ ws.onmessage = (event) => {
         main.insertAdjacentElement('beforeend', error_box);
         return;
     }
+    if (/^R:/.test(event.data)){
+        const main = document.querySelector("main")
+        const result = document.createElement("p");
+        result.classList.add("game_result");
+
+        result.textContent = "you have won: ";
+        if (event.data[2]==="L")result.textContent = "you have lost: ";
+        result.textContent += event.data.replace(/^R:(L|W):/, "")
+        main.insertAdjacentElement('beforeend', result);
+        return;
+    }
     const new_move = document.createElement("div");
     const moves = document.getElementById("moves");
 

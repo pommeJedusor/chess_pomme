@@ -74,14 +74,14 @@ ws_server.on('connection', function(socket) {
 			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
-				let player = new Game.Player(socket, 60000);
+				let player = new Game.Player(socket, socket_id, 60000);
 				let game = new Game.Game(player, id);
 				socket_games[socket_id] = game;
 				id_games[game.id] = game;
 			}else if (id_games[id].player_2===undefined){
 				console.log("player 2 join the game");
 				let game = id_games[id]
-				let player = new Game.Player(socket, 60000);
+				let player = new Game.Player(socket, socket_id, 60000);
 				game.player_2 = player;
 				socket_games[socket_id] = game;
 			}else {
@@ -98,24 +98,30 @@ ws_server.on('connection', function(socket) {
 				game.moves.push(move);
 				//update the timer of the current player
 				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves[game.moves.length-2].timestamp;
+				if (current_player.total_timestamp<=0){
+					const winner = game.player_1===current_player ? game.player_2 : game.player_1;
+					sockets = game.finish(winner, "time out", id_games, socket_games, sockets);
+					return;
+				}
 				console.log(game.player_1.total_timestamp/1000);
 				console.log(game.player_2.total_timestamp/1000);
 				game.player_1.socket.send(msg);
 				game.player_2.socket.send(msg);
 				console.log("recieve: " + msg);
 				if (msg[msg.length-1]==="#"){
-					socket_games[game.player_1] = undefined;
-					socket_games[game.player_2] = undefined;
-					id_games[game.id] = undefined;
-					game.player_1.socket.close();
-					game.player_2.socket.close();
+					const winner = current_player;
+					sockets = game.finish(winner, "checkmate", id_games, socket_games, sockets);
 				}
 			}else socket.send("E:C'est au tour de l'autre joueur");
 		}
 	});
 
 	socket.on('close', function() {
+		const game = socket_games[socket_id];
+		if (!game)return;
+		const winner = game.player_1.socket===socket ? game.player_2 : game.player_1;
+
+		sockets = game.finish(winner, "the other player quit", id_games, socket_games, sockets);
 		console.log("socket closed");
-		sockets = sockets.filter(s => s !== socket);
 	});
 });
