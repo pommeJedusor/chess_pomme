@@ -5,6 +5,7 @@ const KING = 3;
 const BISHOP = 4;
 const ROOK = 5;
 const KNIGHT = 6;
+const QUEEN = 7;
 const COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
 class Board{
@@ -184,12 +185,22 @@ class Knight extends Piece {
         return moves;
     }
 }
-//exports.Queen = class Queen extends Piece{}
+class Queen extends Piece {
+    constructor(x, y, color){
+        super(x, y, color, QUEEN);
+    }
+    get_moves(board){
+        const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1],//rook
+                      [1, 1], [1, -1], [-1, 1], [-1, -1]];//bishop
+        return this.generic_get_moves(board, dirs, "Q");
+    }
+}
 exports.Board = Board;
 exports.Pawn = Pawn;
 exports.King = King;
 exports.Bishop = Bishop;
 exports.Rook = Rook;
 exports.Knight = Knight;
+exports.Queen = Queen;
 exports.WHITE = WHITE;
 exports.BLACK = BLACK;
