@@ -2,6 +2,7 @@ const WHITE = 0;
 const BLACK = 1;
 const PAWN = 2;
 const KING = 3;
+const BISHOP = 4;
 const COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
 class Board{
@@ -120,12 +121,41 @@ class King extends Piece{
         return moves;
     }
 }
+class Bishop extends Piece{
+    constructor(x, y, color){
+        super(x, y, color, BISHOP);
+    }
+    get_moves(board){
+        let moves = [];
+        const dirs = [-1, 1];
+        for (const dir_y of dirs){
+            for (const dir_x of dirs){
+                let i=1;
+                let y = this.y+dir_y;
+                let x = this.x+dir_x;
+                while (!(y<0 || x<0 || y>7 || x>7)){
+                    const square = COLUMNS[x]+(y+1).toString();
+                    if (board.board[y][x]===0)moves.push("B"+square);
+                    else if (board.board[y][x].color!==this.color){
+                        moves.push("Bx"+square);
+                        break;
+                    }
+                    i++;
+                    y = this.y+(dir_y*i);
+                    x = this.x+(dir_x*i);
+                }
+            }
+        }
+        return moves;
+    }
+}
 //exports.Queen = class Queen extends Piece{}
 //exports.Bishop = class Bishop extends Piece{}
 //exports.Knight = class Knight extends Piece{}
 //exports.Rook = class Rook extends Piece{}
 exports.Pawn = Pawn;
 exports.King = King;
+exports.Bishop = Bishop;
 exports.Board = Board;
 exports.WHITE = WHITE;
 exports.BLACK = BLACK;
