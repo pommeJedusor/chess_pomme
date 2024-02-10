@@ -1,14 +1,3 @@
-Piece = class Piece{
-    constructor(x, y, color, name){
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.name = name;
-    }
-    get_moves(board, last_move){
-        return [];
-    }
-}
 exports.Game = class Game{
     constructor(player_1, id){
         this.player_1 = player_1;

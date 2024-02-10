@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const WebSocket = require('ws');
 
-const Game = require("./Game");
+const Game = require("./js_modules/Game");
 
 const port = 8080;
 
@@ -14,28 +14,28 @@ const server = http.createServer(function (req, res){
 	console.log(url.replace(/\?.*/gm, ""));
 	switch (url.replace(/\?.*/gm, "")){
 		case "/":
-			fs.readFile("./html/index.html",function(err, data){
+			fs.readFile("./public/html/index.html",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/html'});
 				res.write(data);
 				res.end()
 			})
 			return
 		case "/game":
-			fs.readFile("./html/game.html",function(err, data){
+			fs.readFile("./public/html/game.html",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/html'});
 				res.write(data);
 				res.end()
 			})
 			return
 		case "/js/chess.js":
-			fs.readFile("./js/chess.js",function(err, data){
+			fs.readFile("./public/js/chess.js",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/javascript'});
 				res.write(data);
 				res.end()
 			})
 			return
 		case "/css/style.css":
-			fs.readFile("./css/style.css",function(err, data){
+			fs.readFile("./public/css/style.css",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/css'});
 				res.write(data);
 				res.end()
