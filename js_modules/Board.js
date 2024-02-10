@@ -3,6 +3,7 @@ const BLACK = 1;
 const PAWN = 2;
 const KING = 3;
 const BISHOP = 4;
+const ROOK = 5;
 const COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
 class Board{
@@ -37,6 +38,27 @@ class Piece{
         this.y = y;
         this.color = color;
         this.type = type;
+    }
+    generic_get_moves(board, dirs, letter){
+        let moves = [];
+        for (const dir of dirs){
+            let y = this.y+dir[0];
+            let x = this.x+dir[1];
+            let i = 1;
+            while (!(y<0 || x<0 || y>7 || x>7)){
+                const square = COLUMNS[x]+(y+1).toString();
+                if (board.board[y][x]===0)moves.push(letter+square);
+                else if (board.board[y][x].color===this.color)break;
+                else if (board.board[y][x].color!==this.color){
+                    moves.push(letter+"x"+square);
+                    break;
+                }
+                i++;
+                y = this.y+(dir[0]*i);
+                x = this.x+(dir[1]*i);
+            }
+        }
+        return moves;
     }
 }
 
@@ -126,36 +148,25 @@ class Bishop extends Piece{
         super(x, y, color, BISHOP);
     }
     get_moves(board){
-        let moves = [];
-        const dirs = [-1, 1];
-        for (const dir_y of dirs){
-            for (const dir_x of dirs){
-                let i=1;
-                let y = this.y+dir_y;
-                let x = this.x+dir_x;
-                while (!(y<0 || x<0 || y>7 || x>7)){
-                    const square = COLUMNS[x]+(y+1).toString();
-                    if (board.board[y][x]===0)moves.push("B"+square);
-                    else if (board.board[y][x].color!==this.color){
-                        moves.push("Bx"+square);
-                        break;
-                    }
-                    i++;
-                    y = this.y+(dir_y*i);
-                    x = this.x+(dir_x*i);
-                }
-            }
-        }
-        return moves;
+        const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+        return this.generic_get_moves(board, dirs, "B");
+    }
+}
+class Rook extends Piece {
+    constructor(x, y, color){
+        super(x, y, color, ROOK);
+    }
+    get_moves(board){
+        const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+        return this.generic_get_moves(board, dirs, "R");
     }
 }
 //exports.Queen = class Queen extends Piece{}
-//exports.Bishop = class Bishop extends Piece{}
 //exports.Knight = class Knight extends Piece{}
-//exports.Rook = class Rook extends Piece{}
+exports.Board = Board;
 exports.Pawn = Pawn;
 exports.King = King;
 exports.Bishop = Bishop;
-exports.Board = Board;
+exports.Rook = Rook;
 exports.WHITE = WHITE;
 exports.BLACK = BLACK;
