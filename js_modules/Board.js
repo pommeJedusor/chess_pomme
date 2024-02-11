@@ -74,6 +74,33 @@ class Board{
         }
         return moves;
     }
+    make_move(move){
+        this.moves.push(move);
+        //return the letter of the piece (and the colum/row if given) (if pawn return its current column)
+        const get_piece_reg = /(^[a-hNBKQR][a-h]?[1-8]?(?=x?[a-h][1-8][+#]?$)|^[a-h](?=[1-8]$))/;
+        //kingside rook
+        if (/^O-O[+#]?$/.test(move)){
+            const y = this.moves.length%2===0 ? 0 : 7;
+            const king = this.board[y][4];
+            const rook = this.board[y][7];
+            king.move(this, king.x+2, y);
+            rook.move(this, rook.x-2, y);
+            return;
+        }
+        //queenside rook
+        if (/^O-O-O[+#]?$/.test(move)){
+            const y = this.moves.length%2===0 ? 0 : 7;
+            const king = this.board[y][4];
+            const rook = this.board[y][0];
+            king.move(this, king.x-2, y);
+            rook.move(this, rook.x+3, y);
+            return;
+        }
+        const piece = move.match(get_piece_reg)[0];
+        const target_x = COLUMNS.indexOf(move.at(-2));
+        const target_y = Number(move.at(-1));
+        return piece;
+    }
 }
 
 class Piece{
