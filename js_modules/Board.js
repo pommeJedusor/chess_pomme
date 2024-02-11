@@ -1,17 +1,27 @@
 const WHITE = 0;
 const BLACK = 1;
-const PAWN = 2;
-const KING = 3;
-const BISHOP = 4;
-const ROOK = 5;
-const KNIGHT = 6;
-const QUEEN = 7;
+const PAWN = "P";
+const KING = "K";
+const BISHOP = "B";
+const ROOK = "R";
+const KNIGHT = "N";
+const QUEEN = "Q";
 const COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
 class Board{
     constructor(){
         this.board = this.get_new_board();
         this.moves = [];
+    }
+    see_board(){
+        for (const line of this.board){
+            let text = "";
+            for (const square of line){
+                if (square===0)text+=" ";
+                else text+=square.type;
+            }
+            console.log(text);
+        }
     }
     get_new_board(){
         let board = [];
@@ -21,6 +31,29 @@ class Board{
                 line.push(0);
             }
             board.push(line);
+        }
+
+        let pieces = [];
+        //pawns
+        for (let i=0;i<8;i++){
+            pieces.push(new Pawn(i, 1, WHITE), new Pawn(i, 6, BLACK));
+        }
+        //queen
+        pieces.push(new Queen(3, 0, WHITE), new Queen(3, 7, BLACK));
+        //king
+        pieces.push(new King(4, 0, WHITE), new King(4, 7, BLACK));
+        //bishop
+        pieces.push(new Bishop(2, 0, WHITE), new Bishop(2, 7, BLACK),
+                    new Bishop(5, 0, WHITE), new Bishop(5, 7, BLACK));
+        //knight
+        pieces.push(new Knight(1, 0, WHITE), new Knight(1, 7, BLACK),
+                    new Knight(6, 0, WHITE), new Knight(6, 7, BLACK));
+        //rook
+        pieces.push(new Rook(0, 0, WHITE), new Rook(0, 7, BLACK),
+                    new Rook(7, 0, WHITE), new Rook(7, 7, BLACK));
+
+        for (const piece of pieces){
+            board[piece.y][piece.x] = piece;
         }
         return board;
     }
