@@ -65,6 +65,15 @@ class Board{
         }
         return false;
     }
+    get_all_moves(){
+        let moves = [];
+        for (const lines of this.board){
+            for (const square of lines){
+                if (square && square.color===this.moves.length%2)moves = moves.concat([square, square.get_moves(this)]);
+            }
+        }
+        return moves;
+    }
 }
 
 class Piece{
@@ -117,7 +126,7 @@ class Pawn extends Piece{
             const single_move = COLUMNS[this.x]+(this.y+dir+1).toString();
             this.add_move(moves, single_move)
             //double forward i.g:e2->e4
-            if ([0,7].includes(this.y-dir) && board.board[this.y+dir+1][this.x]===0)moves.push(COLUMNS[this.x]+(this.y+dir+2).toString());
+            if ([0,7].includes(this.y-dir) && board.board[this.y+(dir*2)][this.x]===0)moves.push(COLUMNS[this.x]+(this.y+(dir*2)+1).toString());
         }
         //check the takes
         for (const side of [-1, 1]){
@@ -131,7 +140,7 @@ class Pawn extends Piece{
 
             //check if there is a pawn to take en-passant
             const en_passant = this.y===4-this.color && board.moves.at(-1)===COLUMNS[this.x+side]+(this.y+1).toString();
-            if (en_passant)continue;
+            if (!en_passant)continue;
             //check if the other pawn had already moved
             const move_searched = COLUMNS[this.x+side]+(this.y+dir+1).toString();
             if (board.check_move_append(move_searched, (this.color+1)%2))continue;
