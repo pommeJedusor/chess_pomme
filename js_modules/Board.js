@@ -83,6 +83,14 @@ class Piece{
         this.color = color;
         this.type = type;
     }
+    move(board, x, y){
+        const square = board.board[y][x];
+        board.board[y][x] = this;
+        board.board[this.y][this.x] = 0;
+        this.y = y;
+        this.x = x;
+        return square;
+    }
     generic_get_moves(board, dirs, letter){
         let moves = [];
         for (const dir of dirs){
@@ -185,6 +193,70 @@ class King extends Piece{
             }
         }
         return moves;
+    }
+    is_in_check(board){
+        //check pawn
+        const pawn_y = [1, -1][this.color];
+        const pawn_dirs = [[pawn_y, 1], [pawn_y, -1]];
+        for (const pawn_dir of pawn_dirs){
+            const y = this.y+pawn_dir[0];
+            const x = this.x+pawn_dir[1];
+            if (y<0 || y>7 || x<0 || x>7)continue;
+            const square = board.board[y][x];
+            if (square!==0 && square.type===PAWN && square.color!==this.color)return true;
+        }
+        //rook
+        const rook_dirs = [[1, 0], [-1, 0], [0, -1], [0, 1]];
+        for (const rook_dir of rook_dirs){
+            let i = 1;
+            let y = this.y+rook_dir[0];
+            let x = this.x+rook_dir[1];
+            while (!(x<0 || x>7 || y<0 || y>7)){
+                const square = board.board[y][x];
+                if (square && square.color!==this.color && [ROOK, QUEEN].includes(square.type))return true;
+                else if (square)break;
+                i++;
+                y = this.y+(rook_dir[0]*i);
+                x = this.x+(rook_dir[1]*i);
+            }
+        }
+        //bishop
+        const bishop_dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+        for (const bishop_dir of bishop_dirs){
+            let i = 1;
+            let y = this.y+bishop_dir[0];
+            let x = this.x+bishop_dir[1];
+            while (!(x<0 || x>7 || y<0 || y>7)){
+                const square = board.board[y][x];
+                if (square && square.color!==this.color && [BISHOP, QUEEN].includes(square.type))return true;
+                else if (square)break;
+                i++;
+                y = this.y+(bishop_dir[0]*i);
+                x = this.x+(bishop_dir[1]*i);
+            }
+        }
+        //knight
+        const knight_dirs = [[-1, 2], [-1, -2], [1, 2], [1, -2],
+                             [-2, 1], [-2, -1], [2, 1], [2, -1]];
+        for (const knight_dir of knight_dirs){
+            const y = this.y+knight_dir[0];
+            const x = this.x+knight_dir[1];
+            if (x<0 || x>7 || y<0 || y>7)continue;
+            const square = board.board[y][x];
+            if (square && square.color!==this.color && square.type===KNIGHT)return true;
+        }
+        //king
+        const king_dirs = [-1, 0, 1];
+        for (const dir1 of king_dirs){
+            for (const dir2 of king_dirs){
+                const y = this.y+dir1;
+                const x = this.x+dir2;
+                if (x<0 || x>7 || y<0 || y>7)continue;
+                const square = board.board[y][x];
+                if (square && square.color!==this.color && square.type===KING)return true;
+            }
+        }
+        return false;
     }
 }
 class Bishop extends Piece{
