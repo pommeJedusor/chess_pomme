@@ -75,9 +75,11 @@ class Board{
         return moves;
     }
     make_move(move){
-        this.moves.push(move);
         //return the letter of the piece (and the colum/row if given) (if pawn return its current column)
         const get_piece_reg = /(^[a-hNBKQR][a-h]?[1-8]?(?=x?[a-h][1-8][+#]?$)|^[a-h](?=[1-8]$))/;
+        const piece = move.match(get_piece_reg)[0];
+        const target_x = COLUMNS.indexOf(move.at(-2));
+        const target_y = Number(move.at(-1))-1;
         //kingside rook
         if (/^O-O[+#]?$/.test(move)){
             const y = this.moves.length%2===0 ? 0 : 7;
@@ -85,20 +87,38 @@ class Board{
             const rook = this.board[y][7];
             king.move(this, king.x+2, y);
             rook.move(this, rook.x-2, y);
-            return;
         }
         //queenside rook
-        if (/^O-O-O[+#]?$/.test(move)){
+        else if (/^O-O-O[+#]?$/.test(move)){
             const y = this.moves.length%2===0 ? 0 : 7;
             const king = this.board[y][4];
             const rook = this.board[y][0];
             king.move(this, king.x-2, y);
             rook.move(this, rook.x+3, y);
-            return;
         }
-        const piece = move.match(get_piece_reg)[0];
-        const target_x = COLUMNS.indexOf(move.at(-2));
-        const target_y = Number(move.at(-1));
+        //pawn
+        else if (/^[a-h]{1,2}[1-8][+#]?$/.test(move)){
+            console.log(target_x, target_y);
+            const dir = this.moves.length%2===0 ? 1 : -1;
+            let square = this.board[target_y-dir][target_x];
+            if (square && square.type===PAWN){
+                square.move(this, target_x, target_y);
+            }else {
+                square = this.board[target_y-(dir*2)][target_x];
+                square.move(this, target_x, target_y);
+            }
+        }//pawn take
+        else if (/[a-h]x[a-h][1-8][+#]?/.test(move)){
+            const dir = this.moves.length%2===0 ? 1 : -1;
+            const current_x = COLUMNS.indexOf(piece);
+            const square = this.board[target_y-dir][current_x];
+            //en-passant
+            if (this.board[target_y][target_x]===0)this.board[target_y-dir][target_x]=0;
+            console.log(current_x, target_y-dir);
+            console.log(square);
+            square.move(this, target_x, target_y);
+        }
+        this.moves.push(move);
         return piece;
     }
 }
