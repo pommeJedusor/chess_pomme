@@ -76,12 +76,19 @@ class Board{
     }
     make_move(move){
         //return the letter of the piece (if pawn return its current column)
-        const get_piece_reg = /(^[a-hNBKQR](?=[a-h]?[1-8]?x?[a-h][1-8][+#]?$)|^[a-h](?=[1-8]$))/;
-        const piece = move.match(get_piece_reg)[0];
-        const target_x = COLUMNS.indexOf(move.at(-2));
-        const target_y = Number(move.at(-1))-1;
+        const piece = move[0];
+        const is_check = move.at(-1)==="+";
+        const is_mate = move.at(-1)==="#";
+        //to avoid getting bother becaus of the + or the #
+        if (is_check || is_mate)move = move.substr(0,move.length-1);
+        const is_taking = move.includes("x");
+        const target_square = move.substr(move.length-2);
+        const target_x = COLUMNS.indexOf(target_square[0]);
+        const target_y = Number(target_square[1])-1;
+        const clean_move = piece+(is_taking?"x":"")+target_square;
+        let piece_taken = 0;
         //kingside rook
-        if (/^O-O[+#]?$/.test(move)){
+        if (/^O-O$/.test(move)){
             const y = this.moves.length%2===0 ? 0 : 7;
             const king = this.board[y][4];
             const rook = this.board[y][7];
@@ -89,7 +96,7 @@ class Board{
             rook.move(this, rook.x-2, y);
         }
         //queenside rook
-        else if (/^O-O-O[+#]?$/.test(move)){
+        else if (/^O-O-O?$/.test(move)){
             const y = this.moves.length%2===0 ? 0 : 7;
             const king = this.board[y][4];
             const rook = this.board[y][0];
@@ -97,7 +104,7 @@ class Board{
             rook.move(this, rook.x+3, y);
         }
         //pawn
-        else if (/^[a-h]{1,2}[1-8][+#]?$/.test(move)){
+        else if (/[a-h]/.test(piece) && !is_taking){
             console.log(target_x, target_y);
             const dir = this.moves.length%2===0 ? 1 : -1;
             let square = this.board[target_y-dir][target_x];
@@ -108,15 +115,13 @@ class Board{
                 square.move(this, target_x, target_y);
             }
         }//pawn take
-        else if (/[a-h]x[a-h][1-8][+#]?/.test(move)){
+        else if (/[a-h]/.test(piece)){
             const dir = this.moves.length%2===0 ? 1 : -1;
             const current_x = COLUMNS.indexOf(piece);
             const square = this.board[target_y-dir][current_x];
             //en-passant
             if (this.board[target_y][target_x]===0)this.board[target_y-dir][target_x]=0;
-            console.log(current_x, target_y-dir);
-            console.log(square);
-            square.move(this, target_x, target_y);
+            piece_taken = square.move(this, target_x, target_y);
         }
         //get the pieces that could have done the move
         let squares = [];
@@ -130,7 +135,7 @@ class Board{
         //get the line and column if given in the move
         let column = null;
         let line = null;
-        if (/[a-h]/.test(move[1]) && move.length>3){
+        if (/[a-h]/.test(move[1]) && move.length>(3+/[+#]/.test(move.at(-1)))){
             column = COLUMNS.indexOf(move[1]);
             if (/[1-8]/.test(move[2]))line=Number(move[2])-1;
         }else{
@@ -138,14 +143,22 @@ class Board{
         }
         //if line or column precised filter
         let new_squares = [];
+        console.log(column, line)
         for (const square of squares){
             if ((square.x===column || column===null) && (square.y===line || line===null)){
                 new_squares.push(square);
             }
         }
+        for (const square of new_squares){
+            const moves = square.get_moves(this);
+            if (moves.includes(clean_move)){
+                piece_taken = square.move(this, target_x, target_y);
+                break;
+            }
+        }
         console.log(new_squares);
         this.moves.push(move);
-        return piece;
+        return piece_taken;
     }
 }
 
