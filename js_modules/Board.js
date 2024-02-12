@@ -14,9 +14,10 @@ class Board{
         this.moves = [];
     }
     see_board(){
-        for (const line of this.board){
+        for (let i=this.board.length-1;i>=0;i--){
             let text = "";
-            for (const square of line){
+            const squares = this.board[i];
+            for (const square of squares){
                 if (square===0)text+=" ";
                 else text+=square.type;
             }
