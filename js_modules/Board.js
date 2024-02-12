@@ -178,6 +178,12 @@ class Piece{
         this.x = x;
         return square;
     }
+    undo_move(board, x, y, piece){
+        board.board[y][x] = this;
+        board.board[this.y][this.x] = piece;
+        this.y = y;
+        this.x = x;
+    }
     generic_get_moves(board, dirs, letter){
         let moves = [];
         for (const dir of dirs){
