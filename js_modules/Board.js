@@ -75,8 +75,8 @@ class Board{
         return moves;
     }
     make_move(move){
-        //return the letter of the piece (and the colum/row if given) (if pawn return its current column)
-        const get_piece_reg = /(^[a-hNBKQR][a-h]?[1-8]?(?=x?[a-h][1-8][+#]?$)|^[a-h](?=[1-8]$))/;
+        //return the letter of the piece (if pawn return its current column)
+        const get_piece_reg = /(^[a-hNBKQR](?=[a-h]?[1-8]?x?[a-h][1-8][+#]?$)|^[a-h](?=[1-8]$))/;
         const piece = move.match(get_piece_reg)[0];
         const target_x = COLUMNS.indexOf(move.at(-2));
         const target_y = Number(move.at(-1))-1;
@@ -118,6 +118,32 @@ class Board{
             console.log(square);
             square.move(this, target_x, target_y);
         }
+        //get the pieces that could have done the move
+        let squares = [];
+        for (const lines of this.board){
+            for (const square of lines){
+                if (square && square.type===piece && square.color===this.moves.length%2){
+                    squares.push(square);
+                }
+            }
+        }
+        //get the line and column if given in the move
+        let column = null;
+        let line = null;
+        if (/[a-h]/.test(move[1]) && move.length>3){
+            column = COLUMNS.indexOf(move[1]);
+            if (/[1-8]/.test(move[2]))line=Number(move[2])-1;
+        }else{
+            if (/[1-8]/.test(move[1]))line=Number(move[1])-1;
+        }
+        //if line or column precised filter
+        let new_squares = [];
+        for (const square of squares){
+            if ((square.x===column || column===null) && (square.y===line || line===null)){
+                new_squares.push(square);
+            }
+        }
+        console.log(new_squares);
         this.moves.push(move);
         return piece;
     }
