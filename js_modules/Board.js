@@ -66,16 +66,16 @@ class Board{
         }
         return false;
     }
-    get_all_moves(){
-        let king;
+    get_all_moves(get_check=true){
+        let same_king;
+        let other_king;
         for (const lines of this.board){
             for (const square of lines){
-                if (square && square.color===this.moves.length%2 && square.type===KING){
-                    king = square;
-                    break;
+                if (square && square.type===KING){
+                    if (square.color===this.moves.length%2)same_king = square;
+                    else other_king = square;
                 }
             }
-            if (king)break;
         }
         let moves = [];
         let temp_moves = [];
@@ -90,12 +90,26 @@ class Board{
                     const y = Number(move.at(-1))-1;
                     const x = COLUMNS.indexOf(move.at(-2));
                     const temp_piece = square.move(this, x, y);
-                    if (!king.is_in_check(this))moves.at(-1)[1].push(move);
+                    if (!same_king.is_in_check(this)){
+                        if (get_check && other_king.is_in_check(this)){
+                            this.moves.push(move);
+                            if (this.get_all_moves(false).length>0)moves.at(-1)[1].push(move+"+");
+                            else moves.at(-1)[1].push(move+"#");
+                            this.moves.splice(-1,1);
+                        }
+                        else moves.at(-1)[1].push(move);
+                    }
                     square.undo_move(this, old_x, old_y, temp_piece);
                 }
+                if (moves.at(-1)[1].length===0)moves.splice(-1,1)
             }
         }
-        return moves;
+        if (get_check)return moves;
+        let final_moves = [];
+        for (const move of moves){
+            final_moves = final_moves.concat(move[1]);
+        }
+        return final_moves;
     }
     make_move(move){
         //return the letter of the piece (if pawn return its current column)
