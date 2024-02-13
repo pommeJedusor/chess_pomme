@@ -67,10 +67,32 @@ class Board{
         return false;
     }
     get_all_moves(){
-        let moves = [];
+        let king;
         for (const lines of this.board){
             for (const square of lines){
-                if (square && square.color===this.moves.length%2)moves = moves.concat([square, square.get_moves(this)]);
+                if (square && square.color===this.moves.length%2 && square.type===KING){
+                    king = square;
+                    break;
+                }
+            }
+            if (king)break;
+        }
+        let moves = [];
+        let temp_moves = [];
+        for (const lines of this.board){
+            for (const square of lines){
+                if (!square || square.color!==this.moves.length%2)continue;
+                moves.push([square, []])
+                const old_y = square.y;
+                const old_x = square.x;
+                temp_moves = square.get_moves(this);
+                for (const move of temp_moves){
+                    const y = Number(move.at(-1))-1;
+                    const x = COLUMNS.indexOf(move.at(-2));
+                    const temp_piece = square.move(this, x, y);
+                    if (!king.is_in_check(this))moves.at(-1)[1].push(move);
+                    square.undo_move(this, old_x, old_y, temp_piece);
+                }
             }
         }
         return moves;
