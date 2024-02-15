@@ -47,6 +47,23 @@ function get_dirs_knight_king(piece, board, dirs){
     return squares;
 }
 
+function get_dir_qrb(color, old_x, old_y, board, dir, deep=1){
+    const x = old_x+dir[0]*deep;
+    const y = old_y+dir[1]*deep;
+    if (!is_valid_square(x, y))return [];
+    if (board[y][x]===0)return [[x, y]].concat(get_dir_qrb(color, x, y, board, dir, deep+1));
+    if (board[y][x].color!==color)return [[x, y]];
+    return [];
+}
+//get the directions for the queen, the rook and the bishop
+function get_dirs_qrb(piece, board, dirs){
+    const good_dirs = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
+    console.log(good_dirs)
+    const good_dirs_filtered = good_dirs.filter((dir)=>dir.length>0);
+    const squares = good_dirs_filtered.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
+    return squares;
+}
+
 class Move{
     constructor(piece, current_x, current_y, target_x, target_y, is_taking=false){
         this.piece = piece;
@@ -131,49 +148,6 @@ class Board{
         }
         return false;
     }
-    get_all_moves(get_check=true){
-        const color = this.moves.length%2;
-        //get the two kings
-        const kings = get_pieces(this.board, function (square){
-            return square && square.type===KING;
-        }).sort();
-        const same_king = color===0 ? kings[0] : kings[1];
-        const other_king = color!==0 ? kings[0] : kings[1];
-
-        let moves = [];
-        let temp_moves = [];
-        for (const lines of this.board){
-            for (const square of lines){
-                if (!square || square.color!==color)continue;
-                moves.push([square, []])
-                const old_y = square.y;
-                const old_x = square.x;
-                temp_moves = square.get_moves(this);
-                for (const move of temp_moves){
-                    const y = Number(move.at(-1))-1;
-                    const x = COLUMNS.indexOf(move.at(-2));
-                    const temp_piece = square.move(this, x, y);
-                    if (!same_king.is_in_check(this)){
-                        if (get_check && other_king.is_in_check(this)){
-                            this.moves.push(move);
-                            if (this.get_all_moves(false).length>0)moves.at(-1)[1].push(move+"+");
-                            else moves.at(-1)[1].push(move+"#");
-                            this.moves.splice(-1,1);
-                        }
-                        else moves.at(-1)[1].push(move);
-                    }
-                    square.undo_move(this, old_x, old_y, temp_piece);
-                }
-                if (moves.at(-1)[1].length===0)moves.splice(-1,1)
-            }
-        }
-        if (get_check)return moves;
-        let final_moves = [];
-        for (const move of moves){
-            final_moves = final_moves.concat(move[1]);
-        }
-        return final_moves;
-    }
 }
 
 class Piece{
@@ -199,7 +173,6 @@ class Piece{
     }
     generic_get_moves(board){
         const squares = this.get_squares(board, this);
-        console.log(squares);
         const moves = squares.map((square)=>new Move(this.type, this.x, this.y, square[0], square[1]));
         return moves;
     }
@@ -363,9 +336,9 @@ class Rook extends Piece {
     constructor(x, y, color){
         super(x, y, color, ROOK);
     }
-    get_moves(board){
+    get_squares(board, piece){
         const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-        return this.generic_get_moves(board, dirs, "R");
+        return get_dirs_qrb(piece, board, dirs);
     }
 }
 class Knight extends Piece {
