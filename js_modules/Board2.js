@@ -197,12 +197,21 @@ class Pawn extends Piece{
         const direction = piece.color ? -1 : 1;
         //single and double push
         if (board[y+direction][x]===0){
-            dirs.push([0, direction]);
+            dirs.push([x, y+direction, false]);
             if (board[y+direction*2][x]===0 && (y===1 || y==6)){
-                dirs.push([0, direction*2]);
+                dirs.push([x, y+direction*2, false]);
             }
         }
-        return get_dirs_knight_king(piece, board, dirs);
+        //normal takes
+        const xys = [[x-1, y+direction], [x+1, y+direction]]
+        for (const xy of xys){
+            const x = xy[0];
+            const y = xy[1];
+            if (!is_valid_square(x, y))continue;
+            const square = board[y][x];
+            if (square && square.color!==piece.color)dirs.push([x, y, true]);
+        }
+        return dirs;
     }
 }
 class King extends Piece{
