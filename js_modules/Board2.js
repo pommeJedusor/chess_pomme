@@ -27,7 +27,7 @@ function is_valid_square(x, y){
 function dir_to_square(old_x, old_y, dir, board){
     const x = old_x+dir[0];
     const y = old_y+dir[1];
-    return [x, y, board[y][x]==true];
+    return [x, y, board[y][x]!==0];
 }
 
 function get_dirs_knight_king(piece, board, dirs){
@@ -67,8 +67,8 @@ function get_dirs_qrb(piece, board, dirs){
         }
     }
     console.log(final_dirs);
-    //const squares = final_dirs.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
-    return final_dirs;
+    const squares = final_dirs.map((dir)=>dir_to_square(0, 0, dir, board));
+    return squares;
 }
 
 class Move{
@@ -78,7 +78,7 @@ class Move{
         this.y = current_y;
         this.target_x = target_x;
         this.target_y = target_y;
-        this.is_taking = false;
+        this.is_taking = is_taking;
         this.is_check = false;
         this.is_mate = false;
     }
@@ -180,7 +180,8 @@ class Piece{
     }
     generic_get_moves(board){
         const squares = this.get_squares(board, this);
-        const moves = squares.map((square)=>new Move(this.type, this.x, this.y, square[0], square[1]));
+        console.log(squares);
+        const moves = squares.map((square)=>new Move(this.type, this.x, this.y, square[0], square[1], square[2]));
         return moves;
     }
 }
@@ -334,9 +335,9 @@ class Bishop extends Piece{
     constructor(x, y, color){
         super(x, y, color, BISHOP);
     }
-    get_moves(board){
-        const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-        return this.generic_get_moves(board, dirs, "B");
+    get_squares(board, piece) {
+        const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+        return get_dirs_qrb(piece, board, dirs);
     }
 }
 class Rook extends Piece {
