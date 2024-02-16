@@ -51,17 +51,24 @@ function get_dir_qrb(color, old_x, old_y, board, dir, deep=1){
     const x = old_x+dir[0]*deep;
     const y = old_y+dir[1]*deep;
     if (!is_valid_square(x, y))return [];
-    if (board[y][x]===0)return [[x, y]].concat(get_dir_qrb(color, x, y, board, dir, deep+1));
+    if (board[y][x]===0)return [[x, y]].concat(get_dir_qrb(color, old_x, old_y, board, dir, deep+1));
     if (board[y][x].color!==color)return [[x, y]];
     return [];
 }
 //get the directions for the queen, the rook and the bishop
 function get_dirs_qrb(piece, board, dirs){
     const good_dirs = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
-    console.log(good_dirs)
     const good_dirs_filtered = good_dirs.filter((dir)=>dir.length>0);
-    const squares = good_dirs_filtered.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
-    return squares;
+    //concat
+    let final_dirs = [];
+    for (const dirs of good_dirs_filtered){
+        for (const dir of dirs){
+            final_dirs.push(dir);
+        }
+    }
+    console.log(final_dirs);
+    //const squares = final_dirs.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
+    return final_dirs;
 }
 
 class Move{
@@ -358,10 +365,10 @@ class Queen extends Piece {
     constructor(x, y, color){
         super(x, y, color, QUEEN);
     }
-    get_moves(board){
+    get_squares(board, piece) {
         const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1],//rook
                       [1, 1], [1, -1], [-1, 1], [-1, -1]];//bishop
-        return this.generic_get_moves(board, dirs, "Q");
+        return get_dirs_qrb(piece, board, dirs);
     }
 }
 exports.Board = Board;
