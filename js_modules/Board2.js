@@ -190,44 +190,19 @@ class Pawn extends Piece{
     constructor(x, y, color){
         super(x, y, color, PAWN);
     }
-    add_move(moves, move){
-        //if not a promotion
-        if (!/(0|8)$/.test(move))moves.push(move);
-        else {
-            const promotions = ["Q", "R", "B", "N"];
-            for (const promotion of promotions)moves.push(move+"="+promotion);
-        }
-    }
-    get_moves(board){
-        const dir = this.color===WHITE ? 1 : -1;
-        let moves = [];
-        //check forward moves
-        if (board.board[this.y+dir][this.x]===0){
-            const single_move = COLUMNS[this.x]+(this.y+dir+1).toString();
-            this.add_move(moves, single_move)
-            //double forward i.g:e2->e4
-            if ([0,7].includes(this.y-dir) && board.board[this.y+(dir*2)][this.x]===0)moves.push(COLUMNS[this.x]+(this.y+(dir*2)+1).toString());
-        }
-        //check the takes
-        for (const side of [-1, 1]){
-            if (this.x+side<0 || this.x+side>7)continue;
-            let move = COLUMNS[this.x]+"x"+COLUMNS[this.x+side]+(this.y+dir+1).toString();
-            let to_take = board.board[this.y+dir][this.x+side]
-            if (to_take!==0 && to_take.color!==this.color){
-                this.add_move(moves, move);
-                continue;
+    get_squares(board, piece) {
+        let dirs = [];
+        const x = piece.x;
+        const y = piece.y;
+        const direction = piece.color ? -1 : 1;
+        //single and double push
+        if (board[y+direction][x]===0){
+            dirs.push([0, direction]);
+            if (board[y+direction*2][x]===0 && (y===1 || y==6)){
+                dirs.push([0, direction*2]);
             }
-
-            //check if there is a pawn to take en-passant
-            const en_passant = this.y===4-this.color && board.moves.at(-1)===COLUMNS[this.x+side]+(this.y+1).toString();
-            if (!en_passant)continue;
-            //check if the other pawn had already moved
-            const move_searched = COLUMNS[this.x+side]+(this.y+dir+1).toString();
-            if (board.check_move_append(move_searched, (this.color+1)%2))continue;
-
-            this.add_move(moves, move);
         }
-        return moves;
+        return get_dirs_knight_king(piece, board, dirs);
     }
 }
 class King extends Piece{
