@@ -12,6 +12,15 @@ function get_square(x, y){
     return COLUMNS[x] + (y+1);
 }
 
+function check_move_append(moves, pattern, player){
+    if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
+
+    for (let i = player;i<moves.length;i+=2){
+        if (pattern.test(moves[i]).get_piece_notation())return true;
+    }
+    return false;
+}
+
 function get_pieces(board, condition, deep=0){
     if (deep===board.length)return [];
     const line = board[deep];
@@ -178,8 +187,8 @@ class Piece{
         this.y = y;
         this.x = x;
     }
-    generic_get_moves(board){
-        const squares = this.get_squares(board, this);
+    generic_get_moves(board, all_moves){
+        const squares = this.get_squares(board, this, all_moves);
         console.log(squares);
         const moves = squares.map((square)=>new Move(this.type, this.x, this.y, square[0], square[1], square[2]));
         return moves;
@@ -190,7 +199,7 @@ class Pawn extends Piece{
     constructor(x, y, color){
         super(x, y, color, PAWN);
     }
-    get_squares(board, piece) {
+    get_squares(board, piece, all_moves) {
         let dirs = [];
         const x = piece.x;
         const y = piece.y;
@@ -210,6 +219,15 @@ class Pawn extends Piece{
             if (!is_valid_square(x, y))continue;
             const square = board[y][x];
             if (square && square.color!==piece.color)dirs.push([x, y, true]);
+        }
+        const last_move = all_moves.at(-1);
+        for (const move of [-1, 1]){
+            const test_last_move = new RegExp("^"+get_square(x+move, y)+"$");
+            if (test_last_move.test(last_move)){
+                if (!check_move_append(all_moves, get_square(x+move, y+direction), (piece.color+1)%2)){
+                    dirs.push()
+                }
+            }
         }
         return dirs;
     }
