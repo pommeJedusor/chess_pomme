@@ -188,10 +188,10 @@ class Piece{
         this.y = y;
         this.x = x;
     }
-    generic_get_moves(board, all_moves){
-        const squares = this.get_squares(board, this, all_moves);
+    get_moves(board, piece, all_moves){
+        const squares = piece.get_squares(board, piece, all_moves);
         console.log(squares);
-        const moves = squares.map((square)=>new Move(this.type, this.x, this.y, square[0], square[1], square[2]));
+        const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square[0], square[1], square[2]));
         return moves;
     }
 }
@@ -222,7 +222,7 @@ class Pawn extends Piece{
         //single and double push
         if (board[y+direction][x]===0){
             moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction,false));
-            if ((y+direction*2===0 || y+direction*2==7) && board[y+direction*2][x]===0){
+            if (((y+direction*2===4 && y===6) || (y+direction*2==3 && y===1)) && board[y+direction*2][x]===0){
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction*2,false));
             }
         }
