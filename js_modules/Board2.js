@@ -75,7 +75,6 @@ function get_dirs_qrb(piece, board, dirs){
             final_dirs.push(dir);
         }
     }
-    console.log(final_dirs);
     const squares = final_dirs.map((dir)=>dir_to_square(0, 0, dir, board));
     return squares;
 }
@@ -175,6 +174,16 @@ class Board{
             if (pattern.test(this.moves[i].get_notation_move()))return True;
         }
         return false;
+    }
+    get_every_moves(){
+        let moves = [];
+        for (const squares of this.board){
+            for (const square of squares){
+                if (square===0 || square.color!==this.moves.length%2)continue;
+                moves.push(...square.get_moves(this.board, square, this.moves));
+            }
+        }
+        return moves;
     }
 }
 
@@ -293,7 +302,7 @@ class King extends Piece{
             }
         }
         //check castle
-        if ((all_moves.length>0 && all_moves.at(-1).endswith("+")) || check_move_append(all_moves, /^K/, piece.color))return moves;
+        if ((all_moves.length>0 && all_moves.at(-1).is_check) || check_move_append(all_moves, /^K/, piece.color))return moves;
         //check kingside castle
         const king_y = (piece.y+1).toString();
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
