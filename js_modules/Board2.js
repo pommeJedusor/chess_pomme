@@ -93,7 +93,7 @@ class Move{
         this.promotion = "";
     }
     get_target_square(){
-        return get_square(this.x, this.y);
+        return get_square(this.target_x, this.target_y);
     }
     get_piece_notation(){
         if (this.piece===PAWN && !this.is_taking)return "";
@@ -188,7 +188,7 @@ class Piece{
     is_legal_move(board, move){
         const piece = board[move.y][move.x];
         const square_taken = piece.move(board, move.target_x, move.target_y);
-        const king = get_pieces(board ,(square)=>square && square.color===piece.color && piece.type===KING)[0];
+        const king = get_pieces(board ,(square)=>square && square.color===piece.color && square.type===KING)[0];
         const is_legal = !king.is_in_check(board);
         piece.undo_move(board, move.x, move.y, square_taken);
         return is_legal;
@@ -209,9 +209,9 @@ class Piece{
     }
     get_moves(board, piece, all_moves){
         const squares = piece.get_squares(board, piece, all_moves);
-        console.log(squares);
         const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square[0], square[1], square[2]));
-        return moves;
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        return legal_moves;
     }
 }
 
