@@ -256,33 +256,37 @@ class King extends Piece{
     constructor(x, y, color){
         super(x, y, color, KING);
     }
-    get_moves(board){
+    get_moves(board, piece, all_moves){
         let moves = [];
         const dirs = [-1, 0, 1];
         for (const y_dir of dirs){
-            if (this.y+y_dir<0 || this.y+y_dir>7)continue;
             for (const x_dir of dirs){
-                if (this.x+x_dir<0 || this.x+x_dir>7)continue;
-                if (x_dir===y_dir && x_dir===0)continue;
-                const square = COLUMNS[this.x+x_dir]+(this.y+y_dir+1).toString();
-                if (board.board[this.y+y_dir][this.x+x_dir]===0)moves.push("K"+square);
-                else if (board.board[this.y+y_dir][this.x+x_dir].color!==this.color)moves.push("Kx"+square);
+                const y = piece.y+y_dir;
+                const x = piece.x+x_dir;
+                if (!is_valid_square(x, y))continue;
+                const move = new Move(piece.type, piece.x, piece.y, x, y);
+                const square = board[y][x];
+                if (square===0 || square.color!==piece.color){
+                    if (square.color!==piece.color)move.is_taking=true;
+                    moves.push(move);
+                }
             }
         }
+        return moves;
         //check castle
-        if (board.check_move_append(/^K/), this.color)return moves;
+        if (check_move_append(all_moves, /^K/, piece.color))return moves;
         //check kingside castle
-        const king_y = (this.y+1).toString();
+        const king_y = (piece.y);
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
-        if (!board.check_move_append(pattern_kingside, this.color)){
-            if (board.board[king_y][1]===board.board[king_y][2] && board.board[king_y][3]===0 && board.board[king_y][1]===0){
+        if (!check_move_append(all_moves, pattern_kingside, piece.color)){
+            if (board[king_y][1]===board[king_y][2] && board[king_y][3]===0 && board[king_y][1]===0){
                 //must check if one of the squares is controlled by an oppenent's peices
             }
         }
         //check queenside castle
         const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
-        if (!board.check_move_append(pattern_queenside, this.color)){
-            if (board.board[king_y][5]===board.board[king_y][6] && board.board[king_y][5]===0){
+        if (!check_move_append(all_moves, pattern_queenside, piece.color)){
+            if (board[king_y][5]===board[king_y][6] && board[king_y][5]===0){
                 //must check if one of the squares is controlled by an oppenent's peices
             }
         }
