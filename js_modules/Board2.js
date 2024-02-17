@@ -287,11 +287,12 @@ class King extends Piece{
                 const move = new Move(piece.type, piece.x, piece.y, x, y);
                 const square = board[y][x];
                 if (square===0 || square.color!==piece.color){
-                    if (square.color!==piece.color)move.is_taking=true;
+                    if (square!==0)move.is_taking=true;
                     moves.push(move);
                 }
             }
         }
+        moves = moves.filter((move)=>piece.is_legal_move(board, move));
         //check castle
         if (check_move_append(all_moves, /^K/, piece.color))return moves;
         //check kingside castle
