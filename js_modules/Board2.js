@@ -109,9 +109,9 @@ class Move{
         const check = this.is_check ? "+" : "";
         const mate = this.is_mate ? "#" : "";
         //check if castle
-        if (piece===KING && piece.x===piece.current_x-2){
+        if (this.piece===KING && this.target_x===this.x-2){
             return "O-O-O"+check+mate;
-        }else if (piece===KING && piece.x===piece.current_x+2){
+        }else if (this.piece===KING && this.target_x===this.x+2){
             return "O-O"+check+mate;
         }
         return piece+taking+target_square+promotion+check+mate;
@@ -292,24 +292,28 @@ class King extends Piece{
                 }
             }
         }
-        moves = moves.filter((move)=>piece.is_legal_move(board, move));
         //check castle
-        if (check_move_append(all_moves, /^K/, piece.color))return moves;
+        if ((all_moves.length>0 && all_moves.at(-1).endswith("+")) || check_move_append(all_moves, /^K/, piece.color))return moves;
         //check kingside castle
         const king_y = (piece.y+1).toString();
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_kingside, piece.color)){
             if (board[piece.y][5]===board[piece.y][6] && board[piece.y][5]===0){
-                moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x+1, piece.y))){
+                    moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
+                }
             }
         }
         //check queenside castle
         const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_queenside, piece.color)){
             if (board[piece.y][1]===board[piece.y][2] && board[piece.y][3]===0 && board[piece.y][1]===0){
-                moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x+1, piece.y))){
+                    moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
+                }
             }
         }
+        moves = moves.filter((move)=>piece.is_legal_move(board, move));
         return moves;
     }
     is_in_check(board){
