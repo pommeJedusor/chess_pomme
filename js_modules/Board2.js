@@ -309,8 +309,8 @@ class King extends Piece{
         for (const pawn_dir of pawn_dirs){
             const y = this.y+pawn_dir[0];
             const x = this.x+pawn_dir[1];
-            if (y<0 || y>7 || x<0 || x>7)continue;
-            const square = board.board[y][x];
+            if (!is_valid_square(x, y))continue;
+            const square = board[y][x];
             if (square!==0 && square.type===PAWN && square.color!==this.color)return true;
         }
         //rook
@@ -319,8 +319,8 @@ class King extends Piece{
             let i = 1;
             let y = this.y+rook_dir[0];
             let x = this.x+rook_dir[1];
-            while (!(x<0 || x>7 || y<0 || y>7)){
-                const square = board.board[y][x];
+            while (is_valid_square(x, y)){
+                const square = board[y][x];
                 if (square && square.color!==this.color && [ROOK, QUEEN].includes(square.type))return true;
                 else if (square)break;
                 i++;
@@ -334,8 +334,8 @@ class King extends Piece{
             let i = 1;
             let y = this.y+bishop_dir[0];
             let x = this.x+bishop_dir[1];
-            while (!(x<0 || x>7 || y<0 || y>7)){
-                const square = board.board[y][x];
+            while (is_valid_square(x, y)){
+                const square = board[y][x];
                 if (square && square.color!==this.color && [BISHOP, QUEEN].includes(square.type))return true;
                 else if (square)break;
                 i++;
@@ -349,8 +349,8 @@ class King extends Piece{
         for (const knight_dir of knight_dirs){
             const y = this.y+knight_dir[0];
             const x = this.x+knight_dir[1];
-            if (x<0 || x>7 || y<0 || y>7)continue;
-            const square = board.board[y][x];
+            if (!is_valid_square(x, y))continue;
+            const square = board[y][x];
             if (square && square.color!==this.color && square.type===KNIGHT)return true;
         }
         //king
@@ -359,8 +359,8 @@ class King extends Piece{
             for (const dir2 of king_dirs){
                 const y = this.y+dir1;
                 const x = this.x+dir2;
-                if (x<0 || x>7 || y<0 || y>7)continue;
-                const square = board.board[y][x];
+                if (!is_valid_square(x, y))continue;
+                const square = board[y][x];
                 if (square && square.color!==this.color && square.type===KING)return true;
             }
         }
