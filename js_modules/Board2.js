@@ -96,14 +96,25 @@ class Move{
         return get_square(this.x, this.y);
     }
     get_piece_notation(){
-        if (this.piece===PAWN && this.is_taking)return "";
+        if (this.piece===PAWN && !this.is_taking)return "";
+        else if (this.piece===PAWN)return COLUMNS[this.current_y];
         return this.piece;
     }
     get_notation_move(){
         const piece = this.get_piece_notation();
+        //piece.x===piece.current_x+2
         const taking = this.is_taking ? "x" : "";
         const target_square = this.get_target_square();
-        return piece+taking+target_square;
+        const promotion = this.promotion;
+        const check = this.is_check ? "+" : "";
+        const mate = this.is_mate ? "#" : "";
+        //check if castle
+        if (piece===KING && piece.x===piece.current_x-2){
+            return "O-O-O"+check+mate;
+        }else if (piece===KING && piece.x===piece.current_x+2){
+            return "O-O"+check+mate;
+        }
+        return piece+taking+target_square+promotion+check+mate;
     }
 }
 
