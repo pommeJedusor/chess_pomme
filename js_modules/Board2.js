@@ -16,7 +16,7 @@ function check_move_append(moves, pattern, player){
     if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
 
     for (let i = player;i<moves.length;i+=2){
-        if (pattern.test(moves[i]).get_piece_notation())return true;
+        if (pattern.test(moves[i]))return true;
     }
     return false;
 }
@@ -90,6 +90,7 @@ class Move{
         this.is_taking = is_taking;
         this.is_check = false;
         this.is_mate = false;
+        this.promotion = "";
     }
     get_target_square(){
         return get_square(this.x, this.y);
@@ -199,16 +200,30 @@ class Pawn extends Piece{
     constructor(x, y, color){
         super(x, y, color, PAWN);
     }
-    get_squares(board, piece, all_moves) {
-        let dirs = [];
+    check_promotion(piece_type, piece_x, piece_y, x, y, is_taking){
+        let moves;
+        if (y===7 || y===0){
+            let promotions = ["=Q", "=R", "=N", "=B"];
+            moves = promotions.map(function (promotion){
+                const move = new Move(piece_type, piece_x, piece_y, x, y, is_taking);
+                move.promotion = promotion;
+                return move;
+            });
+        }else {
+            moves = [new Move(piece_type, piece_x, piece_y, x, y, is_taking)];
+        }
+        return moves;
+    }
+    get_moves(board, piece, all_moves) {
+        let moves = [];
         const x = piece.x;
         const y = piece.y;
         const direction = piece.color ? -1 : 1;
         //single and double push
         if (board[y+direction][x]===0){
-            dirs.push([x, y+direction, false]);
-            if (board[y+direction*2][x]===0 && (y===1 || y==6)){
-                dirs.push([x, y+direction*2, false]);
+            moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction,false));
+            if ((y+direction*2===0 || y+direction*2==7) && board[y+direction*2][x]===0){
+                moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction*2,false));
             }
         }
         //normal takes
@@ -218,18 +233,23 @@ class Pawn extends Piece{
             const y = xy[1];
             if (!is_valid_square(x, y))continue;
             const square = board[y][x];
-            if (square && square.color!==piece.color)dirs.push([x, y, true]);
+            if (square && square.color!==piece.color){
+                moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
+            }
+            
         }
         const last_move = all_moves.at(-1);
         for (const move of [-1, 1]){
-            const test_last_move = new RegExp("^"+get_square(x+move, y)+"$");
+            const x = piece.x + move;
+            const y = piece.y + direction;
+            const test_last_move = new RegExp("^"+get_square(x, piece.y)+"$");
             if (test_last_move.test(last_move)){
-                if (!check_move_append(all_moves, get_square(x+move, y+direction), (piece.color+1)%2)){
-                    dirs.push()
+                if (!check_move_append(all_moves, get_square(x, y), (piece.color+1)%2)){
+                    moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
                 }
             }
         }
-        return dirs;
+        return moves;
     }
 }
 class King extends Piece{
