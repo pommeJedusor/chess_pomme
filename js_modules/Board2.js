@@ -16,7 +16,7 @@ function check_move_append(moves, pattern, player){
     if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
 
     for (let i = player;i<moves.length;i+=2){
-        if (pattern.test(moves[i]))return true;
+        if (pattern.test(moves[i].get_notation_move()))return true;
     }
     return false;
 }
@@ -172,7 +172,7 @@ class Board{
         if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
 
         for (let i = player;i<this.moves.length;i+=2){
-            if (pattern.test(this.moves[i].get_notation_move()))return True;
+            if (pattern.test(this.moves[i].get_notation_move()))return true;
         }
         return false;
     }
@@ -340,7 +340,7 @@ class King extends Piece{
         const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_queenside, piece.color)){
             if (board[piece.y][1]===board[piece.y][2] && board[piece.y][3]===0 && board[piece.y][1]===0){
-                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x+1, piece.y))){
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x-1, piece.y))){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
                 }
             }
