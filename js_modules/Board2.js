@@ -185,17 +185,25 @@ class Piece{
         this.color = color;
         this.type = type;
     }
+    is_legal_move(board, move){
+        const piece = board[move.y][move.x];
+        const square_taken = piece.move(board, move.target_x, move.target_y);
+        const king = get_pieces(board ,(square)=>square && square.color===piece.color && piece.type===KING)[0];
+        const is_legal = !king.is_in_check(board);
+        piece.undo_move(board, move.x, move.y, square_taken);
+        return is_legal;
+    }
     move(board, x, y){
-        const square = board.board[y][x];
-        board.board[y][x] = this;
-        board.board[this.y][this.x] = 0;
+        const square = board[y][x];
+        board[y][x] = this;
+        board[this.y][this.x] = 0;
         this.y = y;
         this.x = x;
         return square;
     }
     undo_move(board, x, y, piece){
-        board.board[y][x] = this;
-        board.board[this.y][this.x] = piece;
+        board[y][x] = this;
+        board[this.y][this.x] = piece;
         this.y = y;
         this.x = x;
     }
