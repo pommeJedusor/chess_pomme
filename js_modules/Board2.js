@@ -97,7 +97,7 @@ class Move{
     }
     get_piece_notation(){
         if (this.piece===PAWN && !this.is_taking)return "";
-        else if (this.piece===PAWN)return COLUMNS[this.current_y];
+        else if (this.piece===PAWN)return COLUMNS[this.x];
         return this.piece;
     }
     get_notation_move(){
@@ -268,7 +268,8 @@ class Pawn extends Piece{
                 }
             }
         }
-        return moves;
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        return legal_moves;
     }
 }
 class King extends Piece{
