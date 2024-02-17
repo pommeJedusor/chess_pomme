@@ -89,6 +89,7 @@ class Move{
         this.is_taking = is_taking;
         this.is_check = false;
         this.is_mate = false;
+        this.precision = "";//if two piece of the same type can go on the same square
         this.promotion = "";
     }
     get_target_square(){
@@ -101,7 +102,7 @@ class Move{
     }
     get_notation_move(){
         const piece = this.get_piece_notation();
-        //piece.x===piece.current_x+2
+        const precision = this.precision;
         const taking = this.is_taking ? "x" : "";
         const target_square = this.get_target_square();
         const promotion = this.promotion;
@@ -113,7 +114,7 @@ class Move{
         }else if (this.piece===KING && this.target_x===this.x+2){
             return "O-O"+check+mate;
         }
-        return piece+taking+target_square+promotion+check+mate;
+        return piece+precision+taking+target_square+promotion+check+mate;
     }
 }
 
@@ -181,6 +182,28 @@ class Board{
             for (const square of squares){
                 if (square===0 || square.color!==this.moves.length%2)continue;
                 moves.push(...square.get_moves(this.board, square, this.moves));
+            }
+        }
+        let moves_hashtable = [];
+        for (const move of moves){
+            const notation = move.get_notation_move();
+            if (!moves_hashtable[notation])moves_hashtable[notation]=[move];
+            else moves_hashtable[notation].push(move);
+        }
+        for (const [notation, moves] of Object.entries(moves_hashtable)) {
+            if (moves.length<2)continue;
+            for (let i=0;i<moves.length;i++){
+                const move = moves_hashtable[notation][i];
+                let same_column = false;
+                let same_line = false;
+                for (let j=0;j<moves.length;j++){
+                    if (j===i)continue;
+                    if (moves[i].x===moves[j].x)same_column=true;
+                    if (moves[i].y===moves[j].y)same_line=true;
+                }
+                if (same_line && same_column)move.precision=get_square(move.x, move.y);
+                else if (same_column)move.precision=(move.y+1).toString();
+                else move.precision=COLUMNS[move.x];
             }
         }
         return moves;
