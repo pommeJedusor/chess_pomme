@@ -272,22 +272,21 @@ class King extends Piece{
                 }
             }
         }
-        return moves;
         //check castle
         if (check_move_append(all_moves, /^K/, piece.color))return moves;
         //check kingside castle
-        const king_y = (piece.y);
+        const king_y = (piece.y+1).toString();
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_kingside, piece.color)){
-            if (board[king_y][1]===board[king_y][2] && board[king_y][3]===0 && board[king_y][1]===0){
-                //must check if one of the squares is controlled by an oppenent's peices
+            if (board[piece.y][5]===board[piece.y][6] && board[piece.y][5]===0){
+                moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
             }
         }
         //check queenside castle
         const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_queenside, piece.color)){
-            if (board[king_y][5]===board[king_y][6] && board[king_y][5]===0){
-                //must check if one of the squares is controlled by an oppenent's peices
+            if (board[piece.y][1]===board[piece.y][2] && board[piece.y][3]===0 && board[piece.y][1]===0){
+                moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
             }
         }
         return moves;
