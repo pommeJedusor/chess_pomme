@@ -330,8 +330,16 @@ class King extends Piece{
         super(x, y, color, KING);
     }
     edit_func(piece, square, x, y, board, move){
+        const is_castle_king = move.x-move.target_x===-2;
+        const is_castle_queen = move.x-move.target_x===2;
+        const rook_x = is_castle_king ? 7 : 0;
+        const new_rook_x = is_castle_king ? 5 : 3;
+        if ((is_castle_king || is_castle_queen) && y===move.y && x===rook_x)return 0;
+        if ((is_castle_king || is_castle_queen) && y===move.y && x===new_rook_x){
+            return new Rook(new_rook_x, y, piece.color);
+        }
         if (piece===square)return 0;
-        if (x===move.target_x && y===move.target_y)return new King(x, y, piece.color, piece.type);
+        if (x===move.target_x && y===move.target_y)return new King(x, y, piece.color);
         else return square;
     }
     get_moves(board, piece, all_moves){
@@ -351,7 +359,7 @@ class King extends Piece{
             }
         }
         //check castle
-        if (check_move_append(all_moves, /^K/, piece.color) || piece.is_in_check(board)){
+        if (check_move_append(all_moves, /^[KO]/, piece.color) || piece.is_in_check(board)){
             return moves.filter((move)=>piece.is_legal_move(board, move));
         }
         //check kingside castle
