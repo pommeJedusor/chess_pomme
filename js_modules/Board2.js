@@ -220,6 +220,15 @@ class Piece{
         piece.undo_move(board, move.x, move.y, square_taken);
         return is_legal;
     }
+    do_move(board, move, edit_func){
+        const piece = this;
+        const new_board = board.map(function (squares, y){
+            return squares.map(function (square, x){
+                return edit_func(piece, square, x, y, board, move);
+            });
+        });
+        return new_board;
+    }
     move(board, x, y){
         const square = board[y][x];
         board[y][x] = this;
@@ -245,6 +254,23 @@ class Piece{
 class Pawn extends Piece{
     constructor(x, y, color){
         super(x, y, color, PAWN);
+    }
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y){
+            if (move.promotion==="")return new Pawn(x, y, piece.color, piece.type);
+            switch (move.promotion[1]){
+                case "Q":
+                    return new Queen(x, y, piece.color, move.promotion[1]);
+                case "R":
+                    return new Rook(x, y, piece.color, move.promotion[1]);
+                case "B":
+                    return new Bishop(x, y, piece.color, move.promotion[1]);
+                case "N":
+                    return new Knight(x, y, piece.color, move.promotion[1]);
+            }
+        }
+        else return square;
     }
     check_promotion(piece_type, piece_x, piece_y, x, y, is_taking){
         let moves;
@@ -302,6 +328,11 @@ class Pawn extends Piece{
 class King extends Piece{
     constructor(x, y, color){
         super(x, y, color, KING);
+    }
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new King(x, y, piece.color, piece.type);
+        else return square;
     }
     get_moves(board, piece, all_moves){
         let moves = [];
@@ -414,6 +445,11 @@ class Bishop extends Piece{
     constructor(x, y, color){
         super(x, y, color, BISHOP);
     }
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Bishop(x, y, piece.color, piece.type);
+        else return square;
+    }
     get_squares(board, piece) {
         const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
         return get_dirs_qrb(piece, board, dirs);
@@ -423,6 +459,11 @@ class Rook extends Piece {
     constructor(x, y, color){
         super(x, y, color, ROOK);
     }
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Rook(x, y, piece.color, piece.type);
+        else return square;
+    }
     get_squares(board, piece){
         const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
         return get_dirs_qrb(piece, board, dirs);
@@ -431,6 +472,11 @@ class Rook extends Piece {
 class Knight extends Piece {
     constructor(x, y, color){
         super(x, y, color, KNIGHT);
+    }
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Knight(x, y, piece.color, piece.type);
+        else return square;
     }
     get_squares(board, piece){
         const dirs = [[ 2,  1], [ 2, -1],
@@ -444,6 +490,11 @@ class Knight extends Piece {
 class Queen extends Piece {
     constructor(x, y, color){
         super(x, y, color, QUEEN);
+    }
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Queen(x, y, piece.color, piece.type);
+        else return square;
     }
     get_squares(board, piece) {
         const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1],//rook
