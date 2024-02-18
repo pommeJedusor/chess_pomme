@@ -310,13 +310,15 @@ class Pawn extends Piece{
             }
             
         }
+        //en-passant
         const last_move = all_moves.at(-1);
         for (const move of [-1, 1]){
+            if (!last_move || (piece.color===WHITE && piece.y!==4) || (piece.color===BLACK && piece.y!==3))break;
             const x = piece.x + move;
             const y = piece.y + direction;
-            const test_last_move = new RegExp("^"+get_square(x, piece.y)+"$");
-            if (test_last_move.test(last_move)){
-                if (!check_move_append(all_moves, get_square(x, y), (piece.color+1)%2)){
+            const test_last_move = new RegExp("^"+get_square(x, piece.y)+"[+#]?$");
+            if (test_last_move.test(last_move.get_notation_move())){
+                if (!check_move_append(all_moves, get_square(x, y)+"[+#]?", (piece.color+1)%2)){
                     moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
                 }
             }
