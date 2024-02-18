@@ -270,7 +270,11 @@ class Pawn extends Piece{
                     return new Knight(x, y, piece.color, move.promotion[1]);
             }
         }
-        else return square;
+        //en-passant
+        const dir = piece.color ? 1 : -1;
+        if (x===move.target_x && y===move.target_y+dir && board[move.target_y][move.target_x]===0)return 0;
+
+        return square;
     }
     check_promotion(piece_type, piece_x, piece_y, x, y, is_taking){
         let moves;
