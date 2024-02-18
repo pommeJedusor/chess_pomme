@@ -8,6 +8,116 @@ const KNIGHT = "N";
 const QUEEN = "Q";
 const COLUMNS = ["a", "b", "c", "d", "e", "f", "g", "h"]
 
+function get_square(x, y){
+    return COLUMNS[x] + (y+1);
+}
+
+function check_move_append(moves, pattern, player){
+    if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
+
+    for (let i = player;i<moves.length;i+=2){
+        if (pattern.test(moves[i].get_notation_move()))return true;
+    }
+    return false;
+}
+
+function get_pieces(board, condition, deep=0){
+    if (deep===board.length)return [];
+    const line = board[deep];
+    const line_pieces = line.filter(condition)
+    return line_pieces.concat(get_pieces(board, condition, deep+1));
+}
+
+function is_valid_square(x, y){
+    if (x<0 || y<0 || x>7 || y>7)return false;
+    return true;
+}
+
+function dir_to_square(old_x, old_y, dir, board){
+    const x = old_x+dir[0];
+    const y = old_y+dir[1];
+    return [x, y, board[y][x]!==0];
+}
+
+function get_dirs_knight_king(piece, board, dirs){
+    const filter_square = function (piece, board, dir){
+        const target_x = piece.x+dir[0];
+        const target_y = piece.y+dir[1];
+        if (!is_valid_square(target_x, target_y))return false;
+        const target_square = board[target_y][target_x];
+        return target_square===0 || target_square.color!==piece.color;
+    }
+    const get_dirs = function (piece, board, dirs){
+        return dirs.filter((dir)=>filter_square(piece, board, dir));
+    }
+    const good_dirs = get_dirs(piece, board, dirs)
+    const squares = good_dirs.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
+
+    return squares;
+}
+
+function get_dir_qrb(color, old_x, old_y, board, dir, deep=1){
+    const x = old_x+dir[0]*deep;
+    const y = old_y+dir[1]*deep;
+    if (!is_valid_square(x, y))return [];
+    if (board[y][x]===0)return [[x, y]].concat(get_dir_qrb(color, old_x, old_y, board, dir, deep+1));
+    if (board[y][x].color!==color)return [[x, y]];
+    return [];
+}
+//get the directions for the queen, the rook and the bishop
+function get_dirs_qrb(piece, board, dirs){
+    const good_dirs = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
+    const good_dirs_filtered = good_dirs.filter((dir)=>dir.length>0);
+    //concat
+    let final_dirs = [];
+    for (const dirs of good_dirs_filtered){
+        for (const dir of dirs){
+            final_dirs.push(dir);
+        }
+    }
+    const squares = final_dirs.map((dir)=>dir_to_square(0, 0, dir, board));
+    return squares;
+}
+
+class Move{
+    constructor(piece, current_x, current_y, target_x, target_y, is_taking=false){
+        this.piece = piece;
+        this.x = current_x;
+        this.y = current_y;
+        this.target_x = target_x;
+        this.target_y = target_y;
+        this.is_taking = is_taking;
+        this.is_check = false;
+        this.is_mate = false;
+        this.precision = "";//if two piece of the same type can go on the same square
+        this.promotion = "";
+    }
+    get_target_square(){
+        return get_square(this.target_x, this.target_y);
+    }
+    get_piece_notation(){
+        if (this.piece===PAWN && !this.is_taking)return "";
+        else if (this.piece===PAWN)return COLUMNS[this.x];
+        return this.piece;
+    }
+    get_notation_move(){
+        const piece = this.get_piece_notation();
+        const precision = this.precision;
+        const taking = this.is_taking ? "x" : "";
+        const target_square = this.get_target_square();
+        const promotion = this.promotion;
+        const check = this.is_check ? "+" : "";
+        const mate = this.is_mate ? "#" : "";
+        //check if castle
+        if (this.piece===KING && this.target_x===this.x-2){
+            return "O-O-O"+check+mate;
+        }else if (this.piece===KING && this.target_x===this.x+2){
+            return "O-O"+check+mate;
+        }
+        return piece+precision+taking+target_square+promotion+check+mate;
+    }
+}
+
 class Board{
     constructor(){
         this.board = this.get_new_board();
@@ -59,143 +169,39 @@ class Board{
         return board;
     }
     check_move_append(pattern, player){
-        if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
-
-        for (let i = player;i<this.moves.length;i+=2){
-            if (pattern.test(this.moves[i]))return True;
-        }
-        return false;
+        return check_move_append(this.moves, pattern, player);
     }
-    get_all_moves(get_check=true){
-        let same_king;
-        let other_king;
-        for (const lines of this.board){
-            for (const square of lines){
-                if (square && square.type===KING){
-                    if (square.color===this.moves.length%2)same_king = square;
-                    else other_king = square;
-                }
-            }
-        }
+    get_every_moves(){
         let moves = [];
-        let temp_moves = [];
-        for (const lines of this.board){
-            for (const square of lines){
-                if (!square || square.color!==this.moves.length%2)continue;
-                moves.push([square, []])
-                const old_y = square.y;
-                const old_x = square.x;
-                temp_moves = square.get_moves(this);
-                for (const move of temp_moves){
-                    const y = Number(move.at(-1))-1;
-                    const x = COLUMNS.indexOf(move.at(-2));
-                    const temp_piece = square.move(this, x, y);
-                    if (!same_king.is_in_check(this)){
-                        if (get_check && other_king.is_in_check(this)){
-                            this.moves.push(move);
-                            if (this.get_all_moves(false).length>0)moves.at(-1)[1].push(move+"+");
-                            else moves.at(-1)[1].push(move+"#");
-                            this.moves.splice(-1,1);
-                        }
-                        else moves.at(-1)[1].push(move);
-                    }
-                    square.undo_move(this, old_x, old_y, temp_piece);
-                }
-                if (moves.at(-1)[1].length===0)moves.splice(-1,1)
+        for (const squares of this.board){
+            for (const square of squares){
+                if (square===0 || square.color!==this.moves.length%2)continue;
+                moves.push(...square.get_moves(this.board, square, this.moves));
             }
         }
-        if (get_check)return moves;
-        let final_moves = [];
+        let moves_hashtable = [];
         for (const move of moves){
-            final_moves = final_moves.concat(move[1]);
+            const notation = move.get_notation_move();
+            if (!moves_hashtable[notation])moves_hashtable[notation]=[move];
+            else moves_hashtable[notation].push(move);
         }
-        return final_moves;
-    }
-    make_move(move){
-        //return the letter of the piece (if pawn return its current column)
-        const piece = move[0];
-        const is_check = move.at(-1)==="+";
-        const is_mate = move.at(-1)==="#";
-        //to avoid getting bother becaus of the + or the #
-        if (is_check || is_mate)move = move.substr(0,move.length-1);
-        const is_taking = move.includes("x");
-        const target_square = move.substr(move.length-2);
-        const target_x = COLUMNS.indexOf(target_square[0]);
-        const target_y = Number(target_square[1])-1;
-        const clean_move = piece+(is_taking?"x":"")+target_square;
-        let piece_taken = 0;
-        //kingside rook
-        if (/^O-O$/.test(move)){
-            const y = this.moves.length%2===0 ? 0 : 7;
-            const king = this.board[y][4];
-            const rook = this.board[y][7];
-            king.move(this, king.x+2, y);
-            rook.move(this, rook.x-2, y);
-        }
-        //queenside rook
-        else if (/^O-O-O?$/.test(move)){
-            const y = this.moves.length%2===0 ? 0 : 7;
-            const king = this.board[y][4];
-            const rook = this.board[y][0];
-            king.move(this, king.x-2, y);
-            rook.move(this, rook.x+3, y);
-        }
-        //pawn
-        else if (/[a-h]/.test(piece) && !is_taking){
-            console.log(target_x, target_y);
-            const dir = this.moves.length%2===0 ? 1 : -1;
-            let square = this.board[target_y-dir][target_x];
-            if (square && square.type===PAWN){
-                square.move(this, target_x, target_y);
-            }else {
-                square = this.board[target_y-(dir*2)][target_x];
-                square.move(this, target_x, target_y);
-            }
-        }//pawn take
-        else if (/[a-h]/.test(piece)){
-            const dir = this.moves.length%2===0 ? 1 : -1;
-            const current_x = COLUMNS.indexOf(piece);
-            const square = this.board[target_y-dir][current_x];
-            //en-passant
-            if (this.board[target_y][target_x]===0)this.board[target_y-dir][target_x]=0;
-            piece_taken = square.move(this, target_x, target_y);
-        }
-        //get the pieces that could have done the move
-        let squares = [];
-        for (const lines of this.board){
-            for (const square of lines){
-                if (square && square.type===piece && square.color===this.moves.length%2){
-                    squares.push(square);
+        for (const [notation, moves] of Object.entries(moves_hashtable)) {
+            if (moves.length<2)continue;
+            for (let i=0;i<moves.length;i++){
+                const move = moves_hashtable[notation][i];
+                let same_column = false;
+                let same_line = false;
+                for (let j=0;j<moves.length;j++){
+                    if (j===i)continue;
+                    if (moves[i].x===moves[j].x)same_column=true;
+                    if (moves[i].y===moves[j].y)same_line=true;
                 }
+                if (same_line && same_column)move.precision=get_square(move.x, move.y);
+                else if (same_column)move.precision=(move.y+1).toString();
+                else move.precision=COLUMNS[move.x];
             }
         }
-        //get the line and column if given in the move
-        let column = null;
-        let line = null;
-        if (/[a-h]/.test(move[1]) && move.length>(3+/[+#]/.test(move.at(-1)))){
-            column = COLUMNS.indexOf(move[1]);
-            if (/[1-8]/.test(move[2]))line=Number(move[2])-1;
-        }else{
-            if (/[1-8]/.test(move[1]))line=Number(move[1])-1;
-        }
-        //if line or column precised filter
-        let new_squares = [];
-        console.log(column, line)
-        for (const square of squares){
-            if ((square.x===column || column===null) && (square.y===line || line===null)){
-                new_squares.push(square);
-            }
-        }
-        for (const square of new_squares){
-            const moves = square.get_moves(this);
-            if (moves.includes(clean_move)){
-                piece_taken = square.move(this, target_x, target_y);
-                break;
-            }
-        }
-        console.log(new_squares);
-        this.moves.push(move);
-        return piece_taken;
+        return moves;
     }
 }
 
@@ -206,40 +212,42 @@ class Piece{
         this.color = color;
         this.type = type;
     }
+    is_legal_move(board, move){
+        const piece = board[move.y][move.x];
+        const square_taken = piece.move(board, move.target_x, move.target_y);
+        const king = get_pieces(board ,(square)=>square && square.color===piece.color && square.type===KING)[0];
+        const is_legal = !king.is_in_check(board);
+        piece.undo_move(board, move.x, move.y, square_taken);
+        return is_legal;
+    }
+    do_move(board, move, edit_func){
+        const piece = this;
+        const new_board = board.map(function (squares, y){
+            return squares.map(function (square, x){
+                return edit_func(piece, square, x, y, board, move);
+            });
+        });
+        return new_board;
+    }
     move(board, x, y){
-        const square = board.board[y][x];
-        board.board[y][x] = this;
-        board.board[this.y][this.x] = 0;
+        const square = board[y][x];
+        board[y][x] = this;
+        board[this.y][this.x] = 0;
         this.y = y;
         this.x = x;
         return square;
     }
     undo_move(board, x, y, piece){
-        board.board[y][x] = this;
-        board.board[this.y][this.x] = piece;
+        board[y][x] = this;
+        board[this.y][this.x] = piece;
         this.y = y;
         this.x = x;
     }
-    generic_get_moves(board, dirs, letter){
-        let moves = [];
-        for (const dir of dirs){
-            let y = this.y+dir[0];
-            let x = this.x+dir[1];
-            let i = 1;
-            while (!(y<0 || x<0 || y>7 || x>7)){
-                const square = COLUMNS[x]+(y+1).toString();
-                if (board.board[y][x]===0)moves.push(letter+square);
-                else if (board.board[y][x].color===this.color)break;
-                else if (board.board[y][x].color!==this.color){
-                    moves.push(letter+"x"+square);
-                    break;
-                }
-                i++;
-                y = this.y+(dir[0]*i);
-                x = this.x+(dir[1]*i);
-            }
-        }
-        return moves;
+    get_moves(board, piece, all_moves){
+        const squares = piece.get_squares(board, piece, all_moves);
+        const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square[0], square[1], square[2]));
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        return legal_moves;
     }
 }
 
@@ -247,81 +255,126 @@ class Pawn extends Piece{
     constructor(x, y, color){
         super(x, y, color, PAWN);
     }
-    add_move(moves, move){
-        //if not a promotion
-        if (!/(0|8)$/.test(move))moves.push(move);
-        else {
-            const promotions = ["Q", "R", "B", "N"];
-            for (const promotion of promotions)moves.push(move+"="+promotion);
-        }
-    }
-    get_moves(board){
-        const dir = this.color===WHITE ? 1 : -1;
-        let moves = [];
-        //check forward moves
-        if (board.board[this.y+dir][this.x]===0){
-            const single_move = COLUMNS[this.x]+(this.y+dir+1).toString();
-            this.add_move(moves, single_move)
-            //double forward i.g:e2->e4
-            if ([0,7].includes(this.y-dir) && board.board[this.y+(dir*2)][this.x]===0)moves.push(COLUMNS[this.x]+(this.y+(dir*2)+1).toString());
-        }
-        //check the takes
-        for (const side of [-1, 1]){
-            if (this.x+side<0 || this.x+side>7)continue;
-            let move = COLUMNS[this.x]+"x"+COLUMNS[this.x+side]+(this.y+dir+1).toString();
-            let to_take = board.board[this.y+dir][this.x+side]
-            if (to_take!==0 && to_take.color!==this.color){
-                this.add_move(moves, move);
-                continue;
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y){
+            if (move.promotion==="")return new Pawn(x, y, piece.color, piece.type);
+            switch (move.promotion[1]){
+                case "Q":
+                    return new Queen(x, y, piece.color, move.promotion[1]);
+                case "R":
+                    return new Rook(x, y, piece.color, move.promotion[1]);
+                case "B":
+                    return new Bishop(x, y, piece.color, move.promotion[1]);
+                case "N":
+                    return new Knight(x, y, piece.color, move.promotion[1]);
             }
-
-            //check if there is a pawn to take en-passant
-            const en_passant = this.y===4-this.color && board.moves.at(-1)===COLUMNS[this.x+side]+(this.y+1).toString();
-            if (!en_passant)continue;
-            //check if the other pawn had already moved
-            const move_searched = COLUMNS[this.x+side]+(this.y+dir+1).toString();
-            if (board.check_move_append(move_searched, (this.color+1)%2))continue;
-
-            this.add_move(moves, move);
+        }
+        else return square;
+    }
+    check_promotion(piece_type, piece_x, piece_y, x, y, is_taking){
+        let moves;
+        if (y===7 || y===0){
+            let promotions = ["=Q", "=R", "=N", "=B"];
+            moves = promotions.map(function (promotion){
+                const move = new Move(piece_type, piece_x, piece_y, x, y, is_taking);
+                move.promotion = promotion;
+                return move;
+            });
+        }else {
+            moves = [new Move(piece_type, piece_x, piece_y, x, y, is_taking)];
         }
         return moves;
+    }
+    get_moves(board, piece, all_moves) {
+        let moves = [];
+        const x = piece.x;
+        const y = piece.y;
+        const direction = piece.color ? -1 : 1;
+        //single and double push
+        if (board[y+direction][x]===0){
+            moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction,false));
+            if (((y+direction*2===4 && y===6) || (y+direction*2==3 && y===1)) && board[y+direction*2][x]===0){
+                moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction*2,false));
+            }
+        }
+        //normal takes
+        const xys = [[x-1, y+direction], [x+1, y+direction]]
+        for (const xy of xys){
+            const x = xy[0];
+            const y = xy[1];
+            if (!is_valid_square(x, y))continue;
+            const square = board[y][x];
+            if (square && square.color!==piece.color){
+                moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
+            }
+            
+        }
+        const last_move = all_moves.at(-1);
+        for (const move of [-1, 1]){
+            const x = piece.x + move;
+            const y = piece.y + direction;
+            const test_last_move = new RegExp("^"+get_square(x, piece.y)+"$");
+            if (test_last_move.test(last_move)){
+                if (!check_move_append(all_moves, get_square(x, y), (piece.color+1)%2)){
+                    moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
+                }
+            }
+        }
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        return legal_moves;
     }
 }
 class King extends Piece{
     constructor(x, y, color){
         super(x, y, color, KING);
     }
-    get_moves(board){
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new King(x, y, piece.color, piece.type);
+        else return square;
+    }
+    get_moves(board, piece, all_moves){
         let moves = [];
         const dirs = [-1, 0, 1];
         for (const y_dir of dirs){
-            if (this.y+y_dir<0 || this.y+y_dir>7)continue;
             for (const x_dir of dirs){
-                if (this.x+x_dir<0 || this.x+x_dir>7)continue;
-                if (x_dir===y_dir && x_dir===0)continue;
-                const square = COLUMNS[this.x+x_dir]+(this.y+y_dir+1).toString();
-                if (board.board[this.y+y_dir][this.x+x_dir]===0)moves.push("K"+square);
-                else if (board.board[this.y+y_dir][this.x+x_dir].color!==this.color)moves.push("Kx"+square);
+                const y = piece.y+y_dir;
+                const x = piece.x+x_dir;
+                if (!is_valid_square(x, y))continue;
+                const move = new Move(piece.type, piece.x, piece.y, x, y);
+                const square = board[y][x];
+                if (square===0 || square.color!==piece.color){
+                    if (square!==0)move.is_taking=true;
+                    moves.push(move);
+                }
             }
         }
         //check castle
-        if (board.check_move_append(/^K/), this.color)return moves;
+        if (check_move_append(all_moves, /^K/, piece.color) || piece.is_in_check(board)){
+            return moves.filter((move)=>piece.is_legal_move(board, move));
+        }
         //check kingside castle
-        const king_y = (this.y+1).toString();
+        const king_y = (piece.y+1).toString();
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
-        if (!board.check_move_append(pattern_kingside, this.color)){
-            if (board.board[king_y][1]===board.board[king_y][2] && board.board[king_y][3]===0 && board.board[king_y][1]===0){
-                //must check if one of the squares is controlled by an oppenent's peices
+        if (!check_move_append(all_moves, pattern_kingside, piece.color)){
+            if (board[piece.y][5]===board[piece.y][6] && board[piece.y][5]===0){
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x+1, piece.y))){
+                    moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
+                }
             }
         }
         //check queenside castle
         const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
-        if (!board.check_move_append(pattern_queenside, this.color)){
-            if (board.board[king_y][5]===board.board[king_y][6] && board.board[king_y][5]===0){
-                //must check if one of the squares is controlled by an oppenent's peices
+        if (!check_move_append(all_moves, pattern_queenside, piece.color)){
+            if (board[piece.y][1]===board[piece.y][2] && board[piece.y][3]===0 && board[piece.y][1]===0){
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x-1, piece.y))){
+                    moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
+                }
             }
         }
-        return moves;
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        return legal_moves;
     }
     is_in_check(board){
         //check pawn
@@ -330,8 +383,8 @@ class King extends Piece{
         for (const pawn_dir of pawn_dirs){
             const y = this.y+pawn_dir[0];
             const x = this.x+pawn_dir[1];
-            if (y<0 || y>7 || x<0 || x>7)continue;
-            const square = board.board[y][x];
+            if (!is_valid_square(x, y))continue;
+            const square = board[y][x];
             if (square!==0 && square.type===PAWN && square.color!==this.color)return true;
         }
         //rook
@@ -340,8 +393,8 @@ class King extends Piece{
             let i = 1;
             let y = this.y+rook_dir[0];
             let x = this.x+rook_dir[1];
-            while (!(x<0 || x>7 || y<0 || y>7)){
-                const square = board.board[y][x];
+            while (is_valid_square(x, y)){
+                const square = board[y][x];
                 if (square && square.color!==this.color && [ROOK, QUEEN].includes(square.type))return true;
                 else if (square)break;
                 i++;
@@ -355,8 +408,8 @@ class King extends Piece{
             let i = 1;
             let y = this.y+bishop_dir[0];
             let x = this.x+bishop_dir[1];
-            while (!(x<0 || x>7 || y<0 || y>7)){
-                const square = board.board[y][x];
+            while (is_valid_square(x, y)){
+                const square = board[y][x];
                 if (square && square.color!==this.color && [BISHOP, QUEEN].includes(square.type))return true;
                 else if (square)break;
                 i++;
@@ -370,8 +423,8 @@ class King extends Piece{
         for (const knight_dir of knight_dirs){
             const y = this.y+knight_dir[0];
             const x = this.x+knight_dir[1];
-            if (x<0 || x>7 || y<0 || y>7)continue;
-            const square = board.board[y][x];
+            if (!is_valid_square(x, y))continue;
+            const square = board[y][x];
             if (square && square.color!==this.color && square.type===KNIGHT)return true;
         }
         //king
@@ -380,8 +433,8 @@ class King extends Piece{
             for (const dir2 of king_dirs){
                 const y = this.y+dir1;
                 const x = this.x+dir2;
-                if (x<0 || x>7 || y<0 || y>7)continue;
-                const square = board.board[y][x];
+                if (!is_valid_square(x, y))continue;
+                const square = board[y][x];
                 if (square && square.color!==this.color && square.type===KING)return true;
             }
         }
@@ -392,50 +445,61 @@ class Bishop extends Piece{
     constructor(x, y, color){
         super(x, y, color, BISHOP);
     }
-    get_moves(board){
-        const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-        return this.generic_get_moves(board, dirs, "B");
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Bishop(x, y, piece.color, piece.type);
+        else return square;
+    }
+    get_squares(board, piece) {
+        const dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+        return get_dirs_qrb(piece, board, dirs);
     }
 }
 class Rook extends Piece {
     constructor(x, y, color){
         super(x, y, color, ROOK);
     }
-    get_moves(board){
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Rook(x, y, piece.color, piece.type);
+        else return square;
+    }
+    get_squares(board, piece){
         const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-        return this.generic_get_moves(board, dirs, "R");
+        return get_dirs_qrb(piece, board, dirs);
     }
 }
 class Knight extends Piece {
     constructor(x, y, color){
         super(x, y, color, KNIGHT);
     }
-    get_moves(board){
-        let moves = [];
-        const dirs = [[ 2,  1], [ 2, -1],
-                      [-2, -1], [-2,  1],
-                      [ 1,  2], [-1,  2],
-                      [ 1, -2], [-1, -2]];
-
-        for (const dir of dirs){
-            const y = this.y+dir[0];
-            const x = this.x+dir[1];
-            const square = COLUMNS[x]+(y+1).toString();
-            if (y<0 || x<0 || y>7 || x>7)continue;
-            if (board.board[y][x]===0)moves.push("N"+square);
-            else if (board.board[y][x].color!==this.color)moves.push("Nx"+square);
-        }
-        return moves;
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Knight(x, y, piece.color, piece.type);
+        else return square;
     }
+    get_squares(board, piece){
+        const dirs = [[ 2,  1], [ 2, -1],
+                        [-2, -1], [-2,  1],
+                        [ 1,  2], [-1,  2],
+                        [ 1, -2], [-1, -2]];
+        return get_dirs_knight_king(piece, board, dirs);
+    }
+    
 }
 class Queen extends Piece {
     constructor(x, y, color){
         super(x, y, color, QUEEN);
     }
-    get_moves(board){
+    edit_func(piece, square, x, y, board, move){
+        if (piece===square)return 0;
+        if (x===move.target_x && y===move.target_y)return new Queen(x, y, piece.color, piece.type);
+        else return square;
+    }
+    get_squares(board, piece) {
         const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1],//rook
                       [1, 1], [1, -1], [-1, 1], [-1, -1]];//bishop
-        return this.generic_get_moves(board, dirs, "Q");
+        return get_dirs_qrb(piece, board, dirs);
     }
 }
 exports.Board = Board;
