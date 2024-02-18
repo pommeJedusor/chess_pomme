@@ -169,12 +169,7 @@ class Board{
         return board;
     }
     check_move_append(pattern, player){
-        if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
-
-        for (let i = player;i<this.moves.length;i+=2){
-            if (pattern.test(this.moves[i].get_notation_move()))return true;
-        }
-        return false;
+        return check_move_append(this.moves, pattern, player);
     }
     get_every_moves(){
         let moves = [];
@@ -325,7 +320,9 @@ class King extends Piece{
             }
         }
         //check castle
-        if ((all_moves.length>0 && all_moves.at(-1).is_check) || check_move_append(all_moves, /^K/, piece.color))return moves;
+        if (check_move_append(all_moves, /^K/, piece.color) || piece.is_in_check(board)){
+            return moves.filter((move)=>piece.is_legal_move(board, move));
+        }
         //check kingside castle
         const king_y = (piece.y+1).toString();
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
@@ -345,8 +342,8 @@ class King extends Piece{
                 }
             }
         }
-        moves = moves.filter((move)=>piece.is_legal_move(board, move));
-        return moves;
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        return legal_moves;
     }
     is_in_check(board){
         //check pawn
