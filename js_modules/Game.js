@@ -1,5 +1,4 @@
 const Board = require("./Board");
-const Test = require("../test");
 
 exports.Game = class Game{
     constructor(player_1, id){
