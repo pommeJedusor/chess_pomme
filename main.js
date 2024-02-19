@@ -71,19 +71,22 @@ ws_server.on('connection', function(socket) {
 		console.log("socket id: "+socket_id);
 		if (/ID:\d*$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
+			const timer = 10 * 60 * 1000 //minutes * seconds * ms
 			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
-				let player = new Game.Player(socket, socket_id, 60000);
+				let player = new Game.Player(socket, socket_id, timer);
 				let game = new Game.Game(player, id);
 				socket_games[socket_id] = game;
 				id_games[game.id] = game;
 			}else if (id_games[id].player_2===undefined){
 				console.log("player 2 join the game");
 				let game = id_games[id]
-				let player = new Game.Player(socket, socket_id, 60000);
+				let player = new Game.Player(socket, socket_id, timer);
 				game.player_2 = player;
 				socket_games[socket_id] = game;
+				game.player_1.socket.send("S:1");
+				game.player_2.socket.send("S:2");
 			}else {
 				socket.send("E:la partie est déjà complète");
 			}
