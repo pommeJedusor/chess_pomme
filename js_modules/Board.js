@@ -212,12 +212,24 @@ class Piece{
         this.color = color;
         this.type = type;
     }
-    is_legal_move(board, move){
+    is_legal_move(board, move, moves){
         const piece = board[move.y][move.x];
-        const square_taken = piece.move(board, move.target_x, move.target_y);
-        const king = get_pieces(board ,(square)=>square && square.color===piece.color && square.type===KING)[0];
-        const is_legal = !king.is_in_check(board);
-        piece.undo_move(board, move.x, move.y, square_taken);
+        const new_board = piece.do_move(board, move, this.edit_func);
+        const king = get_pieces(new_board ,(square)=>square && square.color===piece.color && square.type===KING)[0];
+        const other_king = get_pieces(new_board ,(square)=>square && square.color!==piece.color && square.type===KING)[0];
+        const is_legal = !king.is_in_check(new_board);
+        if (!is_legal)return is_legal;
+        move.is_check = other_king.is_in_check(new_board);
+        if (move.is_check){
+            let temp_board = new Board();
+            temp_board.moves = moves.map((square)=>square);
+            temp_board.moves.push(move);
+            temp_board.board = new_board;
+            if (temp_board.get_every_moves().length===0){
+                move.is_check = false;
+                move.is_mate = true;
+            }
+        }
         return is_legal;
     }
     do_move(board, move, edit_func){
@@ -246,7 +258,7 @@ class Piece{
     get_moves(board, piece, all_moves){
         const squares = piece.get_squares(board, piece, all_moves);
         const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square[0], square[1], square[2]));
-        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move, all_moves));
         return legal_moves;
     }
 }
@@ -327,7 +339,7 @@ class Pawn extends Piece{
                 }
             }
         }
-        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move, all_moves));
         return legal_moves;
     }
 }
@@ -366,14 +378,14 @@ class King extends Piece{
         }
         //check castle
         if (check_move_append(all_moves, /^[KO]/, piece.color) || piece.is_in_check(board)){
-            return moves.filter((move)=>piece.is_legal_move(board, move));
+            return moves.filter((move)=>piece.is_legal_move(board, move, all_moves));
         }
         //check kingside castle
         const king_y = (piece.y+1).toString();
         const pattern_kingside = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_kingside, piece.color)){
             if (board[piece.y][5]===board[piece.y][6] && board[piece.y][5]===0){
-                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x+1, piece.y))){
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x+1, piece.y), all_moves)){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
                 }
             }
@@ -382,12 +394,12 @@ class King extends Piece{
         const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
         if (!check_move_append(all_moves, pattern_queenside, piece.color)){
             if (board[piece.y][1]===board[piece.y][2] && board[piece.y][3]===0 && board[piece.y][1]===0){
-                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x-1, piece.y))){
+                if (piece.is_legal_move(board ,new Move(piece, piece.x, piece.y, piece.x-1, piece.y), all_moves)){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
                 }
             }
         }
-        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move));
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move, all_moves));
         return legal_moves;
     }
     is_in_check(board){
