@@ -95,9 +95,11 @@ ws_server.on('connection', function(socket) {
 			else if ((game.player_1.socket===socket && player_turn===1) || (game.player_2.socket===socket && player_turn===2)){
 				const move = new Game.Move(msg, Date.now(), player_turn);
 				const current_player = [game.player_1, game.player_2][player_turn-1];
+				const result = game.play(msg);
+				if (!result)return socket.send("E:Coup non valide");
 				game.moves.push(move);
 				//update the timer of the current player
-				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves[game.moves.length-2].timestamp;
+				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves.at(-2).timestamp;
 				if (current_player.total_timestamp<=0){
 					const winner = game.player_1===current_player ? game.player_2 : game.player_1;
 					sockets = game.finish(winner, "time out", id_games, socket_games, sockets);
