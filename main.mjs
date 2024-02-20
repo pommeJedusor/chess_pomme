@@ -1,8 +1,8 @@
-const http = require('http');
-const fs = require('fs');
-const WebSocket = require('ws');
+import fs from "fs";
+import http from "http";
+import * as ws from "ws";
 
-const Game = require("./js_modules/Game");
+import * as Game from "./js_modules/Game.mjs";
 
 const port = 8080;
 
@@ -57,7 +57,7 @@ server.listen(port, function(error){
 })
 
 
-const ws_server = new WebSocket.Server({
+const ws_server = new ws.WebSocketServer({
 	port: 3000
 });
 

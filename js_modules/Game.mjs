@@ -1,6 +1,6 @@
-const Board = require("./Board");
+import * as Board from "./Board.mjs";
 
-exports.Game = class Game{
+class Game{
     constructor(player_1, id){
         this.player_1 = player_1;
         this.player_2 = undefined;
@@ -35,7 +35,7 @@ exports.Game = class Game{
     }
 }
 
-exports.Player = class Player{
+class Player{
     constructor(socket,socket_id, total_timestamp){
         this.socket = socket;
         this.socket_id = socket_id;
@@ -43,10 +43,12 @@ exports.Player = class Player{
     }
 }
 
-exports.Move = class Move{
+class Move{
     constructor(move, timestamp, player){
         this.player = player;
         this.move = move;
         this.timestamp = timestamp;
     }
 }
+
+export { Game, Player, Move };
