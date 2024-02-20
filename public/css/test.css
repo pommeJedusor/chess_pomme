@@ -3,7 +3,24 @@
     z-index: 9;
     width: 100px;
     height: 100px;
+}
+.queen {
+    background-color: green;
+}
+.king {
+    background-color: yellow;
+}
+.pawn {
     background-color: blue;
+}
+.rook {
+    background-color: purple;
+}
+.bishop {
+    background-color: brown;
+}
+.knight {
+    background-color: orange;
 }
 #chessboard {
     display: flex;

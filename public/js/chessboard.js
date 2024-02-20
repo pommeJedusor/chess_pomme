@@ -1,6 +1,7 @@
 const width_square = 100;
 const height_square = 100;
 let global_piece;
+let global_board;
 
 function main(){
     const board = document.querySelector("#chessboard");
@@ -35,12 +36,28 @@ function make_board(board){
         }
         board.insertAdjacentElement('beforeend', rank);
     }
-    //piece
-    const piece = document.createElement("div");
-    piece.className = "piece";
-    piece.draggable = true;
-    piece.addEventListener("dragstart", (e)=>global_piece=piece);
-    board.querySelector(".square").insertAdjacentElement("beforeend", piece);
+    //pieces
+    global_board = new Board();
+    let type;
+    for (let y=0;y<8;y++){
+        for (let x=0;x<8;x++){
+            const square = global_board.board[y][x];
+            if (!square)continue;
+            if (square.type==="P")type="pawn";
+            if (square.type==="K")type="king";
+            if (square.type==="Q")type="queen";
+            if (square.type==="R")type="rook";
+            if (square.type==="N")type="knight";
+            if (square.type==="B")type="bishop";
+            const piece = document.createElement("div");
+            piece.classList.add("piece", type);
+            piece.draggable = true;
+            piece.addEventListener("dragstart", (e)=>global_piece=piece);
+            const rank = document.querySelectorAll("#chessboard > div.rank")[square.y];
+            const good_square = rank.querySelectorAll("div.square")[square.x];
+            good_square.insertAdjacentElement("beforeend", piece);
+        }
+    }
 }
 
 main();
