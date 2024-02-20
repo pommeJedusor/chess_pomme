@@ -1,3 +1,4 @@
+import { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK } from "./Board.mjs";
 const width_square = 100;
 const height_square = 100;
 let global_piece;
@@ -17,8 +18,8 @@ function drop(event) {
     const new_x = Number(event.target.classList[1]);
     const new_y = Number(event.target.parentElement.classList[1]);
     const all_moves = global_board.get_every_moves();
-    move_found = null;
-    for (move of all_moves){
+    let move_found = null;
+    for (const move of all_moves){
         if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)move_found = move;
     }
     if (move_found===null)return global_piece = null;

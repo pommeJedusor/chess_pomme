@@ -21,14 +21,28 @@ const server = http.createServer(function (req, res){
 			})
 			return
 		case "/game":
-			fs.readFile("./public/html/game.html",function(err, data){
+			fs.readFile("./public/html/game2.html",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/html'});
 				res.write(data);
 				res.end()
 			})
 			return
-		case "/js/chess.js":
-			fs.readFile("./public/js/chess.js",function(err, data){
+		case "/js/chess.mjs":
+			fs.readFile("./public/js/chess.mjs",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/javascript'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/js/Board.mjs":
+			fs.readFile("js_modules/Board.mjs",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/javascript'});
+				res.write(data);
+				res.end()
+			})
+			return
+		case "/js/chessboard.mjs":
+			fs.readFile("./public/js/chessboard.mjs",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/javascript'});
 				res.write(data);
 				res.end()
