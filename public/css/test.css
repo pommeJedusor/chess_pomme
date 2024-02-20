@@ -1,0 +1,40 @@
+.piece {
+    position: absolute;
+    z-index: 9;
+    width: 100px;
+    height: 100px;
+}
+.queen {
+    background-color: green;
+}
+.king {
+    background-color: yellow;
+}
+.pawn {
+    background-color: blue;
+}
+.rook {
+    background-color: purple;
+}
+.bishop {
+    background-color: brown;
+}
+.knight {
+    background-color: orange;
+}
+#chessboard {
+    display: flex;
+    flex-direction: column;
+}
+.rank {
+    display: flex;
+    flex-direction: row;
+}
+.square {
+    width: 100px;
+    height: 100px;
+    background-color: black;
+}
+.rank:nth-child(odd) > .square:nth-child(odd) , .rank:nth-child(even) > .square:nth-child(even){
+    background-color: red;
+}

@@ -537,12 +537,14 @@ class Queen extends Piece {
         return get_dirs_qrb(piece, board, dirs);
     }
 }
-exports.Board = Board;
-exports.Pawn = Pawn;
-exports.King = King;
-exports.Bishop = Bishop;
-exports.Rook = Rook;
-exports.Knight = Knight;
-exports.Queen = Queen;
-exports.WHITE = WHITE;
-exports.BLACK = BLACK;
+try {
+    exports.Board = Board;
+    exports.Pawn = Pawn;
+    exports.King = King;
+    exports.Bishop = Bishop;
+    exports.Rook = Rook;
+    exports.Knight = Knight;
+    exports.Queen = Queen;
+    exports.WHITE = WHITE;
+    exports.BLACK = BLACK;
+}catch{}
