@@ -15,15 +15,15 @@ function drop(event) {
     event.preventDefault();
     const old_x = Number(global_piece.parentElement.classList[1]);
     const old_y = Number(global_piece.parentElement.parentElement.classList[1]);
-    const new_x = Number(event.target.classList[1]);
-    const new_y = Number(event.target.parentElement.classList[1]);
+    const new_x = Number(event.toElement.classList[1]);
+    const new_y = Number(event.toElement.parentElement.classList[1]);
     const all_moves = global_board.get_every_moves();
     let move_found = null;
     for (const move of all_moves){
         if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)move_found = move;
     }
     if (move_found===null)return global_piece = null;
-    event.target.appendChild(global_piece);
+    event.toElement.appendChild(global_piece);
     global_piece = null;
 }
 
@@ -39,9 +39,6 @@ function make_board(board){
             square.ondragover = "event.preventDefault();";
             square.ondrop = "console.dir(event)";
             square.classList.add("square", j);
-
-            square.addEventListener("dragover", (e)=>e.preventDefault());
-            square.addEventListener("drop", drop);
 
             rank.insertAdjacentElement('beforeend', square);
         }
@@ -62,13 +59,19 @@ function make_board(board){
             if (square.type==="B")type="bishop";
             const piece = document.createElement("div");
             piece.classList.add("piece", type);
+            if (square.color===WHITE)piece.classList.add("white");
+            else piece.classList.add("black");
             piece.draggable = true;
-            piece.addEventListener("dragstart", (e)=>global_piece=piece);
+            piece.addEventListener("dragstart", function (e){
+                global_piece=piece;
+                e.preventDefault();
+            });
             const rank = document.querySelectorAll("#chessboard > div.rank")[square.y];
             const good_square = rank.querySelectorAll("div.square")[square.x];
             good_square.insertAdjacentElement("beforeend", piece);
         }
     }
+    document.addEventListener("mouseup", drop)
 }
 
 main();

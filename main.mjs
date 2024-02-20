@@ -11,7 +11,27 @@ let id_games = [];
 
 const server = http.createServer(function (req, res){
 	const url = req.url;
-	console.log(url.replace(/\?.*/gm, ""));
+	const parsed_url = url.replace(/\?.*/gm, "");
+	console.log(parsed_url);
+	//svg
+	if (/\.svg$/.test(parsed_url)){
+		console.log("svg")
+		//to test the url
+		const url_files = ["/img/bishop.svg", "/img/king.svg", "/img/queen.svg", "/img/knight.svg",  "/img/rook.svg",  "/img/pawn.svg"];
+		//to get the path of the file
+		const files = ["chess-bishop.svg", "chess-king.svg", "chess-queen.svg", "chess-knight.svg",  "chess-rook.svg",  "chess-pawn.svg"];
+		const path_files = files.map((file)=>"./public/img/"+file);
+		const index = url_files.indexOf(parsed_url);
+		if (index!==-1){
+			console.log(path_files[index])
+			fs.readFile(path_files[index],function(err, data){
+				res.writeHead(200, {'Content-Type':'image/svg+xml'});
+				res.write(data);
+				res.end()
+			})
+			return
+		}
+	}
 	switch (url.replace(/\?.*/gm, "")){
 		case "/":
 			fs.readFile("./public/html/index.html",function(err, data){

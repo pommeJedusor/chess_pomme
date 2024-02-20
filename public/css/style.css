@@ -1,26 +1,33 @@
 .piece {
-    position: absolute;
-    z-index: 9;
     width: 100px;
     height: 100px;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+}
+.white {
+    filter: invert(40%) sepia(37%) saturate(2876%) hue-rotate(359deg) brightness(102%) contrast(109%);
+}
+.black {
+    filter: invert(16%) sepia(90%) saturate(2175%) hue-rotate(197deg) brightness(98%) contrast(102%);
 }
 .queen {
-    background-color: green;
+    background-image: url("../img/queen.svg");
 }
 .king {
-    background-color: yellow;
+    background-image: url("../img/king.svg");
 }
 .pawn {
-    background-color: blue;
+    background-image: url("../img/pawn.svg");
 }
 .rook {
-    background-color: purple;
+    background-image: url("../img/rook.svg");
 }
 .bishop {
-    background-color: brown;
+    background-image: url("../img/bishop.svg");
 }
 .knight {
-    background-color: orange;
+    background-image: url("../img/knight.svg");
 }
 #chessboard {
     display: flex;
@@ -33,10 +40,10 @@
 .square {
     width: 100px;
     height: 100px;
-    background-color: black;
+    background-color: #2A231F;
 }
 .rank:nth-child(odd) > .square:nth-child(odd) , .rank:nth-child(even) > .square:nth-child(even){
-    background-color: red;
+    background-color: #D8E1E7;
 }
 /*for blindfold*/
 #moves {
