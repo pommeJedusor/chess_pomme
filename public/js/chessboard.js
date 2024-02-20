@@ -1,31 +1,46 @@
 const width_square = 100;
 const height_square = 100;
+let global_piece;
 
 function main(){
-    const squares = document.querySelectorAll(".square");
-    for (const square of squares){
-        square.onmousedown = (event)=>mouseDown(event, square);
-    }
+    const board = document.querySelector("#chessboard");
+    if (!board)return;
+    make_board(board);
 }
 
-function mouseDown(event, square){
+function drop(event) {
+    if (!global_piece)return;
     event.preventDefault();
-    
-    document.onmouseup = (e)=>dropPiece(e, square);
-    document.onmousemove = (e)=>elementDrag(e, square);
+    event.target.appendChild(global_piece);
+    global_piece = null;
 }
 
-function elementDrag(e, square){
-    console.log(square);
-    square.style.top = (-height_square/2+e.y).toString()+"px";
-    square.style.left = (-width_square/2+e.x).toString()+"px";
-}
+function make_board(board){
+    board.innerHtml = "";
+    const NB_RANKS = 8;
+    const NB_FILES = 8;
+    for (let i=0;i<NB_RANKS;i++){
+        const rank = document.createElement("div");
+        rank.classList.add("rank", i);
+        for (let j=0;j<NB_FILES;j++){
+            const square = document.createElement("div");
+            square.ondragover = "event.preventDefault();";
+            square.ondrop = "console.dir(event)";
+            square.classList.add("square", j);
 
-function dropPiece(e, square){
-    document.onmouseup = null;
-    document.onmousemove = null;
-    square.style.top = (Math.floor(e.y/100)*100).toString()+"px";
-    square.style.left = (Math.floor(e.x/100)*100).toString()+"px";
+            square.addEventListener("dragover", (e)=>e.preventDefault());
+            square.addEventListener("drop", drop);
+
+            rank.insertAdjacentElement('beforeend', square);
+        }
+        board.insertAdjacentElement('beforeend', rank);
+    }
+    //piece
+    const piece = document.createElement("div");
+    piece.className = "piece";
+    piece.draggable = true;
+    piece.addEventListener("dragstart", (e)=>global_piece=piece);
+    board.querySelector(".square").insertAdjacentElement("beforeend", piece);
 }
 
 main();
