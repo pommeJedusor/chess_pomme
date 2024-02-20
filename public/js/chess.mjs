@@ -1,5 +1,5 @@
 function main(href){
-    ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
+    let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
     let player_number;
 
     ws.onopen = () => {
@@ -18,31 +18,20 @@ function main(href){
 
         //if error
         if (/^E:/.test(event.data)){
-            const error_box = document.createElement("p");
-            error_box.classList.add("error");
-            const main = document.querySelector("main");
-            error_box.textContent = event.data.replace(/^E:/, "");
-            main.insertAdjacentElement('beforeend', error_box);
+            console.log(event.data.replace(/^E:/, ""));
             return;
         }
         if (/^R:/.test(event.data)){
-            const main = document.querySelector("main")
-            const result = document.createElement("p");
-            result.classList.add("game_result");
-
-            result.textContent = "you have won: ";
-            if (event.data[2]==="L")result.textContent = "you have lost: ";
-            result.textContent += event.data.replace(/^R:(L|W):/, "")
-            main.insertAdjacentElement('beforeend', result);
+            let result = "you have won: ";
+            if (event.data[2]==="L")result = "you have lost: ";
+            result += event.data.replace(/^R:(L|W):/, "");
+            console.log(result);
             return;
         }
         if (/^S:/.test(event.data)){
             player_number = Number(event.data[2]);
-            const error_box = document.createElement("p");
-            error_box.classList.add("error");
-            const main = document.querySelector("main");
-            error_box.textContent = player_number===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
-            main.insertAdjacentElement('beforeend', error_box);
+            let result = player_number===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
+            console.log(result);
             return;
         }
         const new_move = document.createElement("div");
@@ -86,4 +75,6 @@ function main(href){
         const new_timer = minutes.toString()+":"+seconds.toString();
         timer_el.textContent = new_timer;
     }
+    return ws;
 }
+export { main };

@@ -1,16 +1,18 @@
 import { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK } from "./Board.mjs";
+import { main as ws_main } from "./chess.mjs";
 const width_square = 100;
 const height_square = 100;
 let global_piece;
 let global_board;
 
-function main(){
+function main(href){
     const board = document.querySelector("#chessboard");
     if (!board)return;
-    make_board(board);
+    const ws = ws_main(href);
+    make_board(board, ws);
 }
 
-function drop(event) {
+function drop(event, ws) {
     if (!global_piece)return;
     event.preventDefault();
     const old_x = Number(global_piece.parentElement.classList[1]);
@@ -24,10 +26,11 @@ function drop(event) {
     }
     if (move_found===null)return global_piece = null;
     event.toElement.appendChild(global_piece);
+    ws.send(move_found.get_notation_move());
     global_piece = null;
 }
 
-function make_board(board){
+function make_board(board, ws){
     board.innerHtml = "";
     const NB_RANKS = 8;
     const NB_FILES = 8;
@@ -37,7 +40,6 @@ function make_board(board){
         for (let j=0;j<NB_FILES;j++){
             const square = document.createElement("div");
             square.ondragover = "event.preventDefault();";
-            square.ondrop = "console.dir(event)";
             square.classList.add("square", j);
 
             rank.insertAdjacentElement('beforeend', square);
@@ -71,7 +73,6 @@ function make_board(board){
             good_square.insertAdjacentElement("beforeend", piece);
         }
     }
-    document.addEventListener("mouseup", drop)
+    document.addEventListener("mouseup", (e)=>drop(e, ws));
 }
-
-main();
+main(location.href)

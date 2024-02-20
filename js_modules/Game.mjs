@@ -21,13 +21,13 @@ class Game{
     finish(winner, message, id_games, socket_games, sockets){
         if (this.player_1===winner){
             this.player_1.socket.send("R:W:"+message);
-            this.player_2.socket.send("R:L:"+message);
+            if (this.player_2)this.player_2.socket.send("R:L:"+message);
         }else {
             this.player_1.socket.send("R:L:"+message);
-            this.player_2.socket.send("R:W:"+message);
+            if (this.player_2)this.player_2.socket.send("R:W:"+message);
         }
         this.player_1.socket.close();
-        this.player_2.socket.close();
+        if (this.player_2)this.player_2.socket.close();
         //delete the game
         id_games[this.id] = undefined;
         socket_games[winner.socket_id] = undefined;
