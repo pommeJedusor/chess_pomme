@@ -12,6 +12,16 @@ function main(){
 function drop(event) {
     if (!global_piece)return;
     event.preventDefault();
+    const old_x = Number(global_piece.parentElement.classList[1]);
+    const old_y = Number(global_piece.parentElement.parentElement.classList[1]);
+    const new_x = Number(event.target.classList[1]);
+    const new_y = Number(event.target.parentElement.classList[1]);
+    const all_moves = global_board.get_every_moves();
+    move_found = null;
+    for (move of all_moves){
+        if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)move_found = move;
+    }
+    if (move_found===null)return global_piece = null;
     event.target.appendChild(global_piece);
     global_piece = null;
 }
@@ -20,7 +30,7 @@ function make_board(board){
     board.innerHtml = "";
     const NB_RANKS = 8;
     const NB_FILES = 8;
-    for (let i=0;i<NB_RANKS;i++){
+    for (let i=NB_RANKS-1;i>=0;i--){
         const rank = document.createElement("div");
         rank.classList.add("rank", i);
         for (let j=0;j<NB_FILES;j++){
