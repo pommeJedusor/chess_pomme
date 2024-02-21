@@ -55,7 +55,6 @@ function make_move(board, notation_move){
     const piece = global_board.board[the_move.y][the_move.x];
     global_board.board = piece.do_move(global_board.board, the_move, piece.edit_func);
     global_board.moves.push(the_move);
-    global_board.see_board();
 }
 
 function ws_init(href){
@@ -94,8 +93,6 @@ function drop(event, ws) {
 
     const all_moves = global_board.get_every_moves();
     let move_found = null;
-    console.log(all_moves)
-    console.log(old_x, old_y, new_x, new_y)
     for (const move of all_moves){
         if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y){
             if (["=R", "=B", "=N"].includes(move.promotion))continue;
@@ -103,7 +100,6 @@ function drop(event, ws) {
         }
     }
     if (move_found===null)return global_piece = null;
-    console.log(move_found.get_notation_move());
     ws.send(move_found.get_notation_move());
     global_piece = null;
 }
@@ -143,7 +139,6 @@ function make_board(board, ws){
             else piece.classList.add("black");
             piece.draggable = true;
             piece.addEventListener("dragstart", function (e){
-                console.log(piece)
                 global_piece=piece;
                 e.preventDefault();
             });
@@ -152,7 +147,6 @@ function make_board(board, ws){
             good_square.insertAdjacentElement("beforeend", piece);
         }
     }
-    console.log(ws);
     document.addEventListener("mouseup", (e)=>drop(e, ws));
 }
 main(location.href)

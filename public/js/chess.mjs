@@ -26,6 +26,7 @@ function message(event, ws, player, global_board, make_move){
         player = Number(event.data[2]);
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
         console.log(result);
+        setInterval(()=>update_timer(global_board.moves), 1000);
         return player;
     }
     make_move(global_board, event.data);
@@ -38,20 +39,20 @@ function send_move(){
     ws.send(move.value);
     move.value = "";
 }
-function update_timer(player_number){
-    const moves = document.getElementById("moves");
-    if (player_number%2===moves.childElementCount%2)return;
-    const timer_el = document.getElementById("timer");
+function update_timer(moves){
+    if (moves.length<2)return;
+    const timer_el = document.getElementById("timer"+(moves.length%2+1));
     const str_times = timer_el.textContent.split(":");
     let minutes = Number(str_times[0]);
     let seconds = Number(str_times[1]);
     if (seconds!==0){
         seconds--;
+        seconds = seconds<10 ? "0"+seconds : seconds;
     }else if (minutes!==0){
         minutes--;
         seconds = 59;
     }
-    const new_timer = minutes.toString()+":"+seconds.toString();
+    const new_timer = minutes.toString()+":"+seconds;
     timer_el.textContent = new_timer;
 }
 export { open, message, send_move, update_timer };
