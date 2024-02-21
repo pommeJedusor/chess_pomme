@@ -2,6 +2,10 @@ function open(ws){
     const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
     if (!match_result)return
     ws.send("ID:"+match_result[0])
+    //check if game timed out
+    setInterval(()=>{
+        ws.send("T")
+    }, 10000);
 }
 
 function message(event, ws, player, global_board, make_move){
