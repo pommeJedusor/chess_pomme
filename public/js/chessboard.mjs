@@ -21,17 +21,30 @@ function get_html_piece(x, y){
 }
 
 function make_move(board, notation_move){
+    //get the move
     let the_move;
     for (const move of board.get_every_moves()){
         if (move.get_notation_move()===notation_move)the_move=move;
     }
     if (!the_move)return;
+    //make the html move
     const piece_to_move = get_html_piece(the_move.x, the_move.y);
     const piece_to_take = get_html_piece(the_move.target_x, the_move.target_y);
     if (piece_to_take)piece_to_take.remove();
     const square = get_html_square(the_move.target_x, the_move.target_y);
     square.insertAdjacentElement("beforeend", piece_to_move);
+    //castle
+    if (/^O-O(-O)?[#+]?$/.test(notation_move)){
+        console.log("castle")
+        const y = board.moves.length%2===0 ? 0 : 7;
+        const x = /O-O-O/.test(notation_move) ? 0 : 7;
+        const target_x = x===0 ? 3 : 5;
+        const rook_to_move = get_html_piece(x, y);
+        const square_rook = get_html_square(target_x, y);
+        square_rook.insertAdjacentElement("beforeend", rook_to_move);
+    }
 
+    //make the move in the datas
     const piece = global_board.board[the_move.y][the_move.x];
     global_board.board = piece.do_move(global_board.board, the_move, piece.edit_func);
     global_board.moves.push(the_move);
