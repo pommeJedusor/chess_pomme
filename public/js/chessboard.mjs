@@ -46,6 +46,9 @@ function make_move(board, notation_move){
         const type_pieces = ["Q", "R", "B", "N"];
         const class_pieces = ["queen", "rook", "bishop", "knight"];
         piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
+    }else if (the_move.piece==="P" && the_move.is_taking && global_board.board[the_move.target_y][the_move.target_x]===0){
+        //if en-passant
+        get_html_piece(the_move.target_x, the_move.y).remove();
     }
 
     //make the move in the datas
