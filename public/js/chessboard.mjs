@@ -50,7 +50,15 @@ function make_move(board, notation_move){
     const piece_to_take = get_html_piece(the_move.target_x, the_move.target_y);
     if (piece_to_take)piece_to_take.remove();
     const square = get_html_square(the_move.target_x, the_move.target_y);
-    square.insertAdjacentElement("beforeend", piece_to_move);
+    const trans_x = ((the_move.target_x-the_move.x)*100).toString()+"px";
+    const trans_y = ((-the_move.target_y+the_move.y)*100).toString()+"px";
+    piece_to_move.style.transitionDuration = "100ms";
+    piece_to_move.style.transform = "translate("+trans_x+", "+trans_y+")";
+    setTimeout(function (){
+        square.insertAdjacentElement("beforeend", piece_to_move);
+        piece_to_move.style.transform = "translate(0, 0)";
+        piece_to_move.style.transitionDuration = "0ms";
+    }, 100);
     //castle
     if (/^O-O(-O)?[#+]?$/.test(notation_move)){
         const y = board.moves.length%2===0 ? 0 : 7;

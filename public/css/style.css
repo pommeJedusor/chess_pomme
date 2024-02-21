@@ -4,6 +4,8 @@
     background-repeat: no-repeat;
     background-position-x: center;
     background-position-y: center;
+    transition-property: all;
+    transition-timing-function: linear;
 }
 .white {
     filter: invert(40%) sepia(37%) saturate(2876%) hue-rotate(359deg) brightness(102%) contrast(109%);
