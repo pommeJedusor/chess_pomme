@@ -3,8 +3,26 @@ import * as websocket_chess from "./chess.mjs";
 const width_square = 100;
 const height_square = 100;
 let global_piece;
+let global_piece_origin_pos;
 let global_board;
+let global_animation;
 let ws;
+let cursor_x = 0;
+let cursor_y = 0;
+
+document.addEventListener("mousemove", function (e){
+    cursor_x = e.pageX;
+    cursor_y = e.pageY;
+})
+
+function animation_move(){
+    const origin_x = global_piece_origin_pos.x+50;
+    const origin_y = global_piece_origin_pos.y+50;
+    const x = cursor_x - origin_x;
+    const y = cursor_y - origin_y;
+    const style = "translate("+x+"px,"+y+"px)";
+    global_piece.style.transform = style;
+}
 
 function get_html_square(x, y){
     const ranks = document.querySelectorAll("#chessboard > div");
@@ -81,17 +99,17 @@ function drop(event, ws) {
     event.preventDefault();
     const old_x = Number(global_piece.parentElement.classList[1]);
     const old_y = Number(global_piece.parentElement.parentElement.classList[1]);
-    let new_x;
-    let new_y;
-    if (event.toElement.classList.contains("piece")){
-        new_x = Number(event.toElement.parentElement.classList[1]);
-        new_y = Number(event.toElement.parentElement.parentElement.classList[1]);
-    }else{
-        new_x = Number(event.toElement.classList[1]);
-        new_y = Number(event.toElement.parentElement.classList[1]);
-    }
+    console.log(event)
+    const origin_x = global_piece_origin_pos.x;
+    const origin_y = global_piece_origin_pos.y;
+    const dif_x = Math.floor((cursor_x - origin_x)/100);
+    const dif_y = Math.floor((cursor_y - origin_y)/100);
+    const new_x = old_x + dif_x;
+    const new_y = old_y - dif_y;
 
     const all_moves = global_board.get_every_moves();
+    console.log(old_x, old_y, new_x, new_y)
+    console.log(all_moves)
     let move_found = null;
     for (const move of all_moves){
         if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y){
@@ -99,9 +117,11 @@ function drop(event, ws) {
             move_found = move;
         }
     }
-    if (move_found===null)return global_piece = null;
-    ws.send(move_found.get_notation_move());
+    if (move_found!==null)ws.send(move_found.get_notation_move());
+    global_piece.style.transform = "";
     global_piece = null;
+    global_piece_origin_pos = null;
+    clearInterval(global_animation);
 }
 
 function make_board(board, ws){
@@ -140,6 +160,9 @@ function make_board(board, ws){
             piece.draggable = true;
             piece.addEventListener("dragstart", function (e){
                 global_piece=piece;
+                global_piece_origin_pos = piece.getBoundingClientRect();
+                console.log(global_piece_origin_pos);
+                global_animation = setInterval(animation_move,10)
                 e.preventDefault();
             });
             const rank = document.querySelectorAll("#chessboard > div.rank")[square.y];
