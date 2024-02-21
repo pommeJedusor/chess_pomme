@@ -9,6 +9,7 @@ let global_animation;
 let ws;
 let cursor_x = 0;
 let cursor_y = 0;
+let player_number;
 
 document.addEventListener("mousemove", function (e){
     cursor_x = e.pageX;
@@ -85,10 +86,10 @@ function make_move(board, notation_move){
 
 function ws_init(href){
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
-    let player_number;
+    player_number;
 
     ws.onopen = (event)=>websocket_chess.open(ws);
-    ws.onmessage = (event) => websocket_chess.message(event, ws, player_number, global_board, make_move);
+    ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, global_board, make_move);
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
@@ -125,7 +126,9 @@ function drop(event, ws) {
             move_found = move;
         }
     }
-    if (move_found!==null){
+    //if move not found or not player's turn
+    console.log(player_number, global_board.moves.length);
+    if (move_found!==null && (!player_number || player_number%2!==global_board.moves.length%2)){
         ws.send(move_found.get_notation_move());
         const square = get_html_square(new_x, new_y)
         square.innerHTML = "";

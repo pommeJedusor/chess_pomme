@@ -19,7 +19,7 @@ function message(event, ws, player, global_board, make_move){
         let result = "you have won: ";
         if (event.data[2]==="L")result = "you have lost: ";
         result += event.data.replace(/^R:(L|W):/, "");
-        console.log(result);
+        alert(result);
         return player;
     }
     if (/^S:/.test(event.data)){
