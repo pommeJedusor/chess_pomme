@@ -30,7 +30,7 @@ class Game{
         if (this.player_2)this.player_2.socket.close();
         //delete the game
         id_games[this.id] = undefined;
-        socket_games[winner.socket_id] = undefined;
+        if (winner)socket_games[winner.socket_id] = undefined;
         return sockets.filter(s => s !== this.player_2 && s !== this.player_1);
     }
 }
