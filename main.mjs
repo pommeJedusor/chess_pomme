@@ -144,8 +144,7 @@ ws_server.on('connection', function(socket) {
 				}
 				console.log(game.player_1.total_timestamp/1000);
 				console.log(game.player_2.total_timestamp/1000);
-				game.player_1.socket.send(msg);
-				game.player_2.socket.send(msg);
+				(current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
 				console.log("recieve: " + msg);
 				if (msg[msg.length-1]==="#"){
 					const winner = current_player;

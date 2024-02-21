@@ -117,7 +117,15 @@ function drop(event, ws) {
             move_found = move;
         }
     }
-    if (move_found!==null)ws.send(move_found.get_notation_move());
+    if (move_found!==null){
+        ws.send(move_found.get_notation_move());
+        const square = get_html_square(new_x, new_y)
+        square.innerHTML = "";
+        square.insertAdjacentElement("beforeend", global_piece);
+        const piece = global_board.board[old_y][old_x];
+        global_board.board = piece.do_move(global_board.board, move_found, piece.edit_func);
+        global_board.moves.push(move_found);
+    }
     global_piece.style.transform = "";
     global_piece = null;
     global_piece_origin_pos = null;
