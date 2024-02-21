@@ -35,13 +35,17 @@ function make_move(board, notation_move){
     square.insertAdjacentElement("beforeend", piece_to_move);
     //castle
     if (/^O-O(-O)?[#+]?$/.test(notation_move)){
-        console.log("castle")
         const y = board.moves.length%2===0 ? 0 : 7;
         const x = /O-O-O/.test(notation_move) ? 0 : 7;
         const target_x = x===0 ? 3 : 5;
         const rook_to_move = get_html_piece(x, y);
         const square_rook = get_html_square(target_x, y);
         square_rook.insertAdjacentElement("beforeend", rook_to_move);
+    }else if (the_move.piece==="P" && the_move.target_y===7){
+        piece_to_move.classList.remove("pawn");
+        const type_pieces = ["Q", "R", "B", "N"];
+        const class_pieces = ["queen", "rook", "bishop", "knight"];
+        piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
     }
 
     //make the move in the datas
@@ -90,7 +94,10 @@ function drop(event, ws) {
     console.log(all_moves)
     console.log(old_x, old_y, new_x, new_y)
     for (const move of all_moves){
-        if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)move_found = move;
+        if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y){
+            if (["=R", "=B", "=N"].includes(move.promotion))continue;
+            move_found = move;
+        }
     }
     if (move_found===null)return global_piece = null;
     console.log(move_found.get_notation_move());
