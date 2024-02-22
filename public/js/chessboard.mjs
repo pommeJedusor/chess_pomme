@@ -11,6 +11,27 @@ let cursor_x = 0;
 let cursor_y = 0;
 let player_number;
 
+function special_change(the_move){
+    const notation_move = the_move.get_notation_move();
+    //castle
+    if (/^O-O(-O)?[#+]?$/.test(notation_move)){
+        const y = global_board.moves.length%2===0 ? 0 : 7;
+        const x = /O-O-O/.test(notation_move) ? 0 : 7;
+        const target_x = x===0 ? 3 : 5;
+        const rook_to_move = get_html_piece(x, y);
+        const square_rook = get_html_square(target_x, y);
+        square_rook.insertAdjacentElement("beforeend", rook_to_move);
+    }else if (the_move.piece==="P" && the_move.target_y===7){
+        piece_to_move.classList.remove("pawn");
+        const type_pieces = ["Q", "R", "B", "N"];
+        const class_pieces = ["queen", "rook", "bishop", "knight"];
+        piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
+    }else if (the_move.piece==="P" && the_move.is_taking && global_board.board[the_move.target_y][the_move.target_x]===0){
+        //if en-passant
+        get_html_piece(the_move.target_x, the_move.y).remove();
+    }
+}
+
 document.addEventListener("mousemove", function (e){
     cursor_x = e.pageX;
     cursor_y = e.pageY;
@@ -39,6 +60,12 @@ function get_html_piece(x, y){
     return piece;
 }
 
+function get_xy_from_piece(piece){
+    const x = piece.parentElement.classList[1];
+    const y = piece.parentElement.parentElement.classList[1];
+    return [x, y];
+}
+
 function make_move(board, notation_move){
     //get the move
     let the_move;
@@ -60,23 +87,7 @@ function make_move(board, notation_move){
         piece_to_move.style.transform = "translate(0, 0)";
         piece_to_move.style.transitionDuration = "0ms";
     }, 100);
-    //castle
-    if (/^O-O(-O)?[#+]?$/.test(notation_move)){
-        const y = board.moves.length%2===0 ? 0 : 7;
-        const x = /O-O-O/.test(notation_move) ? 0 : 7;
-        const target_x = x===0 ? 3 : 5;
-        const rook_to_move = get_html_piece(x, y);
-        const square_rook = get_html_square(target_x, y);
-        square_rook.insertAdjacentElement("beforeend", rook_to_move);
-    }else if (the_move.piece==="P" && the_move.target_y===7){
-        piece_to_move.classList.remove("pawn");
-        const type_pieces = ["Q", "R", "B", "N"];
-        const class_pieces = ["queen", "rook", "bishop", "knight"];
-        piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
-    }else if (the_move.piece==="P" && the_move.is_taking && global_board.board[the_move.target_y][the_move.target_x]===0){
-        //if en-passant
-        get_html_piece(the_move.target_x, the_move.y).remove();
-    }
+    special_change(the_move);
 
     //make the move in the datas
     const piece = global_board.board[the_move.y][the_move.x];
@@ -103,6 +114,26 @@ function main(href){
     make_board(board, ws);
 }
 
+function no_drag_move(event, ws){
+    for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+    const xy = get_xy_from_piece(global_piece)
+    const x = Number(xy[0]);
+    const y = Number(xy[1]);
+    const moves = global_board.get_every_moves();
+    let squares_to_edit = [];
+    for (const move of moves){
+        if (move.x===x && move.y===y)squares_to_edit.push(get_html_square(move.target_x, move.target_y));
+    }
+    console.log(squares_to_edit);
+    for (const square of squares_to_edit){
+        square.classList.add("to_move");
+    }
+    global_piece.style.transform = "";
+    global_piece = null;
+    global_piece_origin_pos = null;
+    clearInterval(global_animation);
+}
+
 function drop(event, ws) {
     if (!global_piece)return;
     event.preventDefault();
@@ -116,6 +147,7 @@ function drop(event, ws) {
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
 
+    if (new_x===old_x && new_y===old_y)return no_drag_move(event, ws);//if drop on the same square
     const all_moves = global_board.get_every_moves();
     console.log(old_x, old_y, new_x, new_y)
     console.log(all_moves)
@@ -129,6 +161,7 @@ function drop(event, ws) {
     //if move not found or not player's turn
     console.log(player_number, global_board.moves.length);
     if (move_found!==null && (!player_number || player_number%2!==global_board.moves.length%2)){
+        special_change(move_found)
         ws.send(move_found.get_notation_move());
         const square = get_html_square(new_x, new_y)
         square.innerHTML = "";
@@ -177,7 +210,7 @@ function make_board(board, ws){
             if (square.color===WHITE)piece.classList.add("white");
             else piece.classList.add("black");
             piece.draggable = true;
-            piece.addEventListener("dragstart", function (e){
+            piece.addEventListener("mousedown", function (e){
                 global_piece=piece;
                 global_piece_origin_pos = piece.getBoundingClientRect();
                 console.log(global_piece_origin_pos);
