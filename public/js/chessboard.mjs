@@ -124,6 +124,10 @@ function no_drag_move(event, ws){
         for (const event of events_listeners){
             event[0].removeEventListener("click", event[1]);
         }
+        if (global_piece){
+            global_piece.style.transform=null;
+            global_piece=null;
+        }
         clearInterval(global_animation);
         return;
     }
