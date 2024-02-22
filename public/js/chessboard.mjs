@@ -10,6 +10,7 @@ let ws;
 let cursor_x = 0;
 let cursor_y = 0;
 let player_number;
+let events_listeners = [];
 
 function special_change(the_move, piece_to_move){
         const notation_move = the_move.get_notation_move();
@@ -117,18 +118,46 @@ function main(href){
 }
 
 function no_drag_move(event, ws){
+    const piece = global_piece;
     for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+    if (global_board.moves.length%2===player_number%2){
+        for (const event of events_listeners){
+            event[0].removeEventListener("click", event[1]);
+        }
+        clearInterval(global_animation);
+        return;
+    }
     const xy = get_xy_from_piece(global_piece)
     const x = Number(xy[0]);
     const y = Number(xy[1]);
     const moves = global_board.get_every_moves();
     let squares_to_edit = [];
     for (const move of moves){
-        if (move.x===x && move.y===y)squares_to_edit.push(get_html_square(move.target_x, move.target_y));
+        if (move.x===x && move.y===y)squares_to_edit.push({"square":get_html_square(move.target_x, move.target_y), "move":move});
     }
     console.log(squares_to_edit);
-    for (const square of squares_to_edit){
+    for (const square_move of squares_to_edit){
+        const square = square_move["square"];
+        const move = square_move["move"];
         square.classList.add("to_move");
+        function a(){
+            square.innerHTML = "";
+            special_change(move, piece);
+            square.insertAdjacentElement("beforeend", piece);
+            for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+            const data_piece = global_board.board[move.y][move.x];
+            global_board.moves.push(move);
+            global_board.board = data_piece.do_move(global_board.board, move, data_piece.edit_func);
+            ws.send(move.get_notation_move());
+            global_piece_origin_pos = null;
+            clearInterval(global_animation);
+            console.log(events_listeners);
+            for (const events_listener of events_listeners){
+                events_listener[0].removeEventListener("click", events_listener[1]);
+            }
+        }
+        events_listeners.push([square, a]);
+        square.addEventListener("click", a);
     }
     global_piece.style.transform = "";
     global_piece = null;
