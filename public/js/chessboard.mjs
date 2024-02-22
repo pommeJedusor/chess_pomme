@@ -100,7 +100,6 @@ function make_move(board, notation_move){
 
 function ws_init(href){
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
-    player_number;
 
     ws.onopen = (event)=>websocket_chess.open(ws);
     ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, global_board, make_move);
@@ -161,6 +160,7 @@ function no_drag_move(event, ws){
             }
         }
         events_listeners.push([square, a]);
+        if (!player_number)continue;
         square.addEventListener("click", a);
     }
     global_piece.style.transform = "";
@@ -195,7 +195,7 @@ function drop(event, ws) {
     }
     //if move not found or not player's turn
     console.log(player_number, global_board.moves.length);
-    if (move_found!==null && (!player_number || player_number%2!==global_board.moves.length%2)){
+    if (move_found!==null && (player_number && player_number%2!==global_board.moves.length%2)){
         special_change(move_found, get_html_piece(old_x, old_y))
         ws.send(move_found.get_notation_move());
         const square = get_html_square(new_x, new_y)
