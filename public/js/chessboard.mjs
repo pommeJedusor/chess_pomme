@@ -11,25 +11,26 @@ let cursor_x = 0;
 let cursor_y = 0;
 let player_number;
 
-function special_change(the_move){
-    const notation_move = the_move.get_notation_move();
-    //castle
-    if (/^O-O(-O)?[#+]?$/.test(notation_move)){
-        const y = global_board.moves.length%2===0 ? 0 : 7;
-        const x = /O-O-O/.test(notation_move) ? 0 : 7;
-        const target_x = x===0 ? 3 : 5;
-        const rook_to_move = get_html_piece(x, y);
-        const square_rook = get_html_square(target_x, y);
-        square_rook.insertAdjacentElement("beforeend", rook_to_move);
-    }else if (the_move.piece==="P" && the_move.target_y===7){
-        piece_to_move.classList.remove("pawn");
-        const type_pieces = ["Q", "R", "B", "N"];
-        const class_pieces = ["queen", "rook", "bishop", "knight"];
-        piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
-    }else if (the_move.piece==="P" && the_move.is_taking && global_board.board[the_move.target_y][the_move.target_x]===0){
-        //if en-passant
-        get_html_piece(the_move.target_x, the_move.y).remove();
-    }
+function special_change(the_move, piece_to_move){
+        const notation_move = the_move.get_notation_move();
+        //castle
+        if (/^O-O(-O)?[#+]?$/.test(notation_move)){
+            const y = global_board.moves.length%2===0 ? 0 : 7;
+            const x = /O-O-O/.test(notation_move) ? 0 : 7;
+            const target_x = x===0 ? 3 : 5;
+            const rook_to_move = get_html_piece(x, y);
+            const square_rook = get_html_square(target_x, y);
+            square_rook.insertAdjacentElement("beforeend", rook_to_move);
+        }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
+            console.log(piece_to_move);
+            piece_to_move.classList.remove("pawn");
+            const type_pieces = ["Q", "R", "B", "N"];
+            const class_pieces = ["queen", "rook", "bishop", "knight"];
+            piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
+        }else if (the_move.piece==="P" && the_move.is_taking && global_board.board[the_move.target_y][the_move.target_x]===0){
+            //if en-passant
+            get_html_piece(the_move.target_x, the_move.y).remove();
+        }
 }
 
 document.addEventListener("mousemove", function (e){
@@ -80,14 +81,15 @@ function make_move(board, notation_move){
     const square = get_html_square(the_move.target_x, the_move.target_y);
     const trans_x = ((the_move.target_x-the_move.x)*100).toString()+"px";
     const trans_y = ((-the_move.target_y+the_move.y)*100).toString()+"px";
-    piece_to_move.style.transitionDuration = "100ms";
+    piece_to_move.style.transitionDuration = "300ms";
     piece_to_move.style.transform = "translate("+trans_x+", "+trans_y+")";
+    special_change(the_move, piece_to_move);
     setTimeout(function (){
         square.insertAdjacentElement("beforeend", piece_to_move);
         piece_to_move.style.transform = "translate(0, 0)";
         piece_to_move.style.transitionDuration = "0ms";
-    }, 100);
-    special_change(the_move);
+        console.log(the_move, piece_to_move)
+    }, 300);
 
     //make the move in the datas
     const piece = global_board.board[the_move.y][the_move.x];
@@ -161,7 +163,7 @@ function drop(event, ws) {
     //if move not found or not player's turn
     console.log(player_number, global_board.moves.length);
     if (move_found!==null && (!player_number || player_number%2!==global_board.moves.length%2)){
-        special_change(move_found)
+        special_change(move_found, get_html_piece(old_x, old_y))
         ws.send(move_found.get_notation_move());
         const square = get_html_square(new_x, new_y)
         square.innerHTML = "";
