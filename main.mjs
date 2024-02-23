@@ -68,6 +68,13 @@ const server = http.createServer(function (req, res){
 				res.end()
 			})
 			return
+		case "/js/chess_html.mjs":
+			fs.readFile("./public/js/chess_html.mjs",function(err, data){
+				res.writeHead(200, {'Content-Type':'text/javascript'});
+				res.write(data);
+				res.end()
+			})
+			return
 		case "/css/style.css":
 			fs.readFile("./public/css/style.css",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/css'});
