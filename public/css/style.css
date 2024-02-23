@@ -70,13 +70,16 @@ main {
 }
 /*chat*/
 #chat, #moves-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     width: 20%;
     height: 800px;
     border-radius: 15px;
     border: 1px solid var(--light-dark);
 }
 #messages {
-    height: calc(800px - 50px);/*#chat - send-message*/
+    height: calc(800px - 44px);/*#chat - send-message*/
     overflow: auto;
     scrollbar-width: none;
     scrollbar-color: var(--user-name) var(--dark-dark);
@@ -85,14 +88,38 @@ main {
     margin: 16px 20px;
 }
 #message-form {
+    position: sticky;
     height: 44px;
 }
 input#send-message {
     height: 100%;
-    width: 75%;
+    width: calc(100% - 20px);/*max width - padding*/
+    margin: 0;
+    padding: 0 0 0 20px;
     background-color: var(--dark-dark);
+    color: var(--light-light);
     border: none;
-    border-radius: 0 0 0 15px;
+    border-radius: 0 0 15px 15px;
+    background-image: url("../img/send.svg");
+    background-repeat: no-repeat;
+    background-size: 44px;
+    background-position-x: calc(100% - 10px);
+}
+input#send-message:focus {
+    background-color: var(--light-dark);
+    outline: none;
+}
+input[type=submit] {
+    position: absolute;
+    top: 0;
+    left: calc(100% - 10px - 44px);
+    width: 44px;
+    height: 100%;
+    background-color: transparent;
+    border: none;
+}
+input[type=submit]:hover {
+    cursor: pointer;
 }
 span.user-name {
     color: var(--user-name);

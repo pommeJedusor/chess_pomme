@@ -17,9 +17,9 @@ const server = http.createServer(function (req, res){
 	if (/\.svg$/.test(parsed_url)){
 		console.log("svg")
 		//to test the url
-		const url_files = ["/img/bishop.svg", "/img/king.svg", "/img/queen.svg", "/img/knight.svg",  "/img/rook.svg",  "/img/pawn.svg"];
+		const url_files = ["/img/bishop.svg", "/img/king.svg", "/img/queen.svg", "/img/knight.svg",  "/img/rook.svg",  "/img/pawn.svg", "/img/send.svg"];
 		//to get the path of the file
-		const files = ["chess-bishop.svg", "chess-king.svg", "chess-queen.svg", "chess-knight.svg",  "chess-rook.svg",  "chess-pawn.svg"];
+		const files = ["chess-bishop.svg", "chess-king.svg", "chess-queen.svg", "chess-knight.svg",  "chess-rook.svg",  "chess-pawn.svg", "send.svg"];
 		const path_files = files.map((file)=>"./public/img/"+file);
 		const index = url_files.indexOf(parsed_url);
 		if (index!==-1){
