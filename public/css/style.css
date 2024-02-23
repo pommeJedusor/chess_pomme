@@ -1,3 +1,27 @@
+/*
+pallette
+dark  black : #27374D
+light black : #526D82
+dark  white : #9DB2BF
+light white : #DDE6ED
+*/
+:root {
+    --dark-dark-color : #27374D;
+    --light-dark-color : #526D82;
+    --dark-light-color : #9DB2BF;
+    --light-light : #DDE6ED;
+}
+body {
+    background-color: var(--dark-dark-color);
+    color: var(--dark-light-color);
+}
+main {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+/*chessboard*/
 .piece {
     width: 100px;
     height: 100px;
@@ -8,10 +32,10 @@
     transition-timing-function: linear;
 }
 .white {
-    filter: invert(40%) sepia(37%) saturate(2876%) hue-rotate(359deg) brightness(102%) contrast(109%);
+    filter: invert(17%) sepia(36%) saturate(664%) hue-rotate(175deg) brightness(97%) contrast(90%);
 }
 .black {
-    filter: invert(16%) sepia(90%) saturate(2175%) hue-rotate(197deg) brightness(98%) contrast(102%);
+    filter: invert(97%) sepia(3%) saturate(1353%) hue-rotate(176deg) brightness(97%) contrast(91%);
 }
 .queen {
     background-image: url("../img/queen.svg");
@@ -42,21 +66,25 @@
 .square {
     width: 100px;
     height: 100px;
-    background-color: #2A231F;
+    background-color: var(--light-dark-color);
 }
 .rank:nth-child(odd) > .square:nth-child(odd).to_move , .rank:nth-child(even) > .square:nth-child(even).to_move, .to_move{
     background-color: blue;
 }
 .rank:nth-child(odd) > .square:nth-child(odd) , .rank:nth-child(even) > .square:nth-child(even){
-    background-color: #D8E1E7;
+    background-color: var(--dark-light-color);
 }
-/*for blindfold*/
-#moves {
-    display: flex;
-    flex-wrap: wrap;
+/*chat*/
+#chat, #moves-section {
+    width: 20%;
+    height: 800px;
+    border-radius: 15px;
+    border: 1px solid var(--light-dark-color);
 }
-.move {
-    width: 50%;
+@media (max-width:1400px) {
+    #chat, #moves-section {
+        display: none;
+    }
 }
 @media (max-width:800px) {
     .piece {
