@@ -8,6 +8,7 @@ let cursor_y = 0;
 let player_number;
 let events_listeners = [];
 
+//makes changes on the html board for special moves (castle, promotion, en-passant)
 function special_change(the_move, piece_to_move, data_board){
         const notation_move = the_move.get_notation_move();
         //castle
@@ -49,10 +50,11 @@ function make_move(data_board, notation_move){
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
     for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+    for (const event of events_listeners){
+        event[0].removeEventListener("click", event[1]);
+    }
+    events_listeners = [];
     if (data_board.moves.length%2===player_number%2){
-        for (const event of events_listeners){
-            event[0].removeEventListener("click", event[1]);
-        }
         if (piece)piece.style.transform=null;
         clearInterval(animation_piece_cursor);
         return;
@@ -108,9 +110,9 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     const new_y = old_y - dif_y;
 
     if (new_x===old_x && new_y===old_y)return no_drag_move(event, ws, piece, animation_piece_cursor, data_board);//if drop on the same square
+
+    //get the move played
     const all_moves = data_board.get_every_moves();
-    console.log(old_x, old_y, new_x, new_y)
-    console.log(all_moves)
     let move_found = null;
     for (const move of all_moves){
         if (move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y){
@@ -118,22 +120,24 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
             move_found = move;
         }
     }
-    //if move not found or not player's turn
-    console.log(player_number, data_board.moves.length);
+    //if move found and is player's turn
     if (move_found!==null && (player_number && player_number%2!==data_board.moves.length%2)){
-        special_change(move_found, html_chess.get_html_piece(old_x, old_y), data_board)
-        ws.send(move_found.get_notation_move());
+        //html
         const square = html_chess.get_html_square(new_x, new_y)
         square.innerHTML = "";
-        const data_piece = data_board.board[old_y][old_x];
         square.insertAdjacentElement("beforeend", piece);
+        special_change(move_found, html_chess.get_html_piece(old_x, old_y), data_board)
+        //datas
+        const data_piece = data_board.board[old_y][old_x];
         data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
         data_board.moves.push(move_found);
+        ws.send(move_found.get_notation_move());
     }
     piece.style.transform = "";
     clearInterval(animation_piece_cursor);
 }
 
+//make the html board and init all the event listeners
 function make_board(board, data_board, ws){
     board.innerHtml = "";
     const NB_RANKS = 8;
@@ -151,7 +155,6 @@ function make_board(board, data_board, ws){
         board.insertAdjacentElement('beforeend', rank);
     }
     //pieces
-    global_board = data_board;
     let type;
     for (let y=0;y<8;y++){
         for (let x=0;x<8;x++){
