@@ -47,8 +47,8 @@ const server = http.createServer(function (req, res){
 				res.end()
 			})
 			return
-		case "/js/chess.mjs":
-			fs.readFile("./public/js/chess.mjs",function(err, data){
+		case "/js/chess_ws.mjs":
+			fs.readFile("./public/js/chess_ws.mjs",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/javascript'});
 				res.write(data);
 				res.end()

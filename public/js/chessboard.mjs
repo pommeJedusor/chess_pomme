@@ -1,5 +1,5 @@
 import { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK } from "./Board.mjs";
-import * as websocket_chess from "./chess.mjs";
+import * as websocket_chess from "./chess_ws.mjs";
 import * as html_chess from "./chess_html.mjs";
 const width_square = 100;
 const height_square = 100;
