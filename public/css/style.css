@@ -75,13 +75,15 @@ main {
 }
 /*chat*/
 #chat, #moves-section {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     width: 20%;
     height: 800px;
     border-radius: 15px;
     border: 1px solid var(--light-dark);
+}
+#chat {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 #messages {
     height: calc(800px - 44px);/*#chat - send-message*/
@@ -130,6 +132,50 @@ input[type=submit]:hover {
 }
 span.user-name {
     color: var(--user-name);
+}
+/*moves*/
+#moves-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#moves {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: start;
+    overflow: auto;
+    scrollbar-width: none;
+    scrollbar-color: var(--user-name) var(--dark-dark);
+}
+.move {
+    width: calc(50% - 2px - 40px);/*50% - border - padding*/
+    height: 1em;
+    border-bottom: 1px solid var(--light-dark);
+    margin: 0;
+    padding: 10px 20px;
+}
+.move:nth-child(odd){
+    border-right: 1px solid var(--light-dark);
+}
+.move > p {
+    margin: 0;
+}
+#moves-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 84px;
+    border-top: 1px solid var(--light-dark);
+}
+#moves-buttons > button {
+    width: 128px;
+    height: 39px;
+    background-color: var(--dark-light);
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
 }
 @media (max-width:1400px) {
     #chat, #moves-section {
