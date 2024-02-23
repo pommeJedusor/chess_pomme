@@ -16,6 +16,11 @@ main {
     align-items: center;
 }
 /*chessboard*/
+#opponent-infos, #user-infos {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
 .piece {
     width: 100px;
     height: 100px;
