@@ -3,7 +3,6 @@ import * as websocket_chess from "./chess.mjs";
 import * as html_chess from "./chess_html.mjs";
 const width_square = 100;
 const height_square = 100;
-let global_piece;
 let global_board;
 let global_animation;
 let ws;
@@ -71,21 +70,17 @@ function main(href){
     make_board(board, ws);
 }
 
-function no_drag_move(event, ws){
-    const piece = global_piece;
+function no_drag_move(event, ws, piece){
     for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
     if (global_board.moves.length%2===player_number%2){
         for (const event of events_listeners){
             event[0].removeEventListener("click", event[1]);
         }
-        if (global_piece){
-            global_piece.style.transform=null;
-            global_piece=null;
-        }
+        if (piece)piece.style.transform=null;
         clearInterval(global_animation);
         return;
     }
-    const xy = html_chess.get_xy_from_piece(global_piece)
+    const xy = html_chess.get_xy_from_piece(piece)
     const x = Number(xy[0]);
     const y = Number(xy[1]);
     const moves = global_board.get_every_moves();
@@ -117,17 +112,16 @@ function no_drag_move(event, ws){
         if (!player_number)continue;
         square.addEventListener("click", a);
     }
-    global_piece.style.transform = "";
-    global_piece = null;
+    piece.style.transform = "";
     clearInterval(global_animation);
 }
 
-function drop(event, ws, piece_origin_pos, mouseup_event) {
+function drop(event, ws, piece_origin_pos, piece, mouseup_event) {
     document.removeEventListener("mouseup", mouseup_event);
-    if (!global_piece)return;
+    if (!piece)return;
     event.preventDefault();
-    const old_x = Number(global_piece.parentElement.classList[1]);
-    const old_y = Number(global_piece.parentElement.parentElement.classList[1]);
+    const old_x = Number(piece.parentElement.classList[1]);
+    const old_y = Number(piece.parentElement.parentElement.classList[1]);
     console.log(event)
     const origin_x = piece_origin_pos.x;
     const origin_y = piece_origin_pos.y;
@@ -136,7 +130,7 @@ function drop(event, ws, piece_origin_pos, mouseup_event) {
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
 
-    if (new_x===old_x && new_y===old_y)return no_drag_move(event, ws);//if drop on the same square
+    if (new_x===old_x && new_y===old_y)return no_drag_move(event, ws, piece);//if drop on the same square
     const all_moves = global_board.get_every_moves();
     console.log(old_x, old_y, new_x, new_y)
     console.log(all_moves)
@@ -154,13 +148,12 @@ function drop(event, ws, piece_origin_pos, mouseup_event) {
         ws.send(move_found.get_notation_move());
         const square = html_chess.get_html_square(new_x, new_y)
         square.innerHTML = "";
-        square.insertAdjacentElement("beforeend", global_piece);
-        const piece = global_board.board[old_y][old_x];
-        global_board.board = piece.do_move(global_board.board, move_found, piece.edit_func);
+        const data_piece = global_board.board[old_y][old_x];
+        square.insertAdjacentElement("beforeend", piece);
+        global_board.board = data_piece.do_move(global_board.board, move_found, data_piece.edit_func);
         global_board.moves.push(move_found);
     }
-    global_piece.style.transform = "";
-    global_piece = null;
+    piece.style.transform = "";
     clearInterval(global_animation);
 }
 
@@ -199,12 +192,11 @@ function make_board(board, ws){
             else piece.classList.add("black");
             piece.draggable = true;
             piece.addEventListener("mousedown", function (e){
-                global_piece=piece;
                 const piece_origin_pos = piece.getBoundingClientRect();
                 global_animation = setInterval(()=>html_chess.instant_move_piece(piece, piece_origin_pos, cursor_x, cursor_y),10)
                 e.preventDefault();
                 document.addEventListener("mouseup", function mouseup_event(e){
-                    drop(e, ws, piece_origin_pos, mouseup_event);
+                    drop(e, ws, piece_origin_pos, piece, mouseup_event);
                 });
             });
             const rank = document.querySelectorAll("#chessboard > div.rank")[square.y];
