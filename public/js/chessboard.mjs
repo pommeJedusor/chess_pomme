@@ -126,7 +126,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
         const square = html_chess.get_html_square(new_x, new_y)
         square.innerHTML = "";
         square.insertAdjacentElement("beforeend", piece);
-        special_change(move_found, html_chess.get_html_piece(old_x, old_y), data_board)
+        special_change(move_found, piece, data_board)
         //datas
         const data_piece = data_board.board[old_y][old_x];
         data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
