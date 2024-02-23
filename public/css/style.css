@@ -118,6 +118,9 @@ input#send-message:focus {
     background-color: var(--light-dark);
     outline: none;
 }
+input#send-message:focus::placeholder {
+    color: var(--light-dark);
+}
 input[type=submit] {
     position: absolute;
     top: 0;
