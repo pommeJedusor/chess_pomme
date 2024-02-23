@@ -56,6 +56,7 @@ function insert_move(move_notation){
     move_div.insertAdjacentElement("beforeend", move_p);
 
     moves.insertAdjacentElement("beforeend", move_div);
+    moves.scrollBy(0, 10000);
 }
 
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move };
