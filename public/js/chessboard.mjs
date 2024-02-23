@@ -18,7 +18,6 @@ function special_change(the_move, piece_to_move, data_board){
             const target_x = x===0 ? 3 : 5;
             html_chess.move_piece(x, y, target_x, y);
         }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
-            console.log(piece_to_move);
             piece_to_move.classList.remove("pawn");
             const type_pieces = ["Q", "R", "B", "N"];
             const class_pieces = ["queen", "rook", "bishop", "knight"];
@@ -65,14 +64,19 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
     const moves = data_board.get_every_moves();
     let squares_to_edit = [];
     for (const move of moves){
-        if (move.x===x && move.y===y)squares_to_edit.push({"square":html_chess.get_html_square(move.target_x, move.target_y), "move":move});
+        if (move.x===x && move.y===y)squares_to_edit.push({
+            "square":html_chess.get_html_square(move.target_x, move.target_y),
+            "piece":html_chess.get_html_piece(move.target_x, move.target_y),
+            "move":move
+        });
     }
-    console.log(squares_to_edit);
     for (const square_move of squares_to_edit){
         const square = square_move["square"];
+        const piece_move = square_move["square"];
         const move = square_move["move"];
         square.classList.add("to_move");
         function a(){
+            console.log("test")
             square.innerHTML = "";
             special_change(move, piece, data_board);
             square.insertAdjacentElement("beforeend", piece);
@@ -82,14 +86,19 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             data_board.board = data_piece.do_move(data_board.board, move, data_piece.edit_func);
             ws.send(move.get_notation_move());
             clearInterval(animation_piece_cursor);
-            console.log(events_listeners);
             for (const events_listener of events_listeners){
                 events_listener[0].removeEventListener("click", events_listener[1]);
             }
         }
-        events_listeners.push([square, a]);
         if (!player_number)continue;
-        square.addEventListener("click", a);
+        if (piece_move){
+            events_listeners.push([piece_move, a]);
+            piece_move.addEventListener("click", a);
+        }
+        else {
+            events_listeners.push([square, a]);
+            square.addEventListener("click", a);
+        }
     }
     piece.style.transform = "";
     clearInterval(animation_piece_cursor);
@@ -101,7 +110,6 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     event.preventDefault();
     const old_x = Number(piece.parentElement.classList[1]);
     const old_y = Number(piece.parentElement.parentElement.classList[1]);
-    console.log(event)
     const origin_x = piece_origin_pos.x;
     const origin_y = piece_origin_pos.y;
     const dif_x = Math.floor((cursor_x - origin_x)/width_square);
@@ -109,7 +117,9 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
 
-    if (new_x===old_x && new_y===old_y)return no_drag_move(event, ws, piece, animation_piece_cursor, data_board);//if drop on the same square
+    if (new_x===old_x && new_y===old_y)return setTimeout(function(){
+        no_drag_move(event, ws, piece, animation_piece_cursor, data_board);//if drop on the same square
+    },10);//put a delay to let the event listener start before trying to remove them
 
     //get the move played
     const all_moves = data_board.get_every_moves();
