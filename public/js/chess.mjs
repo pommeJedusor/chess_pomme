@@ -8,7 +8,7 @@ function open(ws){
     }, 10000);
 }
 
-function message(event, ws, player, global_board, make_move){
+function message(event, ws, player, data_board, make_move){
     console.log("recieve: "+event.data);
     //remove last error message
     const last_error = document.querySelector(".error");
@@ -30,10 +30,10 @@ function message(event, ws, player, global_board, make_move){
         player = Number(event.data[2]);
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
         console.log(result);
-        setInterval(()=>update_timer(global_board.moves), 1000);
+        setInterval(()=>update_timer(data_board.moves), 1000);
         return player;
     }
-    make_move(global_board, event.data);
+    make_move(data_board, event.data);
     return player;
 }
 
