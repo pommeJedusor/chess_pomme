@@ -1,19 +1,13 @@
-/*
-pallette
-dark  black : #27374D
-light black : #526D82
-dark  white : #9DB2BF
-light white : #DDE6ED
-*/
 :root {
-    --dark-dark-color : #27374D;
-    --light-dark-color : #526D82;
-    --dark-light-color : #9DB2BF;
+    --dark-dark : #27374D;
+    --light-dark : #526D82;
+    --dark-light : #9DB2BF;
     --light-light : #DDE6ED;
+    --user-name : #D90429;
 }
 body {
-    background-color: var(--dark-dark-color);
-    color: var(--dark-light-color);
+    background: var(--dark-dark);
+    color: var(--dark-light);
 }
 main {
     display: flex;
@@ -66,20 +60,42 @@ main {
 .square {
     width: 100px;
     height: 100px;
-    background-color: var(--light-dark-color);
+    background-color: var(--light-dark);
 }
 .rank:nth-child(odd) > .square:nth-child(odd).to_move , .rank:nth-child(even) > .square:nth-child(even).to_move, .to_move{
     background-color: blue;
 }
 .rank:nth-child(odd) > .square:nth-child(odd) , .rank:nth-child(even) > .square:nth-child(even){
-    background-color: var(--dark-light-color);
+    background-color: var(--dark-light);
 }
 /*chat*/
 #chat, #moves-section {
     width: 20%;
     height: 800px;
     border-radius: 15px;
-    border: 1px solid var(--light-dark-color);
+    border: 1px solid var(--light-dark);
+}
+#messages {
+    height: calc(800px - 50px);/*#chat - send-message*/
+    overflow: auto;
+    scrollbar-width: none;
+    scrollbar-color: var(--user-name) var(--dark-dark);
+}
+.message {
+    margin: 16px 20px;
+}
+#message-form {
+    height: 44px;
+}
+input#send-message {
+    height: 100%;
+    width: 75%;
+    background-color: var(--dark-dark);
+    border: none;
+    border-radius: 0 0 0 15px;
+}
+span.user-name {
+    color: var(--user-name);
 }
 @media (max-width:1400px) {
     #chat, #moves-section {
