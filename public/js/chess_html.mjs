@@ -44,4 +44,18 @@ function instant_move_piece(piece, piece_pos, target_x, target_y){
     piece.style.transform = style;
 }
 
-export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece };
+function insert_move(move_notation){
+    const moves = document.querySelector("#moves");
+    let move_div = document.createElement('div');
+    let move_p = document.createElement('p');
+
+    move_div.classList.add("move");
+    console.log(move_div.childElementCount);
+    if (moves.childElementCount%2===0)move_p.textContent = (moves.childElementCount/2+1).toString()+". ";
+    move_p.textContent += move_notation;
+    move_div.insertAdjacentElement("beforeend", move_p);
+
+    moves.insertAdjacentElement("beforeend", move_div);
+}
+
+export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move };

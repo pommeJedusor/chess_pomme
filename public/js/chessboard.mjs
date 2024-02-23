@@ -29,6 +29,7 @@ function special_change(the_move, piece_to_move, data_board){
 }
 
 function make_move(data_board, notation_move){
+    html_chess.insert_move(notation_move);
     //get the move
     let the_move;
     for (const move of data_board.get_every_moves()){
@@ -76,7 +77,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
         const move = square_move["move"];
         square.classList.add("to_move");
         function a(){
-            console.log("test")
+            html_chess.insert_move(move.get_notation_move());
             square.innerHTML = "";
             special_change(move, piece, data_board);
             square.insertAdjacentElement("beforeend", piece);
@@ -133,6 +134,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     //if move found and is player's turn
     if (move_found!==null && (player_number && player_number%2!==data_board.moves.length%2)){
         //html
+        html_chess.insert_move(move_found.get_notation_move());
         const square = html_chess.get_html_square(new_x, new_y)
         square.innerHTML = "";
         square.insertAdjacentElement("beforeend", piece);
