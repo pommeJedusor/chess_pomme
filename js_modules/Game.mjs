@@ -33,6 +33,16 @@ class Game{
         if (winner)socket_games[winner.socket_id] = undefined;
         return sockets.filter(s => s !== this.player_2 && s !== this.player_1);
     }
+    check_timeout(id_games, socket_games, sockets){
+        const player_turn = this.moves.length%2+1;
+        const current_player = [this.player_1, this.player_2][player_turn-1];
+        const total_timestamp = current_player.total_timestamp - (this.moves.length<2 ? 0 : Date.now() - this.moves.at(-2).timestamp);
+        if (total_timestamp<=0){
+            const winner = this.player_1===current_player ? this.player_2 : this.player_1;
+            sockets = this.finish(winner, "time out", id_games, socket_games, sockets);
+            return sockets;
+        }
+    }
 }
 
 class Player{

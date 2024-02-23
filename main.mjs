@@ -112,7 +112,7 @@ ws_server.on('connection', function(socket) {
 		console.log("socket id: "+socket_id);
 		if (/ID:\d*$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
-			const timer = 10 * 60 * 1000 //minutes * seconds * ms
+			const timer = 1 * 6 * 1000 //minutes * seconds * ms
 			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
@@ -128,6 +128,13 @@ ws_server.on('connection', function(socket) {
 				socket_games[socket_id] = game;
 				game.player_1.socket.send("S:1");
 				game.player_2.socket.send("S:2");
+				const check_timeout_id = setInterval(function (){
+					const result = game.check_timeout(id_games, socket_games, sockets)
+					if (result){
+						sockets = result;
+						clearInterval(check_timeout_id);
+					}
+				}, 1000);
 			}else {
 				socket.send("E:la partie est déjà complète");
 			}
