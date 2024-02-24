@@ -146,9 +146,13 @@ ws_server.on('connection', function(socket) {
 			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
 			//draw proposal
 			if (/^DP$/.test(msg)){
-				current_player.draw_proposal = true;
-				current_player.socket.send("E:vous avez proposé nulle");
-				if (other_player)other_player.socket.send("E:l'autre joueur vous propose nulle");
+				if (current_player.draw_proposal===false){
+					current_player.draw_proposal = true;
+					current_player.socket.send("E:vous avez proposé nulle");
+					if (other_player)other_player.socket.send("E:l'autre joueur vous propose nulle");
+				}else{
+					current_player.socket.send("E:vous avez déjà proposé nulle");
+				}
 			}
 			//draw decline
 			else if (/^DD$/.test(msg)){
@@ -195,6 +199,7 @@ ws_server.on('connection', function(socket) {
 			else if ((game.player_1.socket===socket && player_turn===1) || (game.player_2.socket===socket && player_turn===2)){
 				const move = new Game.Move(msg, Date.now(), player_turn);
 				const current_player = [game.player_1, game.player_2][player_turn-1];
+				const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
 				const result = game.play(msg);
 				if (!result)return socket.send("E:Coup non valide");
 				game.moves.push(move);
@@ -218,6 +223,7 @@ ws_server.on('connection', function(socket) {
 				if (game.board.get_every_moves().length===0){
 					sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
 				}
+				other_player.draw_proposal = false;//reset draw proposal
 			}else socket.send("E:C'est au tour de l'autre joueur");
 		}
 	});
