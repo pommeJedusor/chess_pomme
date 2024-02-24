@@ -146,6 +146,10 @@ ws_server.on('connection', function(socket) {
 			if (game.player_2)game.player_2.socket.send(msg);
 		}else if (/^M:/.test(msg)){
 			socket.send("E:message non valide");
+		}else if (/^R/.test(msg)){
+			let game = socket_games[socket_id];
+			const other_player = [game.player_2, game.player_1][game.moves.length%2];
+			sockets = game.finish(other_player, "par abandon", id_games, socket_games, sockets);
 		}
 		else{
 			let game = socket_games[socket_id];

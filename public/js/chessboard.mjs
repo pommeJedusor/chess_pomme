@@ -232,6 +232,10 @@ function main(href){
         message_input.value = "";
         ws.send("M:Anonyme|"+message);
     });
+    //resign
+    document.querySelector("#resign-button").addEventListener("click", function (){
+        ws.send("R");
+    })
 }
 
 main(location.href)
