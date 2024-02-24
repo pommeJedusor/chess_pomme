@@ -28,7 +28,7 @@ function message(event, ws, player, data_board, make_move){
     else if (/^S:/.test(event.data)){
         player = Number(event.data[2]);
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
-        console.log(result);
+        insert_message(false, result);
         setInterval(()=>update_timer(data_board.moves), 1000);
     }
     //if recieve message
