@@ -1,3 +1,5 @@
+import { insert_end_message } from "./chess_html.mjs";
+
 function open(ws){
     const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
     if (!match_result)return
@@ -16,10 +18,10 @@ function message(event, ws, player, data_board, make_move){
         return player;
     }
     if (/^R:/.test(event.data)){
-        let result = "you have won: ";
-        if (event.data[2]==="L")result = "you have lost: ";
-        result += event.data.replace(/^R:(L|W):/, "");
-        alert(result);
+        let result = 1;
+        if (event.data[2]==="L")result = -1;
+        let reason = event.data.replace(/^R:(L|W):/, "");
+        insert_end_message(result, reason);
         return player;
     }
     if (/^S:/.test(event.data)){

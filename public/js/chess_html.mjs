@@ -65,4 +65,28 @@ function get_width_squares(){
     return document.querySelector(".square").getBoundingClientRect().width;
 }
 
-export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move, get_width_squares };
+function insert_end_message(result, reason){
+    if (result===1)result = "VOUS AVEZ GAGNÉ";
+    else if (result===-1)result = "VOUS AVEZ PERDU";
+    else result = "MATCH NULLE";
+    const chessboard_div = document.querySelector("#chessboard");
+    let alert_div = document.createElement("div");
+    alert_div.id = "alert-message";
+    //if draw win or lose
+    let result_message = document.createElement("h3");
+    alert_div.classList.add("result-message");
+    result_message.textContent = result;
+    //why he lost won or draw
+    let reason_message = document.createElement("p");
+    alert_div.classList.add("reason-message");
+    reason_message.textContent = reason;
+    //button to close
+    let close_button = document.createElement("button");
+    close_button.id = "close-button";
+    alert_div.insertAdjacentElement("afterbegin", result_message);
+    alert_div.insertAdjacentElement("beforeend", reason_message);
+    alert_div.insertAdjacentElement("beforeend", close_button);
+    chessboard_div.insertAdjacentElement("beforeend", alert_div);
+}
+
+export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move, get_width_squares, insert_end_message };
