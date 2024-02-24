@@ -108,10 +108,6 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
 function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece_cursor, data_board) {
     document.removeEventListener("mouseup", mouseup_event);
     if (!piece)return;
-    for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
-    for (const event of events_listeners){
-        event[0].removeEventListener("click", event[1]);
-    }
     event.preventDefault();
     const old_x = Number(piece.parentElement.classList[1]);
     const old_y = Number(piece.parentElement.parentElement.classList[1]);
@@ -121,6 +117,13 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     const dif_y = Math.floor((cursor_y - origin_y)/height_square);
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
+
+    if (!data_board.get_every_moves().filter((move)=>move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)){
+        for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+        for (const event of events_listeners){
+            event[0].removeEventListener("click", event[1]);
+        }
+    }
 
     if (new_x===old_x && new_y===old_y)return setTimeout(function(){
         no_drag_move(event, ws, piece, animation_piece_cursor, data_board);//if drop on the same square
