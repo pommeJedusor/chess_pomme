@@ -62,18 +62,21 @@ function insert_move(move_notation){
 }
 
 function insert_message(username, message){
-    //username
-    let user_span = document.createElement("span")
-    user_span.classList.add("user-name");
-    user_span.textContent = username+" : ";
     //message
     let message_p = document.createElement("p");
     message_p.classList.add("message");
     message_p.textContent = message;
-    message_p.insertAdjacentElement("afterbegin", user_span);
+    //username
+    if (username){
+        let user_span = document.createElement("span")
+        user_span.classList.add("user-name");
+        user_span.textContent = username+" : ";
+        message_p.insertAdjacentElement("afterbegin", user_span);
+    }
     //insert
     const messages = document.querySelector("#messages");
-    messages.insertAdjacentElement("afterbegin", message_p);
+    messages.insertAdjacentElement("beforeend", message_p);
+    messages.scrollBy(0, 10000);
 }
 
 function get_width_squares(){

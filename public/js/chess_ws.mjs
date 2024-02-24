@@ -14,7 +14,7 @@ function message(event, ws, player, data_board, make_move){
 
     //if error
     if (/^E:/.test(event.data)){
-        console.log(event.data.replace(/^E:/, ""));
+        insert_message(false, event.data.replace(/^E:/, ""));
     }
     //if game finished
     else if (/^R:/.test(event.data)){

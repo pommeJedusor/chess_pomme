@@ -225,9 +225,12 @@ function main(href){
         cursor_x = e.pageX;
         cursor_y = e.pageY;
     })
+    //send messages
     document.querySelector("#message-form > input[type=submit]").addEventListener("click", function (){
-        console.log("coucou");
-        ws.send("M:Pomme Jedusor|Salut!");
+        const message_input = document.querySelector("#send-message");
+        const message = message_input.value;
+        message_input.value = "";
+        ws.send("M:Anonyme|"+message);
     });
 }
 

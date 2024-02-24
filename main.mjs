@@ -138,10 +138,14 @@ ws_server.on('connection', function(socket) {
 			}else {
 				socket.send("E:la partie est déjà complète");
 			}
-		}else if (/^M:[A-Za-z0-9éèùûôîà'"-_() ]+|[A-Za-z0-9éèùûôîà'"-_() ]+$/.test(msg)){
+		}else if (/^M:[A-Za-z0-9éèùûôîà'"\-_() ]+\|[A-Za-z0-9éèùûôîà'"\-_() ]+$/.test(msg)){
+			console.log("msg")
+			console.log(msg)
 			let game = socket_games[socket_id];
 			game.player_1.socket.send(msg);
 			if (game.player_2)game.player_2.socket.send(msg);
+		}else if (/^M:/.test(msg)){
+			socket.send("E:message non valide");
 		}
 		else{
 			let game = socket_games[socket_id];
