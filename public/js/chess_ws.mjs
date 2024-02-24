@@ -1,4 +1,4 @@
-import { insert_end_message } from "./chess_html.mjs";
+import { insert_end_message, insert_message } from "./chess_html.mjs";
 
 function open(ws){
     const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
@@ -15,24 +15,32 @@ function message(event, ws, player, data_board, make_move){
     //if error
     if (/^E:/.test(event.data)){
         console.log(event.data.replace(/^E:/, ""));
-        return player;
     }
-    if (/^R:/.test(event.data)){
+    //if game finished
+    else if (/^R:/.test(event.data)){
         let result = 1;
         if (event.data[2]==="L")result = -1;
         else if (event.data[2]==="D")result = 0;
         let reason = event.data.replace(/^R:(L|W|D):/, "");
         insert_end_message(result, reason);
-        return player;
     }
-    if (/^S:/.test(event.data)){
+    //if game started
+    else if (/^S:/.test(event.data)){
         player = Number(event.data[2]);
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
         console.log(result);
         setInterval(()=>update_timer(data_board.moves), 1000);
-        return player;
     }
-    make_move(data_board, event.data);
+    //if recieve message
+    else if (/^M:/.test(event.data)){
+        const content = event.data.substr(2).split("|");
+        const username = content[0];
+        const message = content[1];
+        insert_message(username, message);
+    }
+    else {
+        make_move(data_board, event.data);
+    }
     return player;
 }
 

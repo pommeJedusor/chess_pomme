@@ -61,6 +61,21 @@ function insert_move(move_notation){
     moves.scrollBy(0, 10000);
 }
 
+function insert_message(username, message){
+    //username
+    let user_span = document.createElement("span")
+    user_span.classList.add("user-name");
+    user_span.textContent = username+" : ";
+    //message
+    let message_p = document.createElement("p");
+    message_p.classList.add("message");
+    message_p.textContent = message;
+    message_p.insertAdjacentElement("afterbegin", user_span);
+    //insert
+    const messages = document.querySelector("#messages");
+    messages.insertAdjacentElement("afterbegin", message_p);
+}
+
 function get_width_squares(){
     return document.querySelector(".square").getBoundingClientRect().width;
 }
@@ -101,4 +116,4 @@ function close_end_message(){
 }
 
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move,
-         get_width_squares, insert_end_message, close_end_message };
+         insert_message, get_width_squares, insert_end_message, close_end_message };

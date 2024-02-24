@@ -110,7 +110,7 @@ ws_server.on('connection', function(socket) {
 	socket.on('message', function(msg) {
 		msg = msg.toString();
 		console.log("socket id: "+socket_id);
-		if (/ID:\d*$/.test(msg)){
+		if (/^ID:\d*$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
 			const timer = 10 * 60 * 1000 //minutes * seconds * ms
 			console.log();
@@ -138,7 +138,12 @@ ws_server.on('connection', function(socket) {
 			}else {
 				socket.send("E:la partie est déjà complète");
 			}
-		}else{
+		}else if (/^M:[A-Za-z0-9éèùûôîà'"-_() ]+|[A-Za-z0-9éèùûôîà'"-_() ]+$/.test(msg)){
+			let game = socket_games[socket_id];
+			game.player_1.socket.send(msg);
+			if (game.player_2)game.player_2.socket.send(msg);
+		}
+		else{
 			let game = socket_games[socket_id];
 			if (game===undefined){socket.send("E:vous n'avez rejoint aucune partie");return}
 			const player_turn = game.moves.length%2+1;

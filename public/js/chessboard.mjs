@@ -225,6 +225,10 @@ function main(href){
         cursor_x = e.pageX;
         cursor_y = e.pageY;
     })
+    document.querySelector("#message-form > input[type=submit]").addEventListener("click", function (){
+        console.log("coucou");
+        ws.send("M:Pomme Jedusor|Salut!");
+    });
 }
 
 main(location.href)
