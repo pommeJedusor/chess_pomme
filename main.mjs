@@ -41,7 +41,7 @@ const server = http.createServer(function (req, res){
 			})
 			return
 		case "/game":
-			fs.readFile("./public/html/game2.html",function(err, data){
+			fs.readFile("./public/html/game.html",function(err, data){
 				res.writeHead(200, {'Content-Type':'text/html'});
 				res.write(data);
 				res.end()
