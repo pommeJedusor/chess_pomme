@@ -73,7 +73,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
     }
     for (const square_move of squares_to_edit){
         const square = square_move["square"];
-        const piece_move = square_move["square"];
+        const piece_move = square_move["piece"];
         const move = square_move["move"];
         square.classList.add("to_move");
         function a(){
@@ -108,6 +108,10 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
 function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece_cursor, data_board) {
     document.removeEventListener("mouseup", mouseup_event);
     if (!piece)return;
+    for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+    for (const event of events_listeners){
+        event[0].removeEventListener("click", event[1]);
+    }
     event.preventDefault();
     const old_x = Number(piece.parentElement.classList[1]);
     const old_y = Number(piece.parentElement.parentElement.classList[1]);
