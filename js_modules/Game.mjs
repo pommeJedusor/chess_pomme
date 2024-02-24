@@ -19,10 +19,14 @@ class Game{
         return true;
     }
     finish(winner, message, id_games, socket_games, sockets){
-        if (this.player_1===winner){
+        if (winner===null){
+            this.player_1.socket.send("R:D:"+message);
+            if (this.player_2)this.player_2.socket.send("R:D:"+message);
+        }
+        else if (this.player_1===winner){
             this.player_1.socket.send("R:W:"+message);
             if (this.player_2)this.player_2.socket.send("R:L:"+message);
-        }else {
+        }else if (this.player_2===winner){
             this.player_1.socket.send("R:L:"+message);
             if (this.player_2)this.player_2.socket.send("R:W:"+message);
         }

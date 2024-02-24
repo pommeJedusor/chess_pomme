@@ -20,7 +20,8 @@ function message(event, ws, player, data_board, make_move){
     if (/^R:/.test(event.data)){
         let result = 1;
         if (event.data[2]==="L")result = -1;
-        let reason = event.data.replace(/^R:(L|W):/, "");
+        else if (event.data[2]==="D")result = 0;
+        let reason = event.data.replace(/^R:(L|W|D):/, "");
         insert_end_message(result, reason);
         return player;
     }

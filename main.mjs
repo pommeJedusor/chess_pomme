@@ -17,9 +17,9 @@ const server = http.createServer(function (req, res){
 	if (/\.svg$/.test(parsed_url)){
 		console.log("svg")
 		//to test the url
-		const url_files = ["/img/bishop.svg", "/img/king.svg", "/img/queen.svg", "/img/knight.svg",  "/img/rook.svg",  "/img/pawn.svg", "/img/send.svg", "/img/cross.svg"];
+		const url_files = ["/img/bishop.svg", "/img/king.svg", "/img/queen.svg", "/img/knight.svg",  "/img/rook.svg",  "/img/pawn.svg", "/img/send.svg", "/img/cross.svg", "/img/white_cross.svg"];
 		//to get the path of the file
-		const files = ["chess-bishop.svg", "chess-king.svg", "chess-queen.svg", "chess-knight.svg",  "chess-rook.svg",  "chess-pawn.svg", "send.svg", "cross.svg"];
+		const files = ["chess-bishop.svg", "chess-king.svg", "chess-queen.svg", "chess-knight.svg",  "chess-rook.svg",  "chess-pawn.svg", "send.svg", "cross.svg", "white_cross.svg"];
 		const path_files = files.map((file)=>"./public/img/"+file);
 		const index = url_files.indexOf(parsed_url);
 		if (index!==-1){
@@ -162,7 +162,12 @@ ws_server.on('connection', function(socket) {
 				console.log("recieve: " + msg);
 				if (msg[msg.length-1]==="#"){
 					const winner = current_player;
-					sockets = game.finish(winner, "checkmate", id_games, socket_games, sockets);
+					sockets = game.finish(winner, "par mat", id_games, socket_games, sockets);
+				}
+				console.log("test")
+				console.log(game.board.get_every_moves().length);
+				if (game.board.get_every_moves().length===0){
+					sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
 				}
 			}else socket.send("E:C'est au tour de l'autre joueur");
 		}

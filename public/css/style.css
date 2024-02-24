@@ -104,6 +104,12 @@ main {
 #alert-message.lose {
     background-color: var(--user-name);
 }
+#alert-message.draw {
+    background-color: var(--dark-dark);
+}
+#alert-message.draw > #close-button {
+    background-image: url("../img/white_cross.svg");
+}
 #close-button {
     position: absolute;
     right: 18px;
