@@ -138,17 +138,53 @@ ws_server.on('connection', function(socket) {
 			}else {
 				socket.send("E:la partie est déjà complète");
 			}
-		}else if (/^M:[A-Za-z0-9éèùûôîà'"\-_() ]+\|[A-Za-z0-9éèùûôîà'"\-_() ]+$/.test(msg)){
+		}
+		//draw (proposal, decline or accept)
+		else if (/^D/.test(msg)){
+			let game = socket_games[socket_id];
+			const current_player = game.player_1.socket_id===socket_id ? game.player_1 : game.player_2;
+			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
+			//draw proposal
+			if (/^DP$/.test(msg)){
+				current_player.draw_proposal = true;
+				current_player.socket.send("E:vous avez proposé nulle");
+				if (other_player)other_player.socket.send("E:l'autre joueur vous propose nulle");
+			}
+			//draw decline
+			else if (/^DD$/.test(msg)){
+				if (other_player.draw_proposal){
+					other_player.draw_proposal = false;
+					current_player.socket.send("E:vous avez refusé la nulle");
+					if (other_player)other_player.socket.send("E:l'autre joueur a refusé la nulle");
+				}else {
+					current_player.socket.send("E:pas d'offre de nulle valide pour le moment");
+				}
+			}
+			//draw accept
+			else if (/^DA$/.test(msg)){
+				if (other_player.draw_proposal){
+					sockets = game.finish(null, "par accord mutuel", id_games, socket_games, sockets)
+				}else {
+					current_player.socket.send("E:pas d'offre de nulle valide pour le moment");
+				}
+			}
+		}
+		//messages
+		else if (/^M:/.test(msg)){
+			if (!/^M:[A-Za-z0-9éèùûôîà'"\-_() ]+\|[A-Za-z0-9éèùûôîà'"\-_() ]+$/.test(msg)){
+				socket.send("E:message non valide");
+				return
+			}
 			console.log("msg")
 			console.log(msg)
 			let game = socket_games[socket_id];
 			game.player_1.socket.send(msg);
 			if (game.player_2)game.player_2.socket.send(msg);
-		}else if (/^M:/.test(msg)){
-			socket.send("E:message non valide");
-		}else if (/^R/.test(msg)){
+		}
+		//resign
+		else if (/^R/.test(msg)){
 			let game = socket_games[socket_id];
-			const other_player = [game.player_2, game.player_1][game.moves.length%2];
+			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
 			sockets = game.finish(other_player, "par abandon", id_games, socket_games, sockets);
 		}
 		else{

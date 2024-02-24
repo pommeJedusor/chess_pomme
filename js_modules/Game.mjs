@@ -54,6 +54,7 @@ class Player{
         this.socket = socket;
         this.socket_id = socket_id;
         this.total_timestamp = total_timestamp;
+        this.draw_proposal = false;
     }
 }
 

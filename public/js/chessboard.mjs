@@ -230,7 +230,10 @@ function main(href){
         const message_input = document.querySelector("#send-message");
         const message = message_input.value;
         message_input.value = "";
-        ws.send("M:Anonyme|"+message);
+        if (message==="DP")ws.send("DP");
+        else if (message==="DA")ws.send("DA");
+        else if (message==="DD")ws.send("DD");
+        else ws.send("M:Anonyme|"+message);
     });
     //resign
     document.querySelector("#resign-button").addEventListener("click", function (){
