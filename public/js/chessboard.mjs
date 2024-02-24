@@ -236,7 +236,7 @@ function main(href){
     });
     //resign
     document.querySelector("#resign-button").addEventListener("click", function (){
-        ws.send("R");
+        ws.send("R:");
     })
     //draw proposal
     document.querySelector("#draw-button").addEventListener("click", function (){

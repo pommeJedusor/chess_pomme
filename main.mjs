@@ -186,7 +186,7 @@ ws_server.on('connection', function(socket) {
 			if (game.player_2)game.player_2.socket.send(msg);
 		}
 		//resign
-		else if (/^R/.test(msg)){
+		else if (/^R:/.test(msg)){
 			let game = socket_games[socket_id];
 			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
 			sockets = game.finish(other_player, "par abandon", id_games, socket_games, sockets);
