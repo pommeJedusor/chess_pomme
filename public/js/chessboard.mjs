@@ -242,6 +242,7 @@ function main(href){
     document.querySelector("#draw-button").addEventListener("click", function (){
         ws.send("DP");
     })
+    /*html_chess.insert_draw_proposal();//for testing*/
 }
 
 main(location.href)

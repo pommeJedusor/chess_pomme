@@ -191,6 +191,30 @@ input[type=submit]:hover {
 span.user-name {
     color: var(--user-name);
 }
+/*draw buttons*/
+#draw-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+#draw-buttons > button {
+    width: 25%;
+    height: 26px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: center;
+}
+#accept-draw {
+    background-color: var(--user-name);
+    background-image: url("../img/validate.svg");
+}
+#decline-draw {
+    background-color: var(--light-dark);
+    background-image: url("../img/red_cross.svg");
+}
 /*moves*/
 #moves-section {
     display: flex;

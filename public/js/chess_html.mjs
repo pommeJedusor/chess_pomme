@@ -61,7 +61,7 @@ function insert_move(move_notation){
     moves.scrollBy(0, 10000);
 }
 
-function insert_message(username, message){
+function insert_message(username, message, separator=" : "){
     //message
     let message_p = document.createElement("p");
     message_p.classList.add("message");
@@ -70,7 +70,7 @@ function insert_message(username, message){
     if (username){
         let user_span = document.createElement("span")
         user_span.classList.add("user-name");
-        user_span.textContent = username+" : ";
+        user_span.textContent = username+separator;
         message_p.insertAdjacentElement("afterbegin", user_span);
     }
     //insert
@@ -118,5 +118,24 @@ function close_end_message(){
     if (alert_message)alert_message.remove();
 }
 
+function insert_draw_proposal(username="Anonyme"){
+    //message
+    insert_message(username, "vous propose match nulle", " ");
+    //button accept
+    let validate_button = document.createElement("button");
+    validate_button.id = "accept-draw";
+    //button decline
+    let decline_button = document.createElement("button");
+    decline_button.id = "decline-draw";
+    //insert buttons
+    let buttons = document.createElement("div")
+    buttons.id = "draw-buttons";
+    buttons.insertAdjacentElement("afterbegin", decline_button);
+    buttons.insertAdjacentElement("afterbegin", validate_button);
+    const messages = document.querySelector("#messages");
+    messages.insertAdjacentElement("beforeend", buttons);
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move,
-         insert_message, get_width_squares, insert_end_message, close_end_message };
+         insert_message, get_width_squares, insert_end_message, close_end_message, insert_draw_proposal,
+         };
