@@ -66,16 +66,20 @@ function get_width_squares(){
 }
 
 function insert_end_message(result, reason){
-    if (result===1)result = "VOUS AVEZ GAGNÉ";
-    else if (result===-1)result = "VOUS AVEZ PERDU";
-    else result = "MATCH NULLE";
+    let result_message;
+    if (result===1)result_message = "VOUS AVEZ GAGNÉ";
+    else if (result===-1)result_message = "VOUS AVEZ PERDU";
+    else result_message = "MATCH NULLE";
     const chessboard_div = document.querySelector("#chessboard");
     let alert_div = document.createElement("div");
     alert_div.id = "alert-message";
+    if (result===1)alert_div.classList.add("win");
+    else if (result===-1)alert_div.classList.add("lose");
+    else alert_div.classList.add("draw");
     //if draw win or lose
-    let result_message = document.createElement("h3");
+    let result_h3 = document.createElement("h3");
     alert_div.classList.add("result-message");
-    result_message.textContent = result;
+    result_h3.textContent = result_message;
     //why he lost won or draw
     let reason_message = document.createElement("p");
     alert_div.classList.add("reason-message");
@@ -83,10 +87,18 @@ function insert_end_message(result, reason){
     //button to close
     let close_button = document.createElement("button");
     close_button.id = "close-button";
-    alert_div.insertAdjacentElement("afterbegin", result_message);
+    close_button.addEventListener("click", close_end_message);
+
+    alert_div.insertAdjacentElement("afterbegin", result_h3);
     alert_div.insertAdjacentElement("beforeend", reason_message);
     alert_div.insertAdjacentElement("beforeend", close_button);
     chessboard_div.insertAdjacentElement("beforeend", alert_div);
 }
 
-export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move, get_width_squares, insert_end_message };
+function close_end_message(){
+    const alert_message = document.querySelector("#alert-message");
+    if (alert_message)alert_message.remove();
+}
+
+export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move,
+         get_width_squares, insert_end_message, close_end_message };

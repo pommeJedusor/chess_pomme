@@ -95,9 +95,14 @@ main {
     align-items: center;
     width: 500px;
     height: 100px;
-    background-color: var(--user-name);
     color: var(--light-light);
     border-radius: 20px;
+}
+#alert-message.win {
+    background-color: #4E9F3D;
+}
+#alert-message.lose {
+    background-color: var(--user-name);
 }
 #close-button {
     position: absolute;
@@ -109,6 +114,7 @@ main {
     background-image: url("../img/cross.svg");
     background-size: contain;
     border: none;
+    cursor: pointer;
 }
 #alert-message > p {
     margin: 0;
