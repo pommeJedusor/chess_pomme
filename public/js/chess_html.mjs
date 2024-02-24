@@ -22,8 +22,9 @@ function move_piece(start_x, start_y, target_x , target_y, player_number){
     const piece = get_html_piece(start_x, start_y);
     const piece_to_take = get_html_piece(target_x, target_y);
     const square = get_html_square(target_x, target_y);
-    const trans_x = ((target_x-start_x)*100).toString()+"px";
-    const trans_y = ((-target_y+start_y)*100).toString()+"px";
+    const width_squares = get_width_squares();
+    const trans_x = ((target_x-start_x)*width_squares).toString()+"px";
+    const trans_y = ((-target_y+start_y)*width_squares).toString()+"px";
     piece.style.transitionDuration = "300ms";
     console.log(trans_x, trans_y)
     piece.style.transform = "translate("+trans_x+", "+trans_y+")";
@@ -36,8 +37,9 @@ function move_piece(start_x, start_y, target_x , target_y, player_number){
 }
 
 function instant_move_piece(piece, piece_pos, target_x, target_y){
-    const origin_x = piece_pos.x+50;
-    const origin_y = piece_pos.y+50;
+    const width_squares = get_width_squares();
+    const origin_x = piece_pos.x+width_squares/2;
+    const origin_y = piece_pos.y+width_squares/2;
     const x = target_x - origin_x;
     const y = target_y - origin_y;
     const style = "translate("+x+"px,"+y+"px)";
@@ -59,4 +61,8 @@ function insert_move(move_notation){
     moves.scrollBy(0, 10000);
 }
 
-export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move };
+function get_width_squares(){
+    return document.querySelector(".square").getBoundingClientRect().width;
+}
+
+export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move, get_width_squares };

@@ -1,8 +1,6 @@
 import { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK } from "./Board.mjs";
 import * as websocket_chess from "./chess_ws.mjs";
 import * as html_chess from "./chess_html.mjs";
-const width_square = 100;
-const height_square = 100;
 let cursor_x = 0;
 let cursor_y = 0;
 let player_number;
@@ -113,8 +111,9 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     const old_y = Number(piece.parentElement.parentElement.classList[1]);
     const origin_x = piece_origin_pos.x;
     const origin_y = piece_origin_pos.y;
-    const dif_x = Math.floor((cursor_x - origin_x)/width_square);
-    const dif_y = Math.floor((cursor_y - origin_y)/height_square);
+    const width_squares = html_chess.get_width_squares();
+    const dif_x = Math.floor((cursor_x - origin_x)/width_squares);
+    const dif_y = Math.floor((cursor_y - origin_y)/width_squares);
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
 
