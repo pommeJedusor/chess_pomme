@@ -83,6 +83,7 @@ main {
 .rank:nth-child(odd) > .square:nth-child(odd) , .rank:nth-child(even) > .square:nth-child(even){
     background-color: var(--dark-light);
 }
+/*game finished message*/
 #alert-message {
     position: absolute;
     z-index: 10;
@@ -235,5 +236,35 @@ span.user-name {
     .square, .square.to_move::before {
         width: 12.4vw;
         height: 12.4vw;
+    }
+    /*game finished message*/
+    #alert-message {
+        left: calc(6.2vw * 3);
+        top: calc(6.2vw * 7);
+        width: calc(6.2vw * 10);
+        height: calc(6.2vw * 2);
+    }
+    #close-button {
+        right: calc(12.4vw / 5);
+        top: calc(12.4vw / 7);
+        width: calc(12.4vw / 3);
+        height: calc(12.4vw / 3);
+    }
+    #alert-message > h3 {
+        margin-bottom: calc(12.4vw / 8);
+    }
+}
+@media (max-width:600px) {
+    /*game finished message*/
+    #alert-message {
+        top: calc(6.2vw * 6);
+        height: calc(6.2vw * 4);
+    }
+}
+@media (max-width:300px) {
+    /*game finished message*/
+    #alert-message {
+        top: calc(6.2vw * 5);
+        height: calc(6.2vw * 6);
     }
 }
