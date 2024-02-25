@@ -149,7 +149,7 @@ main {
     justify-content: space-between;
 }
 #messages {
-    height: calc(40vw - 40vw / 16);/*#chat - send-message*/
+    height: calc(100% * 15 / 16);/*#chat - send-message*/
     overflow: auto;
     scrollbar-width: none;
     scrollbar-color: var(--user-name) var(--dark-dark);
@@ -159,8 +159,8 @@ main {
 }
 #message-form {
     border-top: 1px solid var(--light-dark);
-    position: sticky;
-    height: calc(40vw / 16);
+    position: static;
+    height: calc(100% / 16 -1px);
 }
 input#send-message {
     height: 100%;
@@ -289,11 +289,29 @@ span.user-name {
     #chat, #moves-section {
         order: 1;
         width: 30vw;
+        height: 55vw;
     }
     #alert-message {
         top: 6.25%;
         left: 6.25%;
         width: 87.5%;
         height: 87.5%;
+    }
+}
+@media (max-width:800px) {
+    #chat, #moves-section {
+        order: 1;
+        width: 40vw;
+        height: 55vw;
+    }
+}
+@media (max-width:500px) {
+    #chat, #moves-section {
+        order: 1;
+        width: 80vw;
+        height: 55vw;
+    }
+    #chat {
+        margin-bottom: 4vw;
     }
 }
