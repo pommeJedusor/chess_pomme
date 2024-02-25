@@ -118,8 +118,9 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     const origin_x = piece_origin_pos.x;
     const origin_y = piece_origin_pos.y;
     const width_squares = html_chess.get_width_squares();
-    const dif_x = Math.floor((cursor_x - origin_x)/width_squares);
-    const dif_y = Math.floor((cursor_y - origin_y)/width_squares);
+    const chessboard_sens = sessionStorage.getItem("chessboard_sens")!=1 ? -1 : 1;
+    const dif_x = Math.floor((cursor_x - origin_x)/width_squares)*chessboard_sens;
+    const dif_y = Math.floor((cursor_y - origin_y)/width_squares)*chessboard_sens;
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
 
@@ -192,7 +193,8 @@ function make_board(board, data_board, ws){
             if (square.type==="B")type="bishop";
             const piece = document.createElement("div");
             piece.classList.add("piece", type);
-            if (square.color===WHITE)piece.classList.add("white");
+            //y is invered in the data_board
+            if (square.color!==WHITE)piece.classList.add("white");
             else piece.classList.add("black");
             piece.draggable = true;
             piece.addEventListener("mousedown", function (e){

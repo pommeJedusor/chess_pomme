@@ -1,4 +1,4 @@
-import { insert_end_message, insert_message, insert_draw_proposal } from "./chess_html.mjs";
+import { insert_end_message, insert_message, insert_draw_proposal, update_board_sens, invert_board } from "./chess_html.mjs";
 
 function open(ws){
     const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
@@ -28,11 +28,16 @@ function message(event, ws, player, data_board, make_move){
     else if (/^S:/.test(event.data)){
         player = Number(event.data[2]);
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
+        console.log("player : "+player)
+        sessionStorage.setItem("chessboard_sens", player);
+        update_board_sens(player);
+
         insert_message(false, result);
         setInterval(()=>update_timer(data_board.moves), 1000);
     }
     //if recieve message
     else if (/^M:/.test(event.data)){
+        invert_board();
         const content = event.data.substr(2).split("|");
         const username = content[0];
         const message = content[1];

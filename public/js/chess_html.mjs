@@ -153,6 +153,30 @@ function insert_draw_proposal(ws, username="Anonyme"){
     messages.insertAdjacentElement("beforeend", buttons);
 }
 
+function update_board_sens(sens){
+    const chessboard_sens = sens ?? sessionStorage.getItem("chessboard_sens");
+
+    let chessboard = document.querySelector("#chessboard");
+    const ranks = chessboard.querySelectorAll(".rank");
+    const order_sens = chessboard_sens!=1 ? -1 : 1;
+    console.log("order sens: "+order_sens);
+
+    ranks.forEach((rank, i)=>{
+        rank.style.order = i*order_sens;
+        const squares = rank.querySelectorAll(".square");
+        squares.forEach((square, j)=>{
+            square.style.order = j*order_sens;
+        });
+    });
+}
+
+function invert_board(){
+    const chessboard_sens = sessionStorage.getItem("chessboard_sens") ?? 1;
+    sessionStorage.setItem("chessboard_sens", chessboard_sens%2+1);
+    console.log(chessboard_sens)
+    update_board_sens();
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move,
          insert_message, get_width_squares, insert_end_message, close_end_message, insert_draw_proposal,
-         remove_draw_proposal };
+         remove_draw_proposal, invert_board, update_board_sens };

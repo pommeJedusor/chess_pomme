@@ -33,10 +33,10 @@ main {
     transition-timing-function: linear;
 }
 .white {
-    filter: invert(17%) sepia(36%) saturate(664%) hue-rotate(175deg) brightness(97%) contrast(90%);
+    filter: invert(97%) sepia(3%) saturate(1353%) hue-rotate(176deg) brightness(97%) contrast(91%);
 }
 .black {
-    filter: invert(97%) sepia(3%) saturate(1353%) hue-rotate(176deg) brightness(97%) contrast(91%);
+    filter: invert(17%) sepia(36%) saturate(664%) hue-rotate(175deg) brightness(97%) contrast(90%);
 }
 .queen {
     background-image: url("../img/queen.svg");
