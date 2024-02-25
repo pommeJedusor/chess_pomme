@@ -19,12 +19,15 @@ function get_xy_from_piece(piece){
 }
 
 function move_piece(start_x, start_y, target_x , target_y, player_number){
+    const chessboard_sens = sessionStorage.getItem("chessboard_sens") ?? 1;
+    console.log("chessboard_sens : "+chessboard_sens)
+    const sens_move = chessboard_sens==="1" ? 1 : -1;
     const piece = get_html_piece(start_x, start_y);
     const piece_to_take = get_html_piece(target_x, target_y);
     const square = get_html_square(target_x, target_y);
     const width_squares = get_width_squares();
-    const trans_x = ((target_x-start_x)*width_squares).toString()+"px";
-    const trans_y = ((-target_y+start_y)*width_squares).toString()+"px";
+    const trans_x = ((target_x-start_x)*width_squares*sens_move).toString()+"px";
+    const trans_y = ((-target_y+start_y)*width_squares*sens_move).toString()+"px";
     piece.style.transitionDuration = "300ms";
     console.log(trans_x, trans_y)
     piece.style.transform = "translate("+trans_x+", "+trans_y+")";
