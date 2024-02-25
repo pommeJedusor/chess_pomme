@@ -9,83 +9,83 @@ const port = 8080;
 let socket_games = [];
 let id_games = [];
 
+function return_http_error(error_code, res, status_message=null){
+	if (status_message)res.writeHead(error_code, status_message);
+	else res.writeHead(error_code);
+	res.end();
+}
+function return_http_result(res, code, headers, data){
+	res.writeHead(code, headers);
+	res.write(data);
+	res.end();
+}
+
 const server = http.createServer(function (req, res){
 	const url = req.url;
-	const parsed_url = url.replace(/\?.*/gm, "");
-	console.log(parsed_url);
-	//svg
-	if (/\.svg$/.test(parsed_url)){
-		console.log("svg")
-		//to test the url
-		const url_files = ["/img/bishop.svg", "/img/king.svg", "/img/queen.svg", "/img/knight.svg",  "/img/rook.svg",  "/img/pawn.svg", "/img/send.svg", "/img/cross.svg", "/img/white_cross.svg", "/img/validate.svg", "/img/red_cross.svg"];
-		//to get the path of the file
-		const files = ["chess-bishop.svg", "chess-king.svg", "chess-queen.svg", "chess-knight.svg",  "chess-rook.svg",  "chess-pawn.svg", "send.svg", "cross.svg", "white_cross.svg", "validate.svg",  "red_cross.svg"];
-		const path_files = files.map((file)=>"./public/img/"+file);
-		const index = url_files.indexOf(parsed_url);
-		if (index!==-1){
-			console.log(path_files[index])
-			fs.readFile(path_files[index],function(err, data){
-				res.writeHead(200, {'Content-Type':'image/svg+xml'});
-				res.write(data);
-				res.end()
-			})
-			return
-		}
-	}
-	switch (url.replace(/\?.*/gm, "")){
+	const parameters = url.replace(/\?.*/gm, "");
+
+	switch (parameters){
 		case "/":
 			fs.readFile("./public/html/index.html",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/html'});
-				res.write(data);
-				res.end()
+				if (err)return_http_error(400, res, "file not found");
+				else return_http_result(res, 200, {'Content-Type':'text/html'}, data);
 			})
 			return
 		case "/game":
 			fs.readFile("./public/html/game.html",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/html'});
-				res.write(data);
-				res.end()
-			})
-			return
-		case "/js/chess_ws.mjs":
-			fs.readFile("./public/js/chess_ws.mjs",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/javascript'});
-				res.write(data);
-				res.end()
+				if (err)return_http_error(400, res, "file not found");
+				else return_http_result(res, 200, {'Content-Type':'text/html'}, data);
 			})
 			return
 		case "/js/Board.mjs":
-			fs.readFile("js_modules/Board.mjs",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/javascript'});
-				res.write(data);
-				res.end()
+			fs.readFile("./js_modules/Board.mjs",function(err, data){
+				if (err)return_http_error(400, res, "file not found");
+				else return_http_result(res, 200, {'Content-Type':'text/javascript'}, data);
 			})
 			return
-		case "/js/chessboard.mjs":
-			fs.readFile("./public/js/chessboard.mjs",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/javascript'});
-				res.write(data);
-				res.end()
-			})
-			return
-		case "/js/chess_html.mjs":
-			fs.readFile("./public/js/chess_html.mjs",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/javascript'});
-				res.write(data);
-				res.end()
-			})
-			return
-		case "/css/style.css":
-			fs.readFile("./public/css/style.css",function(err, data){
-				res.writeHead(200, {'Content-Type':'text/css'});
-				res.write(data);
-				res.end()
-			})
-			return
-		default:
-			res.writeHead(404);
-			res.end();
-			return
+	}
+
+	if (parameters.length>30)return return_http_error(400, res, "url too long");
+
+	const file_name_extension = /([^\/]*)\.([^.]+$)/.exec(parameters);
+	if (!file_name_extension)return return_http_error(400, res, "unvalid url");
+	const file_name = file_name_extension[1];
+	const file_extension = file_name_extension[2];
+	const file = file_name+"."+file_extension;
+	console.log(file_name, file_extension)
+
+	//check if valid format
+	const char_authorized_check = /^[a-zA-Z0-9_.]+$/;
+	const extensions_authorized = ["svg" ,"mjs", "css"];
+	if (!char_authorized_check.test(file))return return_http_error(400, res, "unvalid characters in the file_name");
+	if (/\.\./.test(file))return return_http_error(400, res, "unvalid characters in the file_name");
+	if (!extensions_authorized.includes(file_extension))return return_http_error(400, res, "extension of file not allowed");
+
+	switch (file_extension){
+		case "svg":
+			const svg_path = "./public/img/"+file;
+			const svg_headers = {'Content-Type':'image/svg+xml'};
+			fs.readFile(svg_path, function(err, data){
+				if (err)return_http_error(404, res, "svg not found");
+				else return_http_result(res, 200, svg_headers, data);
+			});
+			return;
+		case "css":
+			const css_path = "./public/css/"+file;
+			const css_headers = {'Content-Type':'text/css'};
+			fs.readFile(css_path, function(err, data){
+				if (err)return_http_error(404, res, "css not found");
+				else return_http_result(res, 200, css_headers, data);
+			});
+			return;
+		case "mjs":
+			const mjs_path = "./public/js/"+file;
+			const mjs_headers = {'Content-Type':'text/javascript'};
+			fs.readFile(mjs_path, function(err, data){
+				if (err)return_http_error(404, res, "mjs not found");
+				else return_http_result(res, 200, mjs_headers, data);
+			});
+			return;
 	}
 })
 
