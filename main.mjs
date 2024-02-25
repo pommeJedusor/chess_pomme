@@ -20,7 +20,6 @@ function return_http_result(res, code, headers, data){
 	res.end();
 }
 function get_waiting_games(number=10){
-	console.log(id_games);
 	let results = [];
 	id_games.forEach((game, key)=>{
 		if (game && game.player_1 && !game.player_2){
@@ -67,7 +66,6 @@ const server = http.createServer(function (req, res){
 	const file_name = file_name_extension[1];
 	const file_extension = file_name_extension[2];
 	const file = file_name+"."+file_extension;
-	console.log(file_name, file_extension)
 
 	//check if valid format
 	const char_authorized_check = /^[a-zA-Z0-9_.]+$/;
@@ -124,11 +122,9 @@ ws_server.on('connection', function(socket) {
 
 	socket.on('message', function(msg) {
 		msg = msg.toString();
-		console.log("socket id: "+socket_id);
 		if (/^ID:\d{1,5}$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
 			const timer = 20 * 60 * 1000 //minutes * seconds * ms
-			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
 				let player = new Game.Player(socket, socket_id, timer);
@@ -209,8 +205,6 @@ ws_server.on('connection', function(socket) {
 				socket.send("E:message non valide");
 				return
 			}
-			console.log("msg")
-			console.log(msg)
 			game.player_1.socket.send(msg);
 			if (game.player_2)game.player_2.socket.send(msg);
 		}
@@ -243,16 +237,11 @@ ws_server.on('connection', function(socket) {
 					sockets = game.finish(winner, "time out", id_games, socket_games, sockets);
 					return;
 				}
-				console.log(game.player_1.total_timestamp/1000);
-				console.log(game.player_2.total_timestamp/1000);
 				(current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
-				console.log("recieve: " + msg);
 				if (msg[msg.length-1]==="#"){
 					const winner = current_player;
 					sockets = game.finish(winner, "par mat", id_games, socket_games, sockets);
 				}
-				console.log("test")
-				console.log(game.board.get_every_moves().length);
 				if (game.board.get_every_moves().length===0){
 					sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
 				}
@@ -267,6 +256,5 @@ ws_server.on('connection', function(socket) {
 		const winner = game.player_1.socket===socket ? game.player_2 : game.player_1;
 
 		sockets = game.finish(winner, "the other player quit", id_games, socket_games, sockets);
-		console.log("socket closed");
 	});
 });
