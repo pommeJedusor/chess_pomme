@@ -142,6 +142,10 @@ ws_server.on('connection', function(socket) {
 		//draw (proposal, decline or accept)
 		else if (/^D/.test(msg)){
 			let game = socket_games[socket_id];
+			if (!game.player_2){
+				game.player_1.socket.send("E:l'autre joueur n'as pas encore rejoint");
+				return;
+			}
 			const current_player = game.player_1.socket_id===socket_id ? game.player_1 : game.player_2;
 			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
 			//draw proposal
@@ -149,7 +153,7 @@ ws_server.on('connection', function(socket) {
 				if (current_player.draw_proposal===false){
 					current_player.draw_proposal = true;
 					current_player.socket.send("E:vous avez proposé nulle");
-					if (other_player)other_player.socket.send("E:l'autre joueur vous propose nulle");
+					if (other_player)other_player.socket.send("DP");
 				}else{
 					current_player.socket.send("E:vous avez déjà proposé nulle");
 				}

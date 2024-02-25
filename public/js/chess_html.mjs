@@ -118,15 +118,32 @@ function close_end_message(){
     if (alert_message)alert_message.remove();
 }
 
-function insert_draw_proposal(username="Anonyme"){
+function remove_draw_proposal(){
+    const buttons = document.querySelector("#draw-buttons");
+    if (!buttons)return false;
+    buttons.remove();
+    return true;
+}
+
+function insert_draw_proposal(ws, username="Anonyme"){
     //message
     insert_message(username, "vous propose match nulle", " ");
     //button accept
     let validate_button = document.createElement("button");
     validate_button.id = "accept-draw";
+    validate_button.addEventListener("click", function (){
+        ws.send("DA");
+        remove_draw_proposal();
+        return
+    });
     //button decline
     let decline_button = document.createElement("button");
     decline_button.id = "decline-draw";
+    decline_button.addEventListener("click", function (){
+        ws.send("DD");
+        remove_draw_proposal();
+        return
+    });
     //insert buttons
     let buttons = document.createElement("div")
     buttons.id = "draw-buttons";
@@ -138,4 +155,4 @@ function insert_draw_proposal(username="Anonyme"){
 
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move,
          insert_message, get_width_squares, insert_end_message, close_end_message, insert_draw_proposal,
-         };
+         remove_draw_proposal };

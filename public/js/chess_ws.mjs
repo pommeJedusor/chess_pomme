@@ -1,4 +1,4 @@
-import { insert_end_message, insert_message } from "./chess_html.mjs";
+import { insert_end_message, insert_message, insert_draw_proposal } from "./chess_html.mjs";
 
 function open(ws){
     const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
@@ -37,6 +37,10 @@ function message(event, ws, player, data_board, make_move){
         const username = content[0];
         const message = content[1];
         insert_message(username, message);
+    }
+    //draw proposal
+    else if (/^DP$/.test(event.data)){
+        insert_draw_proposal(ws);
     }
     else {
         make_move(data_board, event.data);
