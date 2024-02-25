@@ -22,8 +22,8 @@ main {
     justify-content: space-between;
 }
 .piece {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
     position: relative;
     z-index: 1;
     background-repeat: no-repeat;
@@ -60,14 +60,18 @@ main {
     display: flex;
     flex-direction: column;
     position: relative;
+    height: 40vw;
+    width: 40vw;
 }
 .rank {
     display: flex;
     flex-direction: row;
+    width: 100%;
+    height: 12.5%;
 }
 .square {
-    width: 100px;
-    height: 100px;
+    width: 12.5%;
+    height: 100%;
     background-color: var(--light-dark);
 }
 .rank:nth-child(odd) > .square:nth-child(odd).to_move , .rank:nth-child(even) > .square:nth-child(even).to_move, .to_move{
@@ -76,8 +80,8 @@ main {
 .square.to_move::before {
     position: absolute;
     content: "";
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
     background-color: #d9042763;
 }
 .rank:nth-child(odd) > .square:nth-child(odd) , .rank:nth-child(even) > .square:nth-child(even){
@@ -87,14 +91,14 @@ main {
 #alert-message {
     position: absolute;
     z-index: 10;
-    left: 150px;
-    top: 350px;
+    left: calc(40vw / 8 * 1.5);
+    top: calc(40vw / 8 * 3.5);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    width: 500px;
-    height: 100px;
+    width: calc(40vw / 8 * 5);
+    height: calc(40vw / 8);
     color: var(--light-light);
     border-radius: 20px;
 }
@@ -123,15 +127,19 @@ main {
     cursor: pointer;
 }
 #alert-message > p {
+    text-align: center;
     margin: 0;
+    width: 50%;
 }
 #alert-message > h3 {
     margin-bottom: 13px;
+    text-align: center;
+    width: 50%;
 }
 /*chat*/
 #chat, #moves-section {
-    width: 20%;
-    height: 800px;
+    width: 20vw;
+    height: 40vw;
     border-radius: 15px;
     border: 1px solid var(--light-dark);
 }
@@ -141,7 +149,7 @@ main {
     justify-content: space-between;
 }
 #messages {
-    height: calc(800px - 44px);/*#chat - send-message*/
+    height: calc(40vw - 40vw / 16);/*#chat - send-message*/
     overflow: auto;
     scrollbar-width: none;
     scrollbar-color: var(--user-name) var(--dark-dark);
@@ -152,7 +160,7 @@ main {
 #message-form {
     border-top: 1px solid var(--light-dark);
     position: sticky;
-    height: 44px;
+    height: calc(40vw / 16);
 }
 input#send-message {
     height: 100%;
@@ -165,7 +173,7 @@ input#send-message {
     border-radius: 0 0 15px 15px;
     background-image: url("../img/send.svg");
     background-repeat: no-repeat;
-    background-size: 44px;
+    background-size: contain;
     background-position-x: calc(100% - 10px);
     text-wrap: wrap;
 }
@@ -252,55 +260,40 @@ span.user-name {
     border-top: 1px solid var(--light-dark);
 }
 #moves-buttons > button {
-    width: 128px;
-    height: 39px;
+    width: 40%;
+    height: 50%;
     background-color: var(--dark-light);
     border-radius: 15px;
     border: none;
     cursor: pointer;
 }
-@media (max-width:1400px) {
+@media (max-width:1550px) {
+    #alert-message {
+        height: calc(40vw / 8 * 2);
+    }
+}
+@media (max-width:1050px) {
+    #alert-message {
+        top: calc(40vw / 8 * 2.5);
+        height: calc(40vw / 8 * 3);
+    }
+}
+@media (max-width:1000px) {
+    main {
+        flex-wrap: wrap;
+    }
+    #chessboard {
+        width: 80vw;
+        height: 80vw;
+    }
     #chat, #moves-section {
-        display: none;
+        order: 1;
+        width: 30vw;
     }
-}
-@media (max-width:800px) {
-    .piece {
-        width: 100%;
-        height: 100%;
-    }
-    .square, .square.to_move::before {
-        width: 12.4vw;
-        height: 12.4vw;
-    }
-    /*game finished message*/
     #alert-message {
-        left: calc(6.2vw * 3);
-        top: calc(6.2vw * 7);
-        width: calc(6.2vw * 10);
-        height: calc(6.2vw * 2);
-    }
-    #close-button {
-        right: calc(12.4vw / 5);
-        top: calc(12.4vw / 7);
-        width: calc(12.4vw / 3);
-        height: calc(12.4vw / 3);
-    }
-    #alert-message > h3 {
-        margin-bottom: calc(12.4vw / 8);
-    }
-}
-@media (max-width:600px) {
-    /*game finished message*/
-    #alert-message {
-        top: calc(6.2vw * 6);
-        height: calc(6.2vw * 4);
-    }
-}
-@media (max-width:300px) {
-    /*game finished message*/
-    #alert-message {
-        top: calc(6.2vw * 5);
-        height: calc(6.2vw * 6);
+        top: 6.25%;
+        left: 6.25%;
+        width: 87.5%;
+        height: 87.5%;
     }
 }
