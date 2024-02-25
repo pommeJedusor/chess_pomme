@@ -19,6 +19,16 @@ function return_http_result(res, code, headers, data){
 	res.write(data);
 	res.end();
 }
+function get_waiting_games(number=10){
+	let results = [];
+	id_games.forEach((game, key)=>{
+		if (game && game.player_1 && !game.player_2){
+			results.push(key);
+		}
+		if (results.length>=number)return;
+	});
+	return results;
+}
 
 const server = http.createServer(function (req, res){
 	const url = req.url;
@@ -36,6 +46,10 @@ const server = http.createServer(function (req, res){
 				if (err)return_http_error(400, res, "file not found");
 				else return_http_result(res, 200, {'Content-Type':'text/html'}, data);
 			})
+			return
+		case "/get_games":
+			const games = get_waiting_games();
+			return_http_result(res, 200, {'Content-Type':'json'}, JSON.stringify(games));
 			return
 		case "/js/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){
