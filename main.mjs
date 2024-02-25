@@ -123,9 +123,15 @@ ws_server.on('connection', function(socket) {
 			}else if (id_games[id].player_2===undefined){
 				console.log("player 2 join the game");
 				let game = id_games[id]
-				let player = new Game.Player(socket, socket_id, timer);
-				game.player_2 = player;
 				socket_games[socket_id] = game;
+				let player = new Game.Player(socket, socket_id, timer);
+				//chose first player
+				const pile_face = Math.floor(Math.random()*2);
+				if (pile_face===0)game.player_2 = player;
+				else {
+					game.player_2 = game.player_1;
+					game.player_1 = player;
+				}
 				game.player_1.socket.send("S:1");
 				game.player_2.socket.send("S:2");
 				const check_timeout_id = setInterval(function (){
