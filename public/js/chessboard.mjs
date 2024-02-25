@@ -6,6 +6,14 @@ let cursor_y = 0;
 let player_number;
 let events_listeners = [];
 
+function reset_red_squares(){
+    for (const event of events_listeners){
+        event[0].removeEventListener("click", event[1]);
+        event[0].classList.remove("to_move");
+    }
+    events_listeners = [];
+}
+
 //makes changes on the html board for special moves (castle, promotion, en-passant)
 function special_change(the_move, piece_to_move, data_board){
         const notation_move = the_move.get_notation_move();
@@ -28,6 +36,7 @@ function special_change(the_move, piece_to_move, data_board){
 
 function make_move(data_board, notation_move){
     html_chess.insert_move(notation_move);
+    reset_red_squares();
     //get the move
     let the_move;
     for (const move of data_board.get_every_moves()){
@@ -48,10 +57,7 @@ function make_move(data_board, notation_move){
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
     for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
-    for (const event of events_listeners){
-        event[0].removeEventListener("click", event[1]);
-    }
-    events_listeners = [];
+    reset_red_squares();
     if (data_board.moves.length%2===player_number%2){
         if (piece)piece.style.transform=null;
         clearInterval(animation_piece_cursor);
@@ -76,6 +82,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
         square.classList.add("to_move");
         function a(){
             html_chess.insert_move(move.get_notation_move());
+            reset_red_squares();
             square.innerHTML = "";
             special_change(move, piece, data_board);
             square.insertAdjacentElement("beforeend", piece);
@@ -86,9 +93,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             ws.send(move.get_notation_move());
             html_chess.remove_draw_proposal();
             clearInterval(animation_piece_cursor);
-            for (const events_listener of events_listeners){
-                events_listener[0].removeEventListener("click", events_listener[1]);
-            }
+            reset_red_squares();
         }
         if (!player_number)continue;
         if (piece_move){
@@ -120,9 +125,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
 
     if (!data_board.get_every_moves().filter((move)=>move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)){
         for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
-        for (const event of events_listeners){
-            event[0].removeEventListener("click", event[1]);
-        }
+        reset_red_squares();
     }
 
     if (new_x===old_x && new_y===old_y)return setTimeout(function(){
@@ -142,6 +145,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     if (move_found!==null && (player_number && player_number%2!==data_board.moves.length%2)){
         //html
         html_chess.insert_move(move_found.get_notation_move());
+        reset_red_squares();
         const square = html_chess.get_html_square(new_x, new_y)
         square.innerHTML = "";
         square.insertAdjacentElement("beforeend", piece);
