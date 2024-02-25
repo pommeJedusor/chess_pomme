@@ -112,7 +112,7 @@ ws_server.on('connection', function(socket) {
 		console.log("socket id: "+socket_id);
 		if (/^ID:\d*$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
-			const timer = 10 * 60 * 1000 //minutes * seconds * ms
+			const timer = 20 * 60 * 1000 //minutes * seconds * ms
 			console.log();
 			if (id_games[id]===undefined){
 				console.log("player 1 create the game");
