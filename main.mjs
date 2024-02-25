@@ -20,6 +20,7 @@ function return_http_result(res, code, headers, data){
 	res.end();
 }
 function get_waiting_games(number=10){
+	console.log(id_games);
 	let results = [];
 	id_games.forEach((game, key)=>{
 		if (game && game.player_1 && !game.player_2){
@@ -124,7 +125,7 @@ ws_server.on('connection', function(socket) {
 	socket.on('message', function(msg) {
 		msg = msg.toString();
 		console.log("socket id: "+socket_id);
-		if (/^ID:\d*$/.test(msg)){
+		if (/^ID:\d{1,5}$/.test(msg)){
 			const id = msg.match(/(?<=ID:)\d*$/)[0];
 			const timer = 20 * 60 * 1000 //minutes * seconds * ms
 			console.log();

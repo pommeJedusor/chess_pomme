@@ -8,8 +8,12 @@
 <body>
     <h1>Home</h1>
     <form id="game_form" method="get" action="./game">
-        <input type="text" name="id_game" id="id_game">
+        <input type="text" name="id_game" id="id_game" maxlength="5" pattern="^\d{1,5}$" required>
         <input type="submit">
     </form>
+    <section id="waiting-games">
+        <h2>Parties en attentes : </h2>
+    </section>
+    <script type="module" src="../js/home.mjs"></script>
 </body>
 </html>
