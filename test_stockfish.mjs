@@ -37,7 +37,8 @@ function get_move(game){
         stockfish.stdin.write("quit\n");
         setTimeout(stockfish.kill,100);
         console.log(game.play(move, (m)=>{
-            return move===get_square(m.x, m.y)+get_square(m.target_x, m.target_y);
+            const promotion = m.promotion ? m.promotion[1].toLowerCase() : "";
+            return move===get_square(m.x, m.y)+get_square(m.target_x, m.target_y)+promotion;
         }));
     },3000);
 }
