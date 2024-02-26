@@ -154,6 +154,7 @@ function insert_draw_proposal(ws, username="Anonyme"){
     buttons.insertAdjacentElement("afterbegin", validate_button);
     const messages = document.querySelector("#messages");
     messages.insertAdjacentElement("beforeend", buttons);
+    messages.scrollBy(0, 10000);
 }
 
 function update_board_sens(sens){
