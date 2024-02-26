@@ -8,9 +8,9 @@ class Game{
         this.board = new Board.Board();
         this.moves = [];
     }
-    play(move){
+    play(move, filter_good_move=(m)=>m.get_notation_move()===move){
         const moves = this.board.get_every_moves();
-        const good_moves = moves.filter((m)=>m.get_notation_move()===move);
+        const good_moves = moves.filter(filter_good_move);
         if (good_moves.length===0)return false;
         const good_move = good_moves[0];
         const piece = this.board.board[good_move.y][good_move.x];
