@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <h1>Home</h1>
     <form id="game_form" method="get" action="./game">
-        <input type="text" name="id_game" id="id_game" maxlength="5" pattern="^\d{1,5}$" required>
-        <input type="submit">
+        <input type="text" name="id_game" id="create-game" maxlength="5" pattern="^\d{1,5}$" required>
+        <input type="submit" id="send-game-id" value="créer la partie">
     </form>
     <section id="waiting-games">
         <h2>Parties en attentes : </h2>
