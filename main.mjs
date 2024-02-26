@@ -156,6 +156,10 @@ ws_server.on('connection', function(socket) {
 				socket.send("E:la partie est déjà complète");
 			}
 		}
+		else if (!socket_games[socket_id]){
+			socket.send("E:Vous n'êtes dans une partie");
+			return;
+		}
 		//draw (proposal, decline or accept)
 		else if (/^D/.test(msg)){
 			let game = socket_games[socket_id];
