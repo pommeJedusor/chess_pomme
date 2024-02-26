@@ -537,4 +537,4 @@ class Queen extends Piece {
         return get_dirs_qrb(piece, board, dirs);
     }
 }
-export { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK };
+export { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK, check_move_append, get_square};
