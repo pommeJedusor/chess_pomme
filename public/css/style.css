@@ -16,6 +16,10 @@ main {
     align-items: center;
 }
 /*home page*/
+section#waiting-games {
+    display: flex;
+    flex-direction: column;
+}
 #game-form {
     display: flex;
     flex-direction: row;
