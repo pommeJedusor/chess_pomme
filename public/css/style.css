@@ -15,6 +15,47 @@ main {
     justify-content: space-around;
     align-items: center;
 }
+/*home page*/
+section#waiting-games {
+    display: flex;
+    flex-direction: column;
+}
+#game-form {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+input#create-game {
+    width: 7%;
+    padding: 0 64px 0 20px;
+    background-color: var(--dark-dark);
+    color: var(--light-light);
+    border: 1px solid var(--light-dark);
+    border-radius: 15px;
+    text-wrap: wrap;
+}
+input#create-game:focus {
+    background-color: var(--light-dark);
+    outline: none;
+}
+input#create-game:focus::placeholder {
+    color: var(--light-dark);
+}
+input#send-game-id {
+    border: none;
+    border-radius: 15px;
+    background-color: var(--dark-dark);
+    color: var(--dark-light);
+    font-weight: 600;
+    font-size: 1.2em;
+}
+input#send-game-id:hover {
+    cursor: pointer;
+}
+a {
+    font-size: 1.2em;
+    color: var(--user-name);
+}
 /*chessboard*/
 #opponent-infos, #user-infos {
     display: flex;
@@ -187,7 +228,7 @@ input#send-message:focus {
 input#send-message:focus::placeholder {
     color: var(--light-dark);
 }
-input[type=submit] {
+input#submit-message {
     position: absolute;
     top: 0;
     left: calc(100% - 10px - 44px);
@@ -196,7 +237,7 @@ input[type=submit] {
     background-color: transparent;
     border: none;
 }
-input[type=submit]:hover {
+input#submit-message:hover {
     cursor: pointer;
 }
 span.user-name {
@@ -237,6 +278,7 @@ span.user-name {
     flex-direction: row;
     flex-wrap: wrap;
     align-content: start;
+    height: calc(100% - 84px);
     overflow: auto;
     scrollbar-width: none;
     scrollbar-color: var(--user-name) var(--dark-dark);

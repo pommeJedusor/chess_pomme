@@ -37,7 +37,6 @@ function message(event, ws, player, data_board, make_move){
     }
     //if recieve message
     else if (/^M:/.test(event.data)){
-        invert_board();
         const content = event.data.substr(2).split("|");
         const username = content[0];
         const message = content[1];

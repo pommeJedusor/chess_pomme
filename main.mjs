@@ -3,11 +3,9 @@ import http from "http";
 import * as ws from "ws";
 
 import * as Game from "./js_modules/Game.mjs";
+import * as ws_chess from "./js_modules/ws.mjs";
 
 const port = 8080;
-
-let socket_games = [];
-let id_games = [];
 
 function return_http_error(error_code, res, status_message=null){
 	if (status_message)res.writeHead(error_code, status_message);
@@ -116,83 +114,25 @@ const ws_server = new ws.WebSocketServer({
 });
 
 let sockets = [];
+let socket_games = [];
+let id_games = [];
+
 ws_server.on('connection', function(socket) {
 	sockets.push(socket);
 	const socket_id = Math.floor(Math.random()*1000000)
 
 	socket.on('message', function(msg) {
 		msg = msg.toString();
-		if (/^ID:\d{1,5}$/.test(msg)){
-			const id = msg.match(/(?<=ID:)\d*$/)[0];
-			const timer = 20 * 60 * 1000 //minutes * seconds * ms
-			if (id_games[id]===undefined){
-				console.log("player 1 create the game");
-				let player = new Game.Player(socket, socket_id, timer);
-				let game = new Game.Game(player, id);
-				socket_games[socket_id] = game;
-				id_games[game.id] = game;
-			}else if (id_games[id].player_2===undefined){
-				console.log("player 2 join the game");
-				let game = id_games[id]
-				socket_games[socket_id] = game;
-				let player = new Game.Player(socket, socket_id, timer);
-				//chose first player
-				const pile_face = Math.floor(Math.random()*2);
-				if (pile_face===0)game.player_2 = player;
-				else {
-					game.player_2 = game.player_1;
-					game.player_1 = player;
-				}
-				game.player_1.socket.send("S:1");
-				game.player_2.socket.send("S:2");
-				const check_timeout_id = setInterval(function (){
-					const result = game.check_timeout(id_games, socket_games, sockets)
-					if (result){
-						sockets = result;
-						clearInterval(check_timeout_id);
-					}
-				}, 1000);
-			}else {
-				socket.send("E:la partie est déjà complète");
-			}
+		if (/^ID:/.test(msg)){
+			ws_chess.join_create_game(socket, socket_id, msg, id_games, socket_games, sockets);
+		}
+		else if (!socket_games[socket_id]){
+			socket.send("E:Vous n'êtes dans une partie");
+			return;
 		}
 		//draw (proposal, decline or accept)
 		else if (/^D/.test(msg)){
-			let game = socket_games[socket_id];
-			if (!game.player_2){
-				game.player_1.socket.send("E:l'autre joueur n'as pas encore rejoint");
-				return;
-			}
-			const current_player = game.player_1.socket_id===socket_id ? game.player_1 : game.player_2;
-			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-			//draw proposal
-			if (/^DP$/.test(msg)){
-				if (current_player.draw_proposal===false){
-					current_player.draw_proposal = true;
-					current_player.socket.send("E:vous avez proposé nulle");
-					if (other_player)other_player.socket.send("DP");
-				}else{
-					current_player.socket.send("E:vous avez déjà proposé nulle");
-				}
-			}
-			//draw decline
-			else if (/^DD$/.test(msg)){
-				if (other_player.draw_proposal){
-					other_player.draw_proposal = false;
-					current_player.socket.send("E:vous avez refusé la nulle");
-					if (other_player)other_player.socket.send("E:l'autre joueur a refusé la nulle");
-				}else {
-					current_player.socket.send("E:pas d'offre de nulle valide pour le moment");
-				}
-			}
-			//draw accept
-			else if (/^DA$/.test(msg)){
-				if (other_player.draw_proposal){
-					sockets = game.finish(null, "par accord mutuel", id_games, socket_games, sockets)
-				}else {
-					current_player.socket.send("E:pas d'offre de nulle valide pour le moment");
-				}
-			}
+			ws_chess.draws(socket, socket_id, msg, id_games, socket_games, sockets);
 		}
 		//messages
 		else if (/^M:/.test(msg)){
