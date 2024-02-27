@@ -67,6 +67,7 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
     }
     else if (/^R:/.test(msg)){
         let game = socket_games[socket_id];
+        const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
         sockets = game.finish(other_player, "par abandon", id_games, socket_games, sockets);
     }
     else {

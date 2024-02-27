@@ -240,15 +240,15 @@ function main(href){
         const message_input = document.querySelector("#send-message");
         const message = message_input.value;
         message_input.value = "";
-        ws.send("M:Anonyme|"+message);
+        ws.send(bot+"M:Anonyme|"+message);
     });
     //resign
     document.querySelector("#resign-button").addEventListener("click", function (){
-        ws.send("R:");
+        ws.send(bot+"R:");
     })
     //draw proposal
     document.querySelector("#draw-button").addEventListener("click", function (){
-        ws.send("DP");
+        ws.send(bot+"DP");
     })
 }
 
