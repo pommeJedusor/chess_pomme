@@ -4,7 +4,7 @@ import * as ws from "ws";
 
 import * as Game from "./js_modules/Game.mjs";
 import * as ws_chess from "./js_modules/ws.mjs";
-import * as wstockfish from "./stockfish/wstockfish2.mjs";
+import * as wstockfish from "./stockfish/wstockfish.mjs";
 
 const port = 8080;
 
