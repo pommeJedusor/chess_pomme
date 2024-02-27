@@ -6,7 +6,7 @@ import { get_square } from "../js_modules/Board.mjs";
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 function init_stockfish(move){
-    const stockfish = spawn("./stockfish");
+    const stockfish = spawn("./stockfish/stockfish");
 
     stockfish.stdout.on("data", (data)=>{
         const result = `${data}`.match(/bestmove ([^ ]*)[ \n]/);

@@ -4,6 +4,7 @@ import * as ws from "ws";
 
 import * as Game from "./js_modules/Game.mjs";
 import * as ws_chess from "./js_modules/ws.mjs";
+import * as wstockfish from "./stockfish/wstockfish2.mjs";
 
 const port = 8080;
 
@@ -125,6 +126,9 @@ ws_server.on('connection', function(socket) {
 		msg = msg.toString();
 		if (/^ID:/.test(msg)){
 			ws_chess.join_create_game(socket, socket_id, msg, id_games, socket_games, sockets);
+		}
+		else if (/^stockfish:/.test(msg)){
+			wstockfish.controller(sockets, socket_games, id_games, socket, socket_id, msg.substring(10));
 		}
 		else if (!socket_games[socket_id]){
 			socket.send("E:Vous n'êtes dans une partie");
