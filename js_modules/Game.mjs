@@ -24,14 +24,14 @@ class Game{
             if (this.player_2)this.player_2.socket.send("R:D:"+message);
         }
         else if (this.player_1===winner){
-            this.player_1.socket.send("R:W:"+message);
-            if (this.player_2)this.player_2.socket.send("R:L:"+message);
+            if (this.player_1 && this.player_1.socket)this.player_1.socket.send("R:W:"+message);
+            if (this.player_2 && this.player_2.socket)this.player_2.socket.send("R:L:"+message);
         }else if (this.player_2===winner){
-            this.player_1.socket.send("R:L:"+message);
-            if (this.player_2)this.player_2.socket.send("R:W:"+message);
+            if (this.player_1 && this.player_1.socket)this.player_1.socket.send("R:L:"+message);
+            if (this.player_2 && this.player_2.socket)this.player_2.socket.send("R:W:"+message);
         }
-        this.player_1.socket.close();
-        if (this.player_2)this.player_2.socket.close();
+        if (this.player_1 && this.player_1.socket)this.player_1.socket.close();
+        if (this.player_2 && this.player_2.socket)this.player_2.socket.close();
         //delete the game
         id_games[this.id] = undefined;
         if (winner)socket_games[winner.socket_id] = undefined;

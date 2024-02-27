@@ -1,12 +1,21 @@
 import { insert_end_message, insert_message, insert_draw_proposal, update_board_sens, invert_board } from "./chess_html.mjs";
 
-function open(ws){
+function open(ws, bot=""){
+    //against bot
+    console.log(bot);
+    if (bot.length!==0){
+        console.log(bot+"ID:");
+        ws.send(bot+"ID:");
+        return;
+    }
+    //against other player
     const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
     if (!match_result)return
+    console.log("ID:"+match_result[0]);
     ws.send("ID:"+match_result[0])
 }
 
-function message(event, ws, player, data_board, make_move){
+function message(event, ws, player, data_board, make_move, bot=""){
     console.log("recieve: "+event.data);
     //remove last error message
     const last_error = document.querySelector(".error");
@@ -44,7 +53,7 @@ function message(event, ws, player, data_board, make_move){
     }
     //draw proposal
     else if (/^DP$/.test(event.data)){
-        insert_draw_proposal(ws);
+        insert_draw_proposal(bot+ws);
     }
     else {
         make_move(data_board, event.data);
@@ -52,13 +61,13 @@ function message(event, ws, player, data_board, make_move){
     return player;
 }
 
-function send_move(){
+function send_move(bot=""){
     const move = document.getElementById("move_text");
     console.log("send: "+move.value);
-    ws.send(move.value);
+    ws.send(bot+move.value);
     move.value = "";
 }
-function update_timer(moves){
+function update_timer(moves, bot=""){
     if (moves.length<2)return;
     const timer_el = document.getElementById("timer"+(moves.length%2+1));
     const str_times = timer_el.textContent.split(":");

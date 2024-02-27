@@ -40,6 +40,7 @@ const server = http.createServer(function (req, res){
 				else return_http_result(res, 200, {'Content-Type':'text/html'}, data);
 			})
 			return
+		case "/stockfish":
 		case "/game":
 			fs.readFile("./public/html/game.html",function(err, data){
 				if (err)return_http_error(400, res, "file not found");

@@ -5,6 +5,8 @@ let cursor_x = 0;
 let cursor_y = 0;
 let player_number;
 let events_listeners = [];
+const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
+console.log(bot);
 
 function reset_red_squares(){
     for (const event of events_listeners){
@@ -90,7 +92,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             const data_piece = data_board.board[move.y][move.x];
             data_board.moves.push(move);
             data_board.board = data_piece.do_move(data_board.board, move, data_piece.edit_func);
-            ws.send(move.get_notation_move());
+            ws.send(bot+move.get_notation_move());
             html_chess.remove_draw_proposal();
             clearInterval(animation_piece_cursor);
             reset_red_squares();
@@ -155,7 +157,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
         const data_piece = data_board.board[old_y][old_x];
         data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
         data_board.moves.push(move_found);
-        ws.send(move_found.get_notation_move());
+        ws.send(bot+move_found.get_notation_move());
         html_chess.remove_draw_proposal();
     }
     piece.style.transform = "";
@@ -215,8 +217,8 @@ function make_board(board, data_board, ws){
 function ws_init(href, data_board){
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
 
-    ws.onopen = (event)=>websocket_chess.open(ws);
-    ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, data_board, make_move);
+    ws.onopen = (event)=>websocket_chess.open(ws, bot);
+    ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, data_board, make_move, bot);
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
