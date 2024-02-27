@@ -1,6 +1,6 @@
-import { get_move } from "./test_stockfish.mjs";
+import { get_move } from "./get_moves.mjs";
 import * as ws from "ws";
-import * as Game from "./js_modules/Game.mjs";
+import * as Game from "../js_modules/Game.mjs";
 
 let is_bot_running = false;
 

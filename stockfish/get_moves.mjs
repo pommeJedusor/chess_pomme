@@ -1,12 +1,12 @@
 import { spawn } from 'node:child_process';
-import { get_fen } from "./js_modules/fen.mjs";
-import { get_square } from "./js_modules/Board.mjs";
+import { get_fen } from "../js_modules/fen.mjs";
+import { get_square } from "../js_modules/Board.mjs";
 
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 function init_stockfish(move){
-    const stockfish = spawn("./stockfish/stockfish-ubuntu-x86-64-sse41-popcnt");
+    const stockfish = spawn("./stockfish");
 
     stockfish.stdout.on("data", (data)=>{
         const result = `${data}`.match(/bestmove ([^ ]*) /);
