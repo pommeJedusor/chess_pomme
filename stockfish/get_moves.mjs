@@ -9,7 +9,7 @@ function init_stockfish(move){
     const stockfish = spawn("./stockfish");
 
     stockfish.stdout.on("data", (data)=>{
-        const result = `${data}`.match(/bestmove ([^ ]*) /);
+        const result = `${data}`.match(/bestmove ([^ ]*)[ \n]/);
         if (result)move[0] = result[1];
     });
 
