@@ -3,7 +3,7 @@ import * as websocket_chess from "./chess_ws.mjs";
 import * as html_chess from "./chess_html.mjs";
 let cursor_x = 0;
 let cursor_y = 0;
-let player_number;
+let player_number = [null];
 let events_listeners = [];
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 console.log(bot);
@@ -12,7 +12,7 @@ console.log(bot);
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
     html_chess.reset_red_squares(events_listeners);
     //other player's turn
-    if (data_board.moves.length%2===player_number%2){
+    if (data_board.moves.length%2===player_number[0]%2){
         if (piece)piece.style.transform=null;
         clearInterval(animation_piece_cursor);
         return;
@@ -44,7 +44,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             html_chess.remove_draw_proposal();
             //move the piece(s)
             html_chess.special_change(move, piece, data_board);
-            html_chess.move_piece(move.x, move.y, move.target_x, move.target_y, player_number);
+            html_chess.move_piece(move.x, move.y, move.target_x, move.target_y, player_number[0]);
             //update datas board
             const data_piece = data_board.board[move.y][move.x];
             data_board.moves.push(move);
@@ -53,7 +53,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             ws.send(move.get_notation_move());
             clearInterval(animation_piece_cursor);
         }
-        if (!player_number)continue;
+        if (!player_number[0])continue;
         if (piece_move){
             events_listeners.push([piece_move, a, square]);
             piece_move.addEventListener("click", a);
@@ -101,7 +101,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
         }
     }
     //if move found and is player's turn
-    if (move_found!==null && (player_number && player_number%2!==data_board.moves.length%2)){
+    if (move_found!==null && (player_number[0] && player_number[0]%2!==data_board.moves.length%2)){
         //html
         html_chess.insert_move(move_found.get_notation_move());
         html_chess.reset_red_squares(events_listeners);
@@ -170,22 +170,11 @@ function make_board(board, data_board, ws){
     }
 }
 
-function ws_init(href, data_board){
-    let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
-
-    ws.onopen = (event)=>websocket_chess.open(ws, bot);
-    ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, data_board, events_listeners);
-    ws.onclose = (event) => console.log("WebSocket connection closed");
-    ws.onerror = (error) => console.error("WebSocket error:", error);
-
-    return ws
-}
-
 function main(href){
     const board = document.querySelector("#chessboard");
     if (!board)return;
     const data_board = new Board();
-    const ws = ws_init(href, data_board);
+    const ws = websocket_chess.ws_init(href, data_board, bot, player_number, events_listeners);
     make_board(board, data_board, ws);
     document.addEventListener("mousemove", function (e){
         cursor_x = e.pageX;
