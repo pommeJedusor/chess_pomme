@@ -59,7 +59,7 @@ async function join_game(socket, socket_id, msg, id_games, socket_games, sockets
 
 async function controller(sockets, socket_games, id_games, socket, socket_id, msg){
     console.log("stockfish")
-    if (/^ID:$/.test(msg)){
+    if (/^stockfish:$/.test(msg)){
         join_game(socket, socket_id, msg, id_games, socket_games, sockets);
     }
     else if (!socket_games[socket_id]){

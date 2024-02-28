@@ -5,6 +5,7 @@ import * as ws from "ws";
 import * as Game from "./js_modules/Game.mjs";
 import * as ws_chess from "./js_modules/ws.mjs";
 import * as wstockfish from "./stockfish/wstockfish.mjs";
+import * as ws_controller from "./js_modules/ws_controller.mjs";
 
 const port = 8080;
 
@@ -122,174 +123,43 @@ let id_games = [];
 ws_server.on('connection', function(socket) {
 	sockets.push(socket);
 	const socket_id = Math.floor(Math.random()*1000000)
+	let is_against_bot;
+	let is_against_player;
 
 	socket.on('message', function(msg) {
 		msg = msg.toString();
+		//init games
+		//against player
 		if (/^ID:/.test(msg)){
-			ws_chess.join_create_game(socket, socket_id, msg, id_games, socket_games, sockets);
+			if (is_against_bot || is_against_player){
+				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre game");
+			}
+			else {
+				ws_chess.join_create_game(socket, socket_id, msg, id_games, socket_games, sockets);
+				is_against_bot = false;
+				is_against_player = true;
+			}
+			return;
 		}
+		//against stockfish
 		else if (/^stockfish:/.test(msg)){
-			wstockfish.controller(sockets, socket_games, id_games, socket, socket_id, msg.substring(10));
-		}
-		else if (!socket_games[socket_id]){
-			socket.send("E:Vous n'êtes dans une partie");
+			if (is_against_bot || is_against_player){
+				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre game");
+			}
+			else {
+				wstockfish.controller(sockets, socket_games, id_games, socket, socket_id, msg);
+				is_against_bot = true;
+				is_against_player = false;
+			}
 			return;
 		}
-		else if (!socket_games[socket_id].player_1 || !socket_games[socket_id].player_2){
-			socket.send("E:l'autre joueur a quitté");
-			return;
+		//redirect to the controller needed
+		console.log(is_against_bot)
+		if (is_against_bot){
+			wstockfish.controller(sockets, socket_games, id_games, socket, socket_id, msg);
 		}
-		//messages
-		else if (/^M:/.test(msg)){
-			let game = socket_games[socket_id];
-			if (!game.player_2){
-				socket.send("E:l'autre joueur n'as pas encore rejoint");
-				return;
-			}
-			game.player_1.socket.send(msg);
-			if (game.player_2)game.player_2.socket.send(msg);
-		}
-		//remactch proposal
-		else if (/^RP:/.test(msg)){
-			let game = socket_games[socket_id];
-			const current_player = game.player_2.socket_id===socket_id ? game.player_2 : game.player_1;
-			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-			if (current_player.rematch_proposal){
-				socket.send("E:vous avez déjà proposé une revanche");
-			}
-			else if (other_player.rematch_proposal){
-				//reset player data
-				current_player.rematch_proposal = false;
-				other_player.rematch_proposal = false;
-				current_player.draw_proposal = false;
-				other_player.draw_proposal = false;
-				current_player.total_timestamp = game.timestamp;
-				other_player.total_timestamp = game.timestamp;
-
-				let new_game = new Game.Game(current_player, game.id);
-				socket_games[current_player.socket_id] = new_game;
-				socket_games[other_player.socket_id] = new_game;
-				id_games[game.id] = new_game
-				ws_chess.chose_first_player(game, current_player, other_player);
-				game.player_1.socket.send("S:1");
-				game.player_2.socket.send("S:2");
-
-				//check timer
-				const check_timeout_id = setInterval(function (){
-					const result = game.check_timeout(id_games, socket_games, sockets)
-					if (result){
-						sockets = result;
-						clearInterval(check_timeout_id);
-					}
-				}, 1000);
-			}
-			else{
-				current_player.rematch_proposal = true;
-				socket.send("E:vous avez proposé une revanche")
-				other_player.socket.send("RP:");
-			}
-		}
-		//remactch proposal declined
-		else if (/^RD:/.test(msg)){
-			let game = socket_games[socket_id];
-			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-			if (!other_player.rematch_proposal){
-				socket.send("E:l'autre joueur n'as pas proposé de revanche");
-			}else{
-				other_player.rematch_proposal = false;
-				socket.send("E:vous avez refusé la revanche")
-				other_player.socket.send("RD:");
-			}
-		}
-		//remactch proposal canceled
-		else if (/^RC:/.test(msg)){
-			let game = socket_games[socket_id];
-			const current_player = game.player_2.socket_id===socket_id ? game.player_2 : game.player_1;
-			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-			if (!current_player.rematch_proposal){
-				socket.send("E:vous n'aviez pas proposé de revanche");
-			}else{
-				current_player.rematch_proposal = false;
-				socket.send("E:vous avez annulé votre proposition de revanche");
-				other_player.socket.send("RC:");
-			}
-		}
-		else if (socket_games[socket_id].result){
-			socket.send("E:la partie est déjà finie")
-		}
-		//draw (proposal, decline or accept)
-		else if (/^D/.test(msg)){
-			ws_chess.draws(socket, socket_id, msg, id_games, socket_games, sockets);
-		}
-		//resign
-		else if (/^R:/.test(msg)){
-			let game = socket_games[socket_id];
-			if (!game.player_2){
-				socket.send("E:l'autre joueur n'as pas encore rejoint");
-				return;
-			}
-			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-			game.finish(other_player, "par abandon", id_games, socket_games, sockets);
-		}
-		else{
-			let game = socket_games[socket_id];
-			if (game===undefined){socket.send("E:vous n'avez rejoint aucune partie");return}
-			const player_turn = game.moves.length%2+1;
-			if (game.player_2===undefined)socket.send("E:l'autre joueur n'as pas encore rejoint la partie");
-			else if ((game.player_1.socket===socket && player_turn===1) || (game.player_2.socket===socket && player_turn===2)){
-				const move = new Game.Move(msg, Date.now(), player_turn);
-				const current_player = [game.player_1, game.player_2][player_turn-1];
-				const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-				const result = game.play(msg);
-				if (!result)return socket.send("E:Coup non valide");
-				game.moves.push(move);
-				//update the timer of the current player
-				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves.at(-2).timestamp;
-				if (current_player.total_timestamp<=0){
-					const winner = game.player_1===current_player ? game.player_2 : game.player_1;
-					game.finish(winner, "time out", id_games, socket_games, sockets);
-					return;
-				}
-				(current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
-				if (msg[msg.length-1]==="#"){
-					const winner = current_player;
-					game.finish(winner, "par mat", id_games, socket_games, sockets);
-				}
-				if (game.board.get_every_moves().length===0){
-					game.finish(null, "par pat", id_games, socket_games, sockets);
-				}
-				other_player.draw_proposal = false;//reset draw proposal
-			}else socket.send("E:C'est au tour de l'autre joueur");
-		}
-	});
-
-	socket.on('close', function() {
-		const game = socket_games[socket_id];
-		if (game===undefined){
-			sockets = sockets.filter(s => s !== socket);
-			return;
-		}
-		//if game was still playing
-		if (game.player_1 && game.player_2 && !game.result){
-			if (game.player_1.socket===socket){
-				game.finish(game.player_2, "the other player quit", id_games, socket_games, sockets);
-				game.player_1 = null;
-			}else{
-				game.finish(game.player_1, "the other player quit", id_games, socket_games, sockets);
-				game.player_2 = null;
-			}
-		}
-		//if game was finished
-		else if (game.player_1 && game.player_2 && game.result){
-			if (game.player_1===socket){
-				game.player_1 = null;
-			}else{
-				game.player_2 = null;
-			}
-		}
-		//if only one player left
-		else {
-			sockets  = game.close(id_games, socket_games, sockets);
+		else if (is_against_player){
+			ws_controller.ws_controller(sockets, socket_games, id_games, socket, socket_id, msg);
 		}
 	});
 });

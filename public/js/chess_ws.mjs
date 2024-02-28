@@ -4,8 +4,8 @@ function open(ws, bot=""){
     //against bot
     console.log(bot);
     if (bot.length!==0){
-        console.log(bot+"ID:");
-        ws.send(bot+"ID:");
+        console.log(bot);
+        ws.send(bot);
         return;
     }
     //against other player
@@ -15,7 +15,7 @@ function open(ws, bot=""){
     ws.send("ID:"+match_result[0])
 }
 
-function message(event, ws, player, data_board, make_move, bot=""){
+function message(event, ws, player, data_board, make_move){
     console.log("recieve: "+event.data);
     //remove last error message
     const last_error = document.querySelector(".error");
@@ -61,13 +61,13 @@ function message(event, ws, player, data_board, make_move, bot=""){
     return player;
 }
 
-function send_move(bot=""){
+function send_move(){
     const move = document.getElementById("move_text");
     console.log("send: "+move.value);
-    ws.send(bot+move.value);
+    ws.send(move.value);
     move.value = "";
 }
-function update_timer(moves, bot=""){
+function update_timer(moves){
     if (moves.length<2)return;
     const timer_el = document.getElementById("timer"+(moves.length%2+1));
     const str_times = timer_el.textContent.split(":");

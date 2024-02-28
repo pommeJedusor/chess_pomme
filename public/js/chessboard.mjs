@@ -96,7 +96,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             const data_piece = data_board.board[move.y][move.x];
             data_board.moves.push(move);
             data_board.board = data_piece.do_move(data_board.board, move, data_piece.edit_func);
-            ws.send(bot+move.get_notation_move());
+            ws.send(move.get_notation_move());
             html_chess.remove_draw_proposal();
             clearInterval(animation_piece_cursor);
             reset_red_squares();
@@ -161,7 +161,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
         const data_piece = data_board.board[old_y][old_x];
         data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
         data_board.moves.push(move_found);
-        ws.send(bot+move_found.get_notation_move());
+        ws.send(move_found.get_notation_move());
         html_chess.remove_draw_proposal();
     }
     piece.style.transform = "";
@@ -244,15 +244,15 @@ function main(href){
         const message_input = document.querySelector("#send-message");
         const message = message_input.value;
         message_input.value = "";
-        ws.send(bot+"M:Anonyme|"+message);
+        ws.send("M:Anonyme|"+message);
     });
     //resign
     document.querySelector("#resign-button").addEventListener("click", function (){
-        ws.send(bot+"R:");
+        ws.send("R:");
     })
     //draw proposal
     document.querySelector("#draw-button").addEventListener("click", function (){
-        ws.send(bot+"DP");
+        ws.send("DP");
     })
 }
 
