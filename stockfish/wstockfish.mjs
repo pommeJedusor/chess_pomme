@@ -82,6 +82,13 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
         const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
         sockets = game.finish(other_player, "par abandon", id_games, socket_games, sockets);
     }
+    else if (/^M:/.test(msg)){
+        socket.send(msg);
+        socket.send("E:stockfish ne lit pas les messages");
+    }
+    else if (/^DP/.test(msg)){
+        socket.send("E:impossible de proposer nulle à stockfish");
+    }
     else {
         let game = socket_games[socket_id];
         const player_turn = game.moves.length%2+1;
