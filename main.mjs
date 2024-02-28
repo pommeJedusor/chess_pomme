@@ -119,6 +119,7 @@ const ws_server = new ws.WebSocketServer({
 let sockets = [];
 let socket_games = [];
 let id_games = [];
+let bot_id_games = [];
 
 ws_server.on('connection', function(socket) {
 	sockets.push(socket);
@@ -147,7 +148,7 @@ ws_server.on('connection', function(socket) {
 				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre game");
 			}
 			else {
-				wstockfish.controller(sockets, socket_games, id_games, socket, socket_id, msg);
+				wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
 				is_against_bot = true;
 				is_against_player = false;
 			}
@@ -155,11 +156,19 @@ ws_server.on('connection', function(socket) {
 		}
 		//redirect to the controller needed
 		console.log(is_against_bot)
-		if (is_against_bot){
-			wstockfish.controller(sockets, socket_games, id_games, socket, socket_id, msg);
-		}
-		else if (is_against_player){
+		if (is_against_player){
 			ws_controller.ws_controller(sockets, socket_games, id_games, socket, socket_id, msg);
+		}
+		else if (is_against_bot){
+			wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
+		}
+	});
+	socket.on("close", ()=>{
+		if (is_against_player){
+			ws_controller.close(sockets, socket_games, id_games, socket, socket_id);
+		}
+		else if (is_against_bot){
+			wstockfish.close(sockets, socket_games, bot_id_games, socket, socket_id);
 		}
 	});
 });

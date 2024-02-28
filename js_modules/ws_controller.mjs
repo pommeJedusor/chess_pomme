@@ -1,6 +1,36 @@
 import * as ws_chess from "./ws.mjs";
 import * as Game from "./Game.mjs"
 
+function close(sockets, socket_games, id_games, socket, socket_id){
+    const game = socket_games[socket_id];
+    if (game===undefined){
+        sockets = sockets.filter(s => s !== socket);
+        return;
+    }
+    //if game was still playing
+    if (game.player_1 && game.player_2 && !game.result){
+        if (game.player_1.socket===socket){
+            game.finish(game.player_2, "the other player quit", id_games, socket_games, sockets);
+            game.player_1 = null;
+        }else{
+            game.finish(game.player_1, "the other player quit", id_games, socket_games, sockets);
+            game.player_2 = null;
+        }
+    }
+    //if game was finished
+    else if (game.player_1 && game.player_2 && game.result){
+        if (game.player_1===socket){
+            game.player_1 = null;
+        }else{
+            game.player_2 = null;
+        }
+    }
+    //if only one player left
+    else {
+        sockets  = game.close(id_games, socket_games, sockets);
+    }
+}
+
 function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
     if (!socket_games[socket_id]){
         socket.send("E:Vous n'êtes dans une partie");
@@ -134,4 +164,4 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
     }
 }
 
-export { ws_controller };
+export { ws_controller, close };

@@ -57,6 +57,18 @@ async function join_game(socket, socket_id, msg, id_games, socket_games, sockets
     }, 1000);
 }
 
+function close(sockets, socket_games, id_games, socket, socket_id){
+    const game = socket_games[socket_id];
+    if (game===undefined){
+        sockets = sockets.filter(s => s !== socket);
+        return;
+    }
+    //if only one player left
+    else {
+        sockets  = game.close(id_games, socket_games, sockets);
+    }
+}
+
 async function controller(sockets, socket_games, id_games, socket, socket_id, msg){
     console.log("stockfish")
     if (/^stockfish:$/.test(msg)){
@@ -106,4 +118,4 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
     }
 }
 
-export { controller };
+export { controller, close};
