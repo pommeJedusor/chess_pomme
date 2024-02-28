@@ -146,10 +146,6 @@ ws_server.on('connection', function(socket) {
 				socket.send("E:l'autre joueur n'as pas encore rejoint");
 				return;
 			}
-			if (!/^M:[A-Za-z0-9éèùûôîà'"\-_() ]+\|[A-Za-z0-9éèùûôîà'"\-_() ]+$/.test(msg)){
-				socket.send("E:message non valide");
-				return
-			}
 			game.player_1.socket.send(msg);
 			if (game.player_2)game.player_2.socket.send(msg);
 		}
