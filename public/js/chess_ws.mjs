@@ -53,7 +53,7 @@ function message(event, ws, player, data_board, make_move, bot=""){
     }
     //draw proposal
     else if (/^DP$/.test(event.data)){
-        insert_draw_proposal(bot+ws);
+        insert_draw_proposal(ws);
     }
     else {
         make_move(data_board, event.data);
