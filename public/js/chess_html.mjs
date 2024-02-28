@@ -20,7 +20,6 @@ function get_xy_from_piece(piece){
 
 function move_piece(start_x, start_y, target_x , target_y, player_number){
     const chessboard_sens = sessionStorage.getItem("chessboard_sens") ?? 1;
-    console.log("chessboard_sens : "+chessboard_sens)
     const sens_move = chessboard_sens==="1" ? 1 : -1;
     const piece = get_html_piece(start_x, start_y);
     const piece_to_take = get_html_piece(target_x, target_y);
@@ -29,7 +28,6 @@ function move_piece(start_x, start_y, target_x , target_y, player_number){
     const trans_x = ((target_x-start_x)*width_squares*sens_move).toString()+"px";
     const trans_y = ((-target_y+start_y)*width_squares*sens_move).toString()+"px";
     piece.style.transitionDuration = "300ms";
-    console.log(trans_x, trans_y)
     piece.style.transform = "translate("+trans_x+", "+trans_y+")";
     setTimeout(function (){
         if (piece_to_take)piece_to_take.remove();
@@ -55,7 +53,6 @@ function insert_move(move_notation){
     let move_p = document.createElement('p');
 
     move_div.classList.add("move");
-    console.log(move_div.childElementCount);
     if (moves.childElementCount%2===0)move_p.textContent = (moves.childElementCount/2+1).toString()+". ";
     move_p.textContent += move_notation;
     move_div.insertAdjacentElement("beforeend", move_p);
@@ -163,7 +160,6 @@ function update_board_sens(sens){
     let chessboard = document.querySelector("#chessboard");
     const ranks = chessboard.querySelectorAll(".rank");
     const order_sens = chessboard_sens!=1 ? -1 : 1;
-    console.log("order sens: "+order_sens);
 
     ranks.forEach((rank, i)=>{
         rank.style.order = i*order_sens;
@@ -190,13 +186,11 @@ function update_board_sens(sens){
 function invert_board(){
     const chessboard_sens = sessionStorage.getItem("chessboard_sens") ?? 1;
     sessionStorage.setItem("chessboard_sens", chessboard_sens%2+1);
-    console.log(chessboard_sens)
     update_board_sens();
 }
 
 function reset_red_squares(events_listeners){
     for (const event of events_listeners){
-        console.log(event);
         event[0].removeEventListener("click", event[1]);
         if (!event[0].classList.contains("to_move")){
             //if square not given
@@ -241,7 +235,10 @@ function make_move(data_board, notation_move, events_listeners, player_number){
             break;
         }
     }
-    if (!the_move)return;
+    if (!the_move){
+        console.log("move : "+notation_move+" non trouvé")
+        return;
+    }
     //make the html move
     move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number);
     special_change(the_move, get_html_piece(the_move.x, the_move.y), data_board);

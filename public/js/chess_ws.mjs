@@ -88,7 +88,7 @@ function ws_init(href, data_board, bot, player_number, events_listeners){
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
 
     ws.onopen = (event)=>open(ws, bot);
-    ws.onmessage = (event) => player_number[0] = message(event, ws, player_number, data_board, events_listeners);
+    ws.onmessage = (event) => player_number[0] = message(event, ws, player_number[0], data_board, events_listeners);
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
