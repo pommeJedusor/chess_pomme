@@ -11,7 +11,11 @@ console.log(bot);
 function reset_red_squares(){
     for (const event of events_listeners){
         event[0].removeEventListener("click", event[1]);
-        event[0].classList.remove("to_move");
+        if (!event[0].classList.contains("to_move")){
+            event[0].parentElement.classList.remove("to_move")
+        }else{
+            event[0].classList.remove("to_move");
+        }
     }
     events_listeners = [];
 }
