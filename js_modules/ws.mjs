@@ -1,5 +1,18 @@
 import * as Game from "./Game.mjs";
 
+function chose_first_player(game, player_1, player_2){
+    //chose first player
+    const pile_face = Math.floor(Math.random()*2);
+    if (pile_face===0){
+        game.player_1 = player_1;
+        game.player_2 = player_2;
+    }
+    else {
+        game.player_1 = player_2;
+        game.player_2 = player_1;
+    }
+}
+
 function join_create_game(socket, socket_id, msg, id_games, socket_games, sockets){
     if (!/^ID:\d{1,5}$/.test(msg)){
         socket.send("E: l'id game n'est pas valide");
@@ -18,13 +31,8 @@ function join_create_game(socket, socket_id, msg, id_games, socket_games, socket
         let game = id_games[id]
         socket_games[socket_id] = game;
         let player = new Game.Player(socket, socket_id, timer);
-        //chose first player
-        const pile_face = Math.floor(Math.random()*2);
-        if (pile_face===0)game.player_2 = player;
-        else {
-            game.player_2 = game.player_1;
-            game.player_1 = player;
-        }
+
+        chose_first_player(game, game.player_1, player);
         game.player_1.socket.send("S:1");
         game.player_2.socket.send("S:2");
         const check_timeout_id = setInterval(function (){
@@ -50,6 +58,9 @@ function draws(socket, socket_id, msg, id_games, socket_games, sockets){
     //draw proposal
     if (/^DP$/.test(msg)){
         if (current_player.draw_proposal===false){
+            if (other_player.draw_proposal===true){
+                game.finish(null, "par accord mutuel", id_games, socket_games, sockets);
+            }
             current_player.draw_proposal = true;
             current_player.socket.send("E:vous avez proposé nulle");
             if (other_player)other_player.socket.send("DP");
@@ -70,11 +81,11 @@ function draws(socket, socket_id, msg, id_games, socket_games, sockets){
     //draw accept
     else if (/^DA$/.test(msg)){
         if (other_player.draw_proposal){
-            sockets = game.finish(null, "par accord mutuel", id_games, socket_games, sockets)
+            game.finish(null, "par accord mutuel", id_games, socket_games, sockets)
         }else {
             current_player.socket.send("E:pas d'offre de nulle valide pour le moment");
         }
     }
 }
 
-export { join_create_game, draws };
+export { join_create_game, draws, chose_first_player };

@@ -149,6 +149,71 @@ ws_server.on('connection', function(socket) {
 			game.player_1.socket.send(msg);
 			if (game.player_2)game.player_2.socket.send(msg);
 		}
+		//remactch proposal
+		else if (/^RP:/.test(msg)){
+			let game = socket_games[socket_id];
+			const current_player = game.player_2.socket_id===socket_id ? game.player_2 : game.player_1;
+			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
+			if (current_player.rematch_proposal){
+				socket.send("E:vous avez déjà proposé une revanche");
+			}
+			else if (other_player.rematch_proposal){
+				//reset player data
+				current_player.rematch_proposal = false;
+				other_player.rematch_proposal = false;
+				current_player.draw_proposal = false;
+				other_player.draw_proposal = false;
+				current_player.total_timestamp = game.timestamp;
+				other_player.total_timestamp = game.timestamp;
+
+				let new_game = new Game.Game(current_player, game.id);
+				socket_games[current_player.socket_id] = new_game;
+				socket_games[other_player.socket_id] = new_game;
+				id_games[game.id] = new_game
+				ws_chess.chose_first_player(game, current_player, other_player);
+				game.player_1.socket.send("S:1");
+				game.player_2.socket.send("S:2");
+
+				//check timer
+				const check_timeout_id = setInterval(function (){
+					const result = game.check_timeout(id_games, socket_games, sockets)
+					if (result){
+						sockets = result;
+						clearInterval(check_timeout_id);
+					}
+				}, 1000);
+			}
+			else{
+				current_player.rematch_proposal = true;
+				socket.send("E:vous avez proposé une revanche")
+				other_player.socket.send("RP:");
+			}
+		}
+		//remactch proposal declined
+		else if (/^RD:/.test(msg)){
+			let game = socket_games[socket_id];
+			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
+			if (!other_player.rematch_proposal){
+				socket.send("E:l'autre joueur n'as pas proposé de revanche");
+			}else{
+				other_player.rematch_proposal = false;
+				socket.send("E:vous avez refusé la revanche")
+				other_player.socket.send("RD:");
+			}
+		}
+		//remactch proposal canceled
+		else if (/^RC:/.test(msg)){
+			let game = socket_games[socket_id];
+			const current_player = game.player_2.socket_id===socket_id ? game.player_2 : game.player_1;
+			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
+			if (!current_player.rematch_proposal){
+				socket.send("E:vous n'aviez pas proposé de revanche");
+			}else{
+				current_player.rematch_proposal = false;
+				socket.send("E:vous avez annulé votre proposition de revanche");
+				other_player.socket.send("RC:");
+			}
+		}
 		else if (socket_games[socket_id].result){
 			socket.send("E:la partie est déjà finie")
 		}

@@ -8,6 +8,7 @@ class Game{
         this.board = new Board.Board();
         this.moves = [];
         this.result = null;
+        this.timestamp = 20 * 60 * 1000; //minutes * seconds * ms
     }
     play(move, filter_good_move=(m)=>m.get_notation_move()===move){
         const moves = this.board.get_every_moves();
@@ -64,6 +65,7 @@ class Player{
         this.socket_id = socket_id;
         this.total_timestamp = total_timestamp;
         this.draw_proposal = false;
+        this.rematch_proposal = false;
     }
 }
 
