@@ -172,6 +172,19 @@ function update_board_sens(sens){
             square.style.order = j*order_sens;
         });
     });
+
+    //timers
+    const timer1 = document.querySelector("#timer1");
+    const timer2 = document.querySelector("#timer2");
+    const oppenent = document.querySelector("#opponent-infos");
+    const user = document.querySelector("#user-infos");
+    if (chessboard_sens===1){
+        user.insertAdjacentElement("beforeend", timer1);
+        oppenent.insertAdjacentElement("beforeend", timer2);
+    }else{
+        user.insertAdjacentElement("beforeend", timer2);
+        oppenent.insertAdjacentElement("beforeend", timer1);
+    }
 }
 
 function invert_board(){
