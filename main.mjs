@@ -135,9 +135,9 @@ ws_server.on('connection', function(socket) {
 			socket.send("E:Vous n'êtes dans une partie");
 			return;
 		}
-		//draw (proposal, decline or accept)
-		else if (/^D/.test(msg)){
-			ws_chess.draws(socket, socket_id, msg, id_games, socket_games, sockets);
+		else if (!socket_games[socket_id].player_1 || !socket_games[socket_id].player_2){
+			socket.send("E:l'autre joueur a quitté");
+			return;
 		}
 		//messages
 		else if (/^M:/.test(msg)){
@@ -149,6 +149,13 @@ ws_server.on('connection', function(socket) {
 			game.player_1.socket.send(msg);
 			if (game.player_2)game.player_2.socket.send(msg);
 		}
+		else if (socket_games[socket_id].result){
+			socket.send("E:la partie est déjà finie")
+		}
+		//draw (proposal, decline or accept)
+		else if (/^D/.test(msg)){
+			ws_chess.draws(socket, socket_id, msg, id_games, socket_games, sockets);
+		}
 		//resign
 		else if (/^R:/.test(msg)){
 			let game = socket_games[socket_id];
@@ -157,7 +164,7 @@ ws_server.on('connection', function(socket) {
 				return;
 			}
 			const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-			sockets = game.finish(other_player, "par abandon", id_games, socket_games, sockets);
+			game.finish(other_player, "par abandon", id_games, socket_games, sockets);
 		}
 		else{
 			let game = socket_games[socket_id];
@@ -175,16 +182,16 @@ ws_server.on('connection', function(socket) {
 				current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves.at(-2).timestamp;
 				if (current_player.total_timestamp<=0){
 					const winner = game.player_1===current_player ? game.player_2 : game.player_1;
-					sockets = game.finish(winner, "time out", id_games, socket_games, sockets);
+					game.finish(winner, "time out", id_games, socket_games, sockets);
 					return;
 				}
 				(current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
 				if (msg[msg.length-1]==="#"){
 					const winner = current_player;
-					sockets = game.finish(winner, "par mat", id_games, socket_games, sockets);
+					game.finish(winner, "par mat", id_games, socket_games, sockets);
 				}
 				if (game.board.get_every_moves().length===0){
-					sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
+					game.finish(null, "par pat", id_games, socket_games, sockets);
 				}
 				other_player.draw_proposal = false;//reset draw proposal
 			}else socket.send("E:C'est au tour de l'autre joueur");
@@ -193,9 +200,31 @@ ws_server.on('connection', function(socket) {
 
 	socket.on('close', function() {
 		const game = socket_games[socket_id];
-		if (!game)return;
-		const winner = game.player_1.socket===socket ? game.player_2 : game.player_1;
-
-		sockets = game.finish(winner, "the other player quit", id_games, socket_games, sockets);
+		if (game===undefined){
+			sockets = sockets.filter(s => s !== socket);
+			return;
+		}
+		//if game was still playing
+		if (game.player_1 && game.player_2 && !game.result){
+			if (game.player_1.socket===socket){
+				game.finish(game.player_2, "the other player quit", id_games, socket_games, sockets);
+				game.player_1 = null;
+			}else{
+				game.finish(game.player_1, "the other player quit", id_games, socket_games, sockets);
+				game.player_2 = null;
+			}
+		}
+		//if game was finished
+		else if (game.player_1 && game.player_2 && game.result){
+			if (game.player_1===socket){
+				game.player_1 = null;
+			}else{
+				game.player_2 = null;
+			}
+		}
+		//if only one player left
+		else {
+			sockets  = game.close(id_games, socket_games, sockets);
+		}
 	});
 });
