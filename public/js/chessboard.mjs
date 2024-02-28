@@ -8,67 +8,16 @@ let events_listeners = [];
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 console.log(bot);
 
-function reset_red_squares(){
-    for (const event of events_listeners){
-        event[0].removeEventListener("click", event[1]);
-        if (!event[0].classList.contains("to_move")){
-            event[0].parentElement.classList.remove("to_move")
-        }else{
-            event[0].classList.remove("to_move");
-        }
-    }
-    events_listeners = [];
-}
-
-//makes changes on the html board for special moves (castle, promotion, en-passant)
-function special_change(the_move, piece_to_move, data_board){
-        const notation_move = the_move.get_notation_move();
-        //castle
-        if (/^O-O(-O)?[#+]?$/.test(notation_move)){
-            const y = data_board.moves.length%2===0 ? 0 : 7;
-            const x = /O-O-O/.test(notation_move) ? 0 : 7;
-            const target_x = x===0 ? 3 : 5;
-            html_chess.move_piece(x, y, target_x, y);
-        }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
-            piece_to_move.classList.remove("pawn");
-            const type_pieces = ["Q", "R", "B", "N"];
-            const class_pieces = ["queen", "rook", "bishop", "knight"];
-            piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
-        }else if (the_move.piece==="P" && the_move.is_taking && data_board.board[the_move.target_y][the_move.target_x]===0){
-            //if en-passant
-            html_chess.get_html_piece(the_move.target_x, the_move.y).remove();
-        }
-}
-
-function make_move(data_board, notation_move){
-    html_chess.insert_move(notation_move);
-    reset_red_squares();
-    //get the move
-    let the_move;
-    for (const move of data_board.get_every_moves()){
-        if (move.get_notation_move()===notation_move){
-            the_move=move;
-            break;
-        }
-    }
-    if (!the_move)return;
-    //make the html move
-    html_chess.move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number);
-    special_change(the_move, html_chess.get_html_piece(the_move.x, the_move.y), data_board);
-    //make the move in the datas
-    const piece = data_board.board[the_move.y][the_move.x];
-    data_board.board = piece.do_move(data_board.board, the_move, piece.edit_func);
-    data_board.moves.push(the_move);
-}
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
-    for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
-    reset_red_squares();
+    html_chess.reset_red_squares(events_listeners);
+    //other player's turn
     if (data_board.moves.length%2===player_number%2){
         if (piece)piece.style.transform=null;
         clearInterval(animation_piece_cursor);
         return;
     }
+    //get the potentials moves for the piece
     const xy = html_chess.get_xy_from_piece(piece)
     const x = Number(xy[0]);
     const y = Number(xy[1]);
@@ -81,29 +30,32 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             "move":move
         });
     }
+    //edit the target squares
     for (const square_move of squares_to_edit){
         const square = square_move["square"];
         const piece_move = square_move["piece"];
         const move = square_move["move"];
         square.classList.add("to_move");
         function a(){
+            //red squares
+            html_chess.reset_red_squares(events_listeners);
+            //insert move notation and remove draw proposal
             html_chess.insert_move(move.get_notation_move());
-            reset_red_squares();
-            square.innerHTML = "";
-            special_change(move, piece, data_board);
-            square.insertAdjacentElement("beforeend", piece);
-            for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
+            html_chess.remove_draw_proposal();
+            //move the piece(s)
+            html_chess.special_change(move, piece, data_board);
+            html_chess.move_piece(move.x, move.y, move.target_x, move.target_y, player_number);
+            //update datas board
             const data_piece = data_board.board[move.y][move.x];
             data_board.moves.push(move);
             data_board.board = data_piece.do_move(data_board.board, move, data_piece.edit_func);
+            //send move to server
             ws.send(move.get_notation_move());
-            html_chess.remove_draw_proposal();
             clearInterval(animation_piece_cursor);
-            reset_red_squares();
         }
         if (!player_number)continue;
         if (piece_move){
-            events_listeners.push([piece_move, a]);
+            events_listeners.push([piece_move, a, square]);
             piece_move.addEventListener("click", a);
         }
         else {
@@ -130,9 +82,9 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     const new_x = old_x + dif_x;
     const new_y = old_y - dif_y;
 
+    //if the move check with one which is legal
     if (!data_board.get_every_moves().filter((move)=>move.x===old_x && move.y===old_y && move.target_x===new_x && move.target_y===new_y)){
-        for (const square of document.querySelectorAll(".to_move"))square.classList.remove("to_move");
-        reset_red_squares();
+        html_chess.reset_red_squares(events_listeners);
     }
 
     if (new_x===old_x && new_y===old_y)return setTimeout(function(){
@@ -152,11 +104,11 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
     if (move_found!==null && (player_number && player_number%2!==data_board.moves.length%2)){
         //html
         html_chess.insert_move(move_found.get_notation_move());
-        reset_red_squares();
+        html_chess.reset_red_squares(events_listeners);
         const square = html_chess.get_html_square(new_x, new_y)
         square.innerHTML = "";
         square.insertAdjacentElement("beforeend", piece);
-        special_change(move_found, piece, data_board)
+        html_chess.special_change(move_found, piece, data_board)
         //datas
         const data_piece = data_board.board[old_y][old_x];
         data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
@@ -222,7 +174,7 @@ function ws_init(href, data_board){
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
 
     ws.onopen = (event)=>websocket_chess.open(ws, bot);
-    ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, data_board, make_move, bot);
+    ws.onmessage = (event) => player_number = websocket_chess.message(event, ws, player_number, data_board, events_listeners);
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 

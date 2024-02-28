@@ -194,6 +194,63 @@ function invert_board(){
     update_board_sens();
 }
 
+function reset_red_squares(events_listeners){
+    for (const event of events_listeners){
+        console.log(event);
+        event[0].removeEventListener("click", event[1]);
+        if (!event[0].classList.contains("to_move")){
+            //if square not given
+            if (event.length===1)continue;
+            event[2].classList.remove("to_move")
+        }else{
+            event[0].classList.remove("to_move");
+        }
+    }
+    events_listeners.splice(0); 
+}
+
+//makes changes on the html board for special moves (castle, promotion, en-passant)
+function special_change(the_move, piece_to_move, data_board){
+        const notation_move = the_move.get_notation_move();
+        //castle
+        if (/^O-O(-O)?[#+]?$/.test(notation_move)){
+            const y = data_board.moves.length%2===0 ? 0 : 7;
+            const x = /O-O-O/.test(notation_move) ? 0 : 7;
+            const target_x = x===0 ? 3 : 5;
+            move_piece(x, y, target_x, y);
+        }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
+            piece_to_move.classList.remove("pawn");
+            const type_pieces = ["Q", "R", "B", "N"];
+            const class_pieces = ["queen", "rook", "bishop", "knight"];
+            piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
+        }else if (the_move.piece==="P" && the_move.is_taking && data_board.board[the_move.target_y][the_move.target_x]===0){
+            //if en-passant
+            get_html_piece(the_move.target_x, the_move.y).remove();
+        }
+}
+
+//when recieve move
+function make_move(data_board, notation_move, events_listeners, player_number){
+    insert_move(notation_move);
+    reset_red_squares(events_listeners);
+    //get the move
+    let the_move;
+    for (const move of data_board.get_every_moves()){
+        if (move.get_notation_move()===notation_move){
+            the_move=move;
+            break;
+        }
+    }
+    if (!the_move)return;
+    //make the html move
+    move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number);
+    special_change(the_move, get_html_piece(the_move.x, the_move.y), data_board);
+    //make the move in the datas
+    const piece = data_board.board[the_move.y][the_move.x];
+    data_board.board = piece.do_move(data_board.board, the_move, piece.edit_func);
+    data_board.moves.push(the_move);
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, instant_move_piece, insert_move,
          insert_message, get_width_squares, insert_end_message, close_end_message, insert_draw_proposal,
-         remove_draw_proposal, invert_board, update_board_sens };
+         remove_draw_proposal, invert_board, update_board_sens, reset_red_squares, special_change, make_move };

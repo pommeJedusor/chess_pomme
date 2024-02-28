@@ -1,4 +1,4 @@
-import { insert_end_message, insert_message, insert_draw_proposal, update_board_sens, invert_board } from "./chess_html.mjs";
+import { insert_end_message, insert_message, insert_draw_proposal, update_board_sens, invert_board, make_move } from "./chess_html.mjs";
 
 function open(ws, bot=""){
     //against bot
@@ -15,7 +15,7 @@ function open(ws, bot=""){
     ws.send("ID:"+match_result[0])
 }
 
-function message(event, ws, player, data_board, make_move){
+function message(event, ws, player, data_board, events_listeners_red_squares){
     console.log("recieve: "+event.data);
     //remove last error message
     const last_error = document.querySelector(".error");
@@ -56,7 +56,7 @@ function message(event, ws, player, data_board, make_move){
         insert_draw_proposal(ws);
     }
     else {
-        make_move(data_board, event.data);
+        make_move(data_board, event.data, events_listeners_red_squares, player);
     }
     return player;
 }
