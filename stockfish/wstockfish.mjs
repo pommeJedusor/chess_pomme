@@ -94,6 +94,10 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
         const player_turn = game.moves.length%2+1;
 
         if ((game.player_1.socket_id===STOCKFISH && player_turn===2) || (game.player_2.socket_id===STOCKFISH && player_turn===1)){
+            if (game.result){
+                socket.send("E:partie déjà finie");
+                return;
+            }
             const move = new Game.Move(msg, Date.now(), player_turn);
             const current_player = [game.player_1, game.player_2][player_turn-1];
             const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
@@ -116,6 +120,7 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
             }
             other_player.draw_proposal = false;//reset draw proposal
             const stockfish_move = await get_stockfish_move(game);
+            if (game.result)return;
             socket.send(stockfish_move);
             game.moves.push(stockfish_move);
             if (stockfish_move.endsWith("#")){
