@@ -1,5 +1,7 @@
 import * as Board from "./Board.mjs";
 
+const STOCKFISH = -1
+
 class Game{
     constructor(player_1, id){
         this.player_1 = player_1;
@@ -37,15 +39,18 @@ class Game{
         }
     }
     close(id_games, socket_games, sockets){
-        if (this.player_1 && this.player_1.socket)this.player_1.socket.close();
-        if (this.player_2 && this.player_2.socket)this.player_2.socket.close();
+        const do_player_1 = this.player_1 && this.player_1.socket;
+        const do_player_2 = this.player_2 && this.player_2.socket;
+
+        if (do_player_1)this.player_1.socket.close();
+        if (do_player_2)this.player_2.socket.close();
         //delete the game
         id_games[this.id] = undefined;
-        if (this.player_1 && this.player_1.socket_id)socket_games[this.player_1.socket_id] = undefined;
-        if (this.player_2 && this.player_2.socket_id)socket_games[this.player_2.socket_id] = undefined;
+        if (do_player_1)socket_games[this.player_1.socket_id] = undefined;
+        if (do_player_2)socket_games[this.player_2.socket_id] = undefined;
         //delete sockets
-        if (this.player_1 && this.player_1.socket_id)sockets[this.player_1.socket_id] = undefined;
-        if (this.player_2 && this.player_2.socket_id)sockets[this.player_2.socket_id] = undefined;
+        if (do_player_1)sockets[this.player_1.socket_id] = undefined;
+        if (do_player_2)sockets[this.player_2.socket_id] = undefined;
     }
     check_timeout(id_games, socket_games, sockets){
         const player_turn = this.moves.length%2+1;
