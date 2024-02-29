@@ -68,6 +68,9 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
     else if (/^DP$/.test(event.data)){
         chess_ws_html.insert_draw_proposal(ws);
     }
+    else if (/^RP:/.test(event.data)){
+        chess_ws_html.insert_rematch_proposal(ws);
+    }
     else {
         chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
     }

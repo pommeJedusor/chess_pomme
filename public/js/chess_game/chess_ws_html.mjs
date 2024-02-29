@@ -59,6 +59,35 @@ function insert_draw_proposal(ws, username="Anonyme"){
     messages.scrollBy(0, 10000);
 }
 
+function insert_rematch_proposal(ws, username="Anonyme"){
+    //message
+    insert_message(username, "vous propose une revanche", " ");
+    //button accept
+    let validate_button = document.createElement("button");
+    validate_button.id = "accept-draw";
+    validate_button.addEventListener("click", function (){
+        ws.send("RP:");
+        //chess_html.remove_rematch_proposal();
+        return
+    });
+    //button decline
+    let decline_button = document.createElement("button");
+    decline_button.id = "decline-draw";
+    decline_button.addEventListener("click", function (){
+        ws.send("RD:");
+        //chess_html.remove_rematch_proposal();
+        return
+    });
+    //insert buttons
+    let buttons = document.createElement("div")
+    buttons.id = "draw-buttons";
+    buttons.insertAdjacentElement("afterbegin", decline_button);
+    buttons.insertAdjacentElement("afterbegin", validate_button);
+    const messages = document.querySelector("#messages");
+    messages.insertAdjacentElement("beforeend", buttons);
+    messages.scrollBy(0, 10000);
+}
+
 function insert_message(username, message, separator=" : "){
     //message
     let message_p = document.createElement("p");
@@ -141,4 +170,4 @@ function switch_moves_buttons(ws){
     chess_html.event_moves_buttons(ws);
 }
 
-export { insert_end_message, insert_draw_proposal, make_move, insert_message, switch_moves_buttons };
+export { insert_end_message, insert_draw_proposal, make_move, insert_message, switch_moves_buttons, insert_rematch_proposal };
