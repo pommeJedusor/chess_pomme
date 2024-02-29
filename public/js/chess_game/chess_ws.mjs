@@ -5,6 +5,7 @@ import { chessboard } from "./chessboard.mjs";
 
 let player_number = [null];
 let events_listeners = [];
+let data_board;
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 console.log(bot);
 
@@ -23,7 +24,7 @@ function open(ws, bot=""){
     ws.send("ID:"+match_result[0])
 }
 
-function message(event, ws, player, data_board, events_listeners_red_squares){
+function message(event, ws, player, events_listeners_red_squares){
     console.log("recieve: "+event.data);
     //remove last error message
     const last_error = document.querySelector(".error");
@@ -46,6 +47,8 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
     else if (/^S:/.test(event.data)){
         //if new game
         if (player){
+            data_board = new Board.Board();
+            chessboard(location.href, ws, data_board, player_number, events_listeners);
             chess_ws_html.switch_moves_buttons(ws);
         }
         player = Number(event.data[2]);
@@ -102,12 +105,12 @@ function update_timer(moves){
 
 function ws_init(){
     const href = location.href;
-    const data_board = new Board.Board();
+    data_board = new Board.Board();
 
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
 
     ws.onopen = (event)=>open(ws, bot);
-    ws.onmessage = (event) => player_number[0] = message(event, ws, player_number[0], data_board, events_listeners);
+    ws.onmessage = (event) => player_number[0] = message(event, ws, player_number[0], events_listeners);
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 

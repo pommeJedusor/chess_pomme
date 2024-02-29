@@ -122,7 +122,13 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
 
 //make the html board and init all the event listeners
 function make_board(board, data_board, ws){
-    board.innerHtml = "";
+    //reset board if there was one
+    board.innerHTML = "";
+    const moves = document.querySelector("#moves");
+    if (moves)moves.innerHTML = "";
+    const messages = document.querySelector("#messages");
+    if (messages)messages.innerHTML = "";
+
     const NB_RANKS = 8;
     const NB_FILES = 8;
     for (let i=NB_RANKS-1;i>=0;i--){
