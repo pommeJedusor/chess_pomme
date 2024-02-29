@@ -43,7 +43,9 @@ class Game{
         id_games[this.id] = undefined;
         if (this.player_1 && this.player_1.socket_id)socket_games[this.player_1.socket_id] = undefined;
         if (this.player_2 && this.player_2.socket_id)socket_games[this.player_2.socket_id] = undefined;
-        return sockets.filter(s => s !== this.player_2 && s !== this.player_1);
+        //delete sockets
+        if (this.player_1 && this.player_1.socket_id)sockets[this.player_1.socket_id] = undefined;
+        if (this.player_2 && this.player_2.socket_id)sockets[this.player_2.socket_id] = undefined;
     }
     check_timeout(id_games, socket_games, sockets){
         const player_turn = this.moves.length%2+1;
@@ -53,8 +55,7 @@ class Game{
         const total_timestamp = current_player.total_timestamp - (this.moves.length<2 ? 0 : Date.now() - this.moves.at(-2).timestamp);
         if (total_timestamp<=0){
             const winner = this.player_1===current_player ? this.player_2 : this.player_1;
-            sockets = this.finish(winner, "time out", id_games, socket_games, sockets);
-            return sockets;
+            this.finish(winner, "time out", id_games, socket_games, sockets);
         }
     }
 }

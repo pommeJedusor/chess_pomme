@@ -27,7 +27,7 @@ function close(sockets, socket_games, id_games, socket, socket_id){
     }
     //if only one player left
     else {
-        sockets  = game.close(id_games, socket_games, sockets);
+        game.close(id_games, socket_games, sockets);
     }
 }
 
@@ -70,10 +70,10 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
             let new_game = new Game.Game(current_player, game.id);
             socket_games[current_player.socket_id] = new_game;
             socket_games[other_player.socket_id] = new_game;
-            id_games[game.id] = new_game
-            ws_chess.chose_first_player(game, current_player, other_player);
-            game.player_1.socket.send("S:1");
-            game.player_2.socket.send("S:2");
+            id_games[new_game.id] = new_game
+            ws_chess.chose_first_player(new_game, current_player, other_player);
+            new_game.player_1.socket.send("S:1");
+            new_game.player_2.socket.send("S:2");
 
             //check timer
             const check_timeout_id = setInterval(function (){

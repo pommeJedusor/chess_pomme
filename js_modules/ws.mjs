@@ -36,9 +36,8 @@ function join_create_game(socket, socket_id, msg, id_games, socket_games, socket
         game.player_1.socket.send("S:1");
         game.player_2.socket.send("S:2");
         const check_timeout_id = setInterval(function (){
-            const result = game.check_timeout(id_games, socket_games, sockets)
-            if (result){
-                sockets = result;
+            game.check_timeout(id_games, socket_games, sockets)
+            if (game.result){
                 clearInterval(check_timeout_id);
             }
         }, 1000);
