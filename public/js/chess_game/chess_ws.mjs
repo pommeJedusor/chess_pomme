@@ -7,14 +7,15 @@ let player_number = [null];
 let events_listeners = [];
 let data_board;
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
+const level = /[?&]level=(0|[01][1-9]|20)(\&|$)/.test(location.search) ? location.search.match(/level=(\d\d?)(\&|$)/)[1] : 20;
 console.log(bot);
 
 function open(ws, bot=""){
     //against bot
     console.log(bot);
     if (bot.length!==0){
-        console.log(bot);
-        ws.send(bot);
+        console.log(bot+level);
+        ws.send(bot+level);
         return;
     }
     //against other player

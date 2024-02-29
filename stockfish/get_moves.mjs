@@ -23,15 +23,19 @@ function init_stockfish(move){
     return stockfish;
 }
 
-async function get_move(game){
+async function get_move(game, level=null){
     let p_move = [null];
     const stockfish = init_stockfish(p_move);
     const fen = get_fen(game.board);
     stockfish.stdin.write("uci\n");
     console.log(fen);
     stockfish.stdin.write("position fen "+fen+"\n");
-    stockfish.stdin.write("go movetime 2000\n");
-    await delay(3000);
+    if (level!==null){
+        console.log(level);
+        stockfish.stdin.write("setoption name Skill Level value "+level+"\n");
+    }
+    stockfish.stdin.write("go movetime 3000\n");
+    while (!p_move[0])await delay(500);
     const move = p_move[0];
     console.log(move);
     stockfish.stdin.write("quit\n");

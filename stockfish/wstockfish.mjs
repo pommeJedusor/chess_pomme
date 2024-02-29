@@ -3,8 +3,8 @@ import { get_move } from "./get_moves.mjs";
 
 const STOCKFISH = -1;
 
-async function get_stockfish_move(game){
-    await get_move(game);
+async function get_stockfish_move(game, bot_level){
+    await get_move(game, bot_level);
     const move = game.board.moves.at(-1).get_notation_move();
     return move;
 }
@@ -69,9 +69,9 @@ function close(sockets, socket_games, id_games, socket, socket_id){
     }
 }
 
-async function controller(sockets, socket_games, id_games, socket, socket_id, msg){
+async function controller(sockets, socket_games, id_games, socket, socket_id, msg, bot_level){
     console.log("stockfish")
-    if (/^stockfish:$/.test(msg)){
+    if (/^stockfish:/.test(msg)){
         join_game(socket, socket_id, msg, id_games, socket_games, sockets);
     }
     else if (!socket_games[socket_id]){
@@ -119,7 +119,7 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
                 sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
             }
             other_player.draw_proposal = false;//reset draw proposal
-            const stockfish_move = await get_stockfish_move(game);
+            const stockfish_move = await get_stockfish_move(game, bot_level);
             if (game.result)return;
             socket.send(stockfish_move);
             game.moves.push(stockfish_move);

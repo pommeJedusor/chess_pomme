@@ -123,6 +123,7 @@ ws_server.on('connection', function(socket) {
 	const socket_id = Math.floor(Math.random()*1000000)
 	let is_against_bot;
 	let is_against_player;
+	let bot_level;
 
 	socket.on('message', function(msg) {
 		msg = msg.toString();
@@ -145,6 +146,8 @@ ws_server.on('connection', function(socket) {
 				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre game");
 			}
 			else {
+				if (msg==="stockfish:")bot_level = 20;
+				else bot_level = Number(msg.match(/^stockfish:(\d*)/)[1]);
 				wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
 				is_against_bot = true;
 				is_against_player = false;
@@ -156,7 +159,7 @@ ws_server.on('connection', function(socket) {
 			ws_controller.ws_controller(sockets, socket_games, id_games, socket, socket_id, msg);
 		}
 		else if (is_against_bot){
-			wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
+			wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg, bot_level);
 		}
 	});
 	socket.on("close", ()=>{
