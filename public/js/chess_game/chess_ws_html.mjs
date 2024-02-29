@@ -1,0 +1,105 @@
+import * as chess_html from "./chess_html.mjs";
+
+function insert_end_message(result, reason){
+    let result_message;
+    if (result===1)result_message = "VOUS AVEZ GAGNÉ";
+    else if (result===-1)result_message = "VOUS AVEZ PERDU";
+    else result_message = "MATCH NULLE";
+    const chessboard_div = document.querySelector("#chessboard");
+    let alert_div = document.createElement("div");
+    alert_div.id = "alert-message";
+    if (result===1)alert_div.classList.add("win");
+    else if (result===-1)alert_div.classList.add("lose");
+    else alert_div.classList.add("draw");
+    //if draw win or lose
+    let result_h3 = document.createElement("h3");
+    alert_div.classList.add("result-message");
+    result_h3.textContent = result_message;
+    //why he lost won or draw
+    let reason_message = document.createElement("p");
+    alert_div.classList.add("reason-message");
+    reason_message.textContent = reason;
+    //button to close
+    let close_button = document.createElement("button");
+    close_button.id = "close-button";
+    close_button.addEventListener("click", chess_html.close_end_message);
+
+    alert_div.insertAdjacentElement("afterbegin", result_h3);
+    alert_div.insertAdjacentElement("beforeend", reason_message);
+    alert_div.insertAdjacentElement("beforeend", close_button);
+    chessboard_div.insertAdjacentElement("beforeend", alert_div);
+}
+
+function insert_draw_proposal(ws, username="Anonyme"){
+    //message
+    insert_message(username, "vous propose match nulle", " ");
+    //button accept
+    let validate_button = document.createElement("button");
+    validate_button.id = "accept-draw";
+    validate_button.addEventListener("click", function (){
+        ws.send("DA");
+        chess_html.remove_draw_proposal();
+        return
+    });
+    //button decline
+    let decline_button = document.createElement("button");
+    decline_button.id = "decline-draw";
+    decline_button.addEventListener("click", function (){
+        ws.send("DD");
+        chess_html.remove_draw_proposal();
+        return
+    });
+    //insert buttons
+    let buttons = document.createElement("div")
+    buttons.id = "draw-buttons";
+    buttons.insertAdjacentElement("afterbegin", decline_button);
+    buttons.insertAdjacentElement("afterbegin", validate_button);
+    const messages = document.querySelector("#messages");
+    messages.insertAdjacentElement("beforeend", buttons);
+    messages.scrollBy(0, 10000);
+}
+
+function insert_message(username, message, separator=" : "){
+    //message
+    let message_p = document.createElement("p");
+    message_p.classList.add("message");
+    message_p.textContent = message;
+    //username
+    if (username){
+        let user_span = document.createElement("span")
+        user_span.classList.add("user-name");
+        user_span.textContent = username+separator;
+        message_p.insertAdjacentElement("afterbegin", user_span);
+    }
+    //insert
+    const messages = document.querySelector("#messages");
+    messages.insertAdjacentElement("beforeend", message_p);
+    messages.scrollBy(0, 10000);
+}
+
+//when recieve move
+function make_move(data_board, notation_move, events_listeners, player_number){
+    chess_html.insert_move(notation_move);
+    chess_html.reset_red_squares(events_listeners);
+    //get the move
+    let the_move;
+    for (const move of data_board.get_every_moves()){
+        if (move.get_notation_move()===notation_move){
+            the_move=move;
+            break;
+        }
+    }
+    if (!the_move){
+        console.log("move : "+notation_move+" non trouvé")
+        return;
+    }
+    //make the html move
+    chess_html.move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number);
+    chess_html.special_change(the_move, chess_html.get_html_piece(the_move.x, the_move.y), data_board);
+    //make the move in the datas
+    const piece = data_board.board[the_move.y][the_move.x];
+    data_board.board = piece.do_move(data_board.board, the_move, piece.edit_func);
+    data_board.moves.push(the_move);
+}
+
+export { insert_end_message, insert_draw_proposal, make_move, insert_message };

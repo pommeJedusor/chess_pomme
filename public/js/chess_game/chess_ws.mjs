@@ -1,4 +1,5 @@
-import { insert_end_message, insert_message, insert_draw_proposal, update_board_sens, invert_board, make_move } from "./chess_html.mjs";
+import * as chess_html from "./chess_html.mjs";
+import * as chess_ws_html from "./chess_ws_html.mjs";
 
 function open(ws, bot=""){
     //against bot
@@ -23,7 +24,7 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
 
     //if error
     if (/^E:/.test(event.data)){
-        insert_message(false, event.data.replace(/^E:/, ""));
+        chess_ws_html.insert_message(false, event.data.replace(/^E:/, ""));
     }
     //if game finished
     else if (/^R:/.test(event.data)){
@@ -31,7 +32,7 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
         if (event.data[2]==="L")result = -1;
         else if (event.data[2]==="D")result = 0;
         let reason = event.data.replace(/^R:(L|W|D):/, "");
-        insert_end_message(result, reason);
+        chess_ws_html.insert_end_message(result, reason);
     }
     //if game started
     else if (/^S:/.test(event.data)){
@@ -39,9 +40,9 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
         console.log("player : "+player)
         sessionStorage.setItem("chessboard_sens", player);
-        update_board_sens(player);
+        chess_html.update_board_sens(player);
 
-        insert_message(false, result);
+        chess_ws_html.insert_message(false, result);
         setInterval(()=>update_timer(data_board.moves), 1000);
     }
     //if recieve message
@@ -49,14 +50,14 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
         const content = event.data.substr(2).split("|");
         const username = content[0];
         const message = content[1];
-        insert_message(username, message);
+        chess_ws_html.insert_message(username, message);
     }
     //draw proposal
     else if (/^DP$/.test(event.data)){
-        insert_draw_proposal(ws);
+        chess_ws_html.insert_draw_proposal(ws);
     }
     else {
-        make_move(data_board, event.data, events_listeners_red_squares, player);
+        chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
     }
     return player;
 }

@@ -1,6 +1,8 @@
 import { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK } from "./Board.mjs";
 import * as websocket_chess from "./chess_ws.mjs";
 import * as html_chess from "./chess_html.mjs";
+import * as html_chessboard from "./chessboard_html.mjs";
+
 let cursor_x = 0;
 let cursor_y = 0;
 let player_number = [null];
@@ -157,7 +159,7 @@ function make_board(board, data_board, ws){
             piece.draggable = true;
             piece.addEventListener("mousedown", function (e){
                 const piece_origin_pos = piece.getBoundingClientRect();
-                const animation_piece_cursor = setInterval(()=>html_chess.instant_move_piece(piece, piece_origin_pos, cursor_x, cursor_y),10)
+                const animation_piece_cursor = setInterval(()=>html_chessboard.instant_move_piece(piece, piece_origin_pos, cursor_x, cursor_y),10)
                 e.preventDefault();
                 document.addEventListener("mouseup", function mouseup_event(e){
                     drop(e, ws, piece_origin_pos, piece, mouseup_event, animation_piece_cursor, data_board);

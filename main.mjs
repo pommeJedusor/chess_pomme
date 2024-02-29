@@ -67,7 +67,7 @@ const server = http.createServer(function (req, res){
 			return
 	}
 
-	if (parameters.length>30)return return_http_error(400, res, "url too long");
+	if (parameters.length>50)return return_http_error(400, res, "url too long");
 
 	//get the extension of the file
 	const file_name_extension = /\.([^.]+$)/.exec(parameters);
