@@ -115,7 +115,7 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
                 const winner = current_player;
                 sockets = game.finish(winner, "par mat", id_games, socket_games, sockets);
             }
-            if (game.board.get_every_moves().length===0){
+            else if (game.board.get_every_moves().length===0){
                 sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
             }
             other_player.draw_proposal = false;//reset draw proposal
