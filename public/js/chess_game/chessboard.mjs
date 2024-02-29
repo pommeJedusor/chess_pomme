@@ -189,13 +189,6 @@ function chessboard(href, ws ,data_board, player_num, events){
         message_input.value = "";
         ws.send("M:Anonyme|"+message);
     });
-    //resign
-    document.querySelector("#resign-button").addEventListener("click", function (){
-        ws.send("R:");
-    })
-    //draw proposal
-    document.querySelector("#draw-button").addEventListener("click", function (){
-        ws.send("DP");
-    })
+    html_chess.event_moves_buttons(ws);
 }
 export { chessboard };

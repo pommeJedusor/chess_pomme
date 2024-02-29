@@ -136,6 +136,28 @@ function special_change(the_move, piece_to_move, data_board){
         }
 }
 
+function event_moves_buttons(ws){
+    const resign_button = document.querySelector("#resign-button");
+    const draw_button = document.querySelector("#draw-button");
+    const rematch_button = document.querySelector("#rematch-button");
+    const new_game_button = document.querySelector("#new-game-button");
+    //resign
+    if (resign_button)resign_button.addEventListener("click", function (){
+        ws.send("R:");
+    })
+    //draw proposal
+    if (draw_button)draw_button.addEventListener("click", function (){
+        ws.send("DP");
+    })
+    //rematch proposal
+    if (rematch_button)rematch_button.addEventListener("click", function(){
+        ws.send("RP:");
+    })
+    if (new_game_button)new_game_button.addEventListener("click", function(){
+        //doesn't work for now
+    })
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, insert_move,
          get_width_squares, close_end_message, remove_draw_proposal, invert_board,
-         update_board_sens, reset_red_squares, special_change };
+         update_board_sens, reset_red_squares, special_change, event_moves_buttons };

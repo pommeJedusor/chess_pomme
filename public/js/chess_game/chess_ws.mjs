@@ -40,9 +40,14 @@ function message(event, ws, player, data_board, events_listeners_red_squares){
         else if (event.data[2]==="D")result = 0;
         let reason = event.data.replace(/^R:(L|W|D):/, "");
         chess_ws_html.insert_end_message(result, reason);
+        chess_ws_html.switch_moves_buttons(ws);
     }
     //if game started
     else if (/^S:/.test(event.data)){
+        //if new game
+        if (player){
+            chess_ws_html.switch_moves_buttons(ws);
+        }
         player = Number(event.data[2]);
         let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
         console.log("player : "+player)

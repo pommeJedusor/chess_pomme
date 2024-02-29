@@ -102,4 +102,43 @@ function make_move(data_board, notation_move, events_listeners, player_number){
     data_board.moves.push(the_move);
 }
 
-export { insert_end_message, insert_draw_proposal, make_move, insert_message };
+function switch_moves_buttons(ws){
+    const buttons = document.querySelector("#moves-buttons");
+    const resign_button = document.querySelector("#resign-button");
+    if (resign_button){
+        //remove previous buttons
+        const draw_button = document.querySelector("#draw-button");
+        resign_button.remove();
+        draw_button.remove();
+        //make the new buttons
+        const rematch_button = document.createElement("button");
+        const new_game_button = document.createElement("button");
+        rematch_button.id = "rematch-button";
+        new_game_button.id = "new-game-button";
+        rematch_button.textContent = "Proposer une revanche";
+        new_game_button.textContent = "lancer une nouvelle partie";
+        //insert them
+        buttons.insertAdjacentElement("beforeend", rematch_button);
+        buttons.insertAdjacentElement("beforeend", new_game_button);
+    }
+    else {
+        //remove previous buttons
+        const rematch_button = document.querySelector("#rematch-button");
+        const new_game_button = document.querySelector("#new-game-button");
+        rematch_button.remove();
+        new_game_button.remove();
+        //make the new buttons
+        const resign_button = document.createElement("button");
+        const draw_button = document.createElement("button");
+        resign_button.id = "resign-button";
+        draw_button.id = "draw-button";
+        resign_button.textContent = "Abandonner";
+        draw_button.textContent = "Proposer nulle";
+        //insert them
+        buttons.insertAdjacentElement("beforeend", resign_button);
+        buttons.insertAdjacentElement("beforeend", draw_button);
+    }
+    chess_html.event_moves_buttons(ws);
+}
+
+export { insert_end_message, insert_draw_proposal, make_move, insert_message, switch_moves_buttons };
