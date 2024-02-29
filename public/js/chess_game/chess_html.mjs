@@ -151,9 +151,15 @@ function event_moves_buttons(ws){
     })
     //rematch proposal
     if (rematch_button)rematch_button.addEventListener("click", function(){
+        if (location.pathname==="/stockfish"){
+            window.location.reload();
+        }
         ws.send("RP:");
     })
     if (new_game_button)new_game_button.addEventListener("click", function(){
+        if (location.pathname==="/stockfish"){
+            window.location.reload();
+        }
         //doesn't work for now
     })
 }
