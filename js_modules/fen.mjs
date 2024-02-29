@@ -33,7 +33,7 @@ function get_active_color(moves){
 
 function get_castling(game){
     let castling = [[true, true], [true, true]];
-    const ys = [0, 7];
+    const ys = [1, 8];
 
     for (const color of [WHITE, BLACK]){
         if (Game.check_move_append(game.moves, /^[KO]/, color))castling[color] = [false, false];
