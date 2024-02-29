@@ -1,14 +1,12 @@
-import { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK } from "./Board.mjs";
-import * as websocket_chess from "./chess_ws.mjs";
 import * as html_chess from "./chess_html.mjs";
 import * as html_chessboard from "./chessboard_html.mjs";
 
+const WHITE = 0;
+const BLACK = 1;
 let cursor_x = 0;
 let cursor_y = 0;
-let player_number = [null];
+let player_number = [];
 let events_listeners = [];
-const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
-console.log(bot);
 
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
@@ -172,11 +170,13 @@ function make_board(board, data_board, ws){
     }
 }
 
-function main(href){
+function chessboard(href, ws ,data_board, player_num, events){
+    //init global variables
+    player_number = player_num;
+    events_listeners = events;
+
     const board = document.querySelector("#chessboard");
     if (!board)return;
-    const data_board = new Board();
-    const ws = websocket_chess.ws_init(href, data_board, bot, player_number, events_listeners);
     make_board(board, data_board, ws);
     document.addEventListener("mousemove", function (e){
         cursor_x = e.pageX;
@@ -198,5 +198,4 @@ function main(href){
         ws.send("DP");
     })
 }
-
-main(location.href)
+export { chessboard };

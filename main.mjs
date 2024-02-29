@@ -33,7 +33,6 @@ function get_waiting_games(number=10){
 const server = http.createServer(function (req, res){
 	const url = req.url;
 	const parameters = url.replace(/\?.*/gm, "");
-	console.log(parameters)
 
 	switch (parameters){
 		case "/":
@@ -153,7 +152,6 @@ ws_server.on('connection', function(socket) {
 			return;
 		}
 		//redirect to the controller needed
-		console.log(is_against_bot)
 		if (is_against_player){
 			ws_controller.ws_controller(sockets, socket_games, id_games, socket, socket_id, msg);
 		}

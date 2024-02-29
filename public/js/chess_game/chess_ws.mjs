@@ -1,5 +1,12 @@
+import * as Board from "./Board.mjs";
 import * as chess_html from "./chess_html.mjs";
 import * as chess_ws_html from "./chess_ws_html.mjs";
+import { chessboard } from "./chessboard.mjs";
+
+let player_number = [null];
+let events_listeners = [];
+const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
+console.log(bot);
 
 function open(ws, bot=""){
     //against bot
@@ -85,7 +92,10 @@ function update_timer(moves){
     timer_el.textContent = new_timer;
 }
 
-function ws_init(href, data_board, bot, player_number, events_listeners){
+function ws_init(){
+    const href = location.href;
+    const data_board = new Board.Board();
+
     let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
 
     ws.onopen = (event)=>open(ws, bot);
@@ -93,7 +103,7 @@ function ws_init(href, data_board, bot, player_number, events_listeners){
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
-    return ws
+    chessboard(href, ws, data_board, player_number, events_listeners);
 }
 
-export { open, message, send_move, update_timer, ws_init };
+ws_init()
