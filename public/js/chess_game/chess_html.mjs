@@ -107,7 +107,7 @@ function reset_red_squares(events_listeners){
         event[0].removeEventListener("click", event[1]);
         if (!event[0].classList.contains("to_move")){
             //if square not given
-            if (event.length===1)continue;
+            if (event.length<=2)continue;
             event[2].classList.remove("to_move")
         }else{
             event[0].classList.remove("to_move");
