@@ -14,12 +14,14 @@ function chose_first_player(game, player_1, player_2){
 }
 
 function join_create_game(socket, socket_id, msg, id_games, socket_games, sockets){
-    if (!/^ID:\d{1,5}$/.test(msg)){
+    if (!/^ID:\d{1,5}|minutes:\d{1,2}|seconds:\d{1,2}$/.test(msg)){
         socket.send("E: l'id game n'est pas valide");
         return;
     }
-    const id = msg.match(/(?<=ID:)\d*$/)[0];
-    const timer = 20 * 60 * 1000 //minutes * seconds * ms
+    const id = msg.match(/ID:(\d*)\|/)[1];
+    const minutes = Number(msg.match(/minutes:(\d*)\|/)[1]);
+    const seconds = Number(msg.match(/seconds:(\d*)$/)[1]);
+    const timer = minutes * 60 * 1000 + seconds *1000//(minutes * seconds * ms) + (seconds * ms)
     if (id_games[id]===undefined){
         console.log("player 1 create the game");
         let player = new Game.Player(socket, socket_id, timer);

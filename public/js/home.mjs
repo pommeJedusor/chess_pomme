@@ -49,14 +49,52 @@ function stockfish_popup(){
     close_button.addEventListener("click", ()=>document.querySelector("#bot-parameters").remove());
 }
 
+function launch_game(){
+    const minutes = Number(document.querySelector("#minutes-game").value);
+    const seconds = Number(document.querySelector("#seconds-game").value);
+    if (seconds<0 || seconds>59 || minutes<0 || minutes>60){
+        alert("cadence invalide");
+        return;
+    }
+    const id_game = Math.floor(Math.random()*1000);
+    const url = "./game?id_game="+id_game+"&minutes="+minutes+"&seconds="+seconds;
+    location.href = url;
+}
+
+function create_game_popup(){
+    const popup = `
+    <div id="game-parameters">
+        <h2>Créer une partie</h2>
+        <form>
+            <h3>Choix de la cadence</h3>
+            <label for="minutes-game">minutes</label>
+            <input type="number" name="minutes-game" id="minutes-game" value="20" min="0" max="59">
+            <label for="seconds-game">minutes</label>
+            <input type="number" name="seconds-game" id="seconds-game" value="0" min="0" max="59">
+        </form>
+        <button id="launch-games-button">Lancer la partie</button>
+        <button id="close-button"></button>
+    </div>
+    `;
+    document.body.insertAdjacentHTML("afterbegin", popup);
+    const launch_game_button = document.querySelector("#launch-games-button");
+    launch_game_button.addEventListener("click", launch_game);
+    const close_button = document.querySelector("#close-button");
+    close_button.addEventListener("click", ()=>document.querySelector("#game-parameters").remove());
+}
+
 function main(){
     update_games();
     setInterval(update_games, 5000);
     const link_stockfish = document.querySelector("#stockfish-games > h3 > a:first-child");
-    console.log(link_stockfish);
     link_stockfish.addEventListener("click", (event)=>{
         event.preventDefault();
         stockfish_popup();
+    });
+    const link_game = document.querySelector("h2 > a");
+    link_game.addEventListener("click", (event)=>{
+        event.preventDefault();
+        create_game_popup();
     });
 }
 

@@ -57,7 +57,7 @@ a {
     color: var(--user-name);
 }
 /*bot parameters*/
-#bot-parameters {
+#bot-parameters, #game-parameters {
     display: flex;
     flex-direction: column;
     align-items: center;

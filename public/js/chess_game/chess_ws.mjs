@@ -6,9 +6,13 @@ import { chessboard } from "./chessboard.mjs";
 let player_number = [null];
 let events_listeners = [];
 let data_board;
+let timer_interval_id;
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 const level = /[?&]level=([0-9]|1[0-9]|20)(\&|$)/.test(location.search) ? location.search.match(/level=(\d\d?)(\&|$)/)[1] : 20;
 console.log(bot);
+
+function get_minutes(){return document.URL.match(/[?&]minutes=(\d*)/)[1];};
+function get_seconds(){return document.URL.match(/[?&]seconds=(\d*)/)[1];};
 
 function open(ws, bot=""){
     //against bot
@@ -19,10 +23,14 @@ function open(ws, bot=""){
         return;
     }
     //against other player
-    const match_result = document.URL.match(/(?<=(\?|\&)id_game=)\d*/);
-    if (!match_result)return
-    console.log("ID:"+match_result[0]);
-    ws.send("ID:"+match_result[0])
+    const id = document.URL.match(/[?&]id_game=(\d*)/)[1];
+    const minutes = get_minutes();
+    const seconds = get_seconds();
+    console.log("ID:"+id);
+    console.log("minutes:"+minutes);
+    console.log("seconds:"+seconds);
+    ws.send("ID:"+id+"|minutes:"+minutes+"|seconds:"+seconds);
+    init_timer(minutes, seconds)
 }
 
 function message(event, ws, player, events_listeners_red_squares){
@@ -48,6 +56,10 @@ function message(event, ws, player, events_listeners_red_squares){
     else if (/^S:/.test(event.data)){
         //if new game
         if (player){
+            //reset timer
+            if (timer_interval_id)clearInterval(timer_interval_id);
+            init_timer(get_minutes(), get_seconds());
+
             data_board = new Board.Board();
             chessboard(location.href, ws, data_board, player_number, events_listeners);
             chess_ws_html.switch_moves_buttons(ws);
@@ -59,7 +71,7 @@ function message(event, ws, player, events_listeners_red_squares){
         chess_html.update_board_sens(player);
 
         chess_ws_html.insert_message(false, result);
-        setInterval(()=>update_timer(data_board.moves), 1000);
+        timer_interval_id = setInterval(()=>update_timer(data_board.moves), 1000);
     }
     //if recieve message
     else if (/^M:/.test(event.data)){
@@ -81,12 +93,16 @@ function message(event, ws, player, events_listeners_red_squares){
     return player;
 }
 
-function send_move(){
-    const move = document.getElementById("move_text");
-    console.log("send: "+move.value);
-    ws.send(move.value);
-    move.value = "";
+function init_timer(minutes, seconds){
+    if (minutes.length===1)minutes = "0"+minutes;
+    if (seconds.length===1)seconds = "0"+seconds;
+    const timer = minutes+":"+seconds
+    const timer1 = document.querySelector("#timer1");
+    const timer2 = document.querySelector("#timer2");
+    timer1.textContent = timer;
+    timer2.textContent = timer;
 }
+
 function update_timer(moves){
     if (moves.length<2)return;
     const timer_el = document.getElementById("timer"+(moves.length%2+1));
