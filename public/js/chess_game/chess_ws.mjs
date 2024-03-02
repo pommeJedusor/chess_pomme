@@ -7,6 +7,9 @@ let player_number = [null];
 let events_listeners = [];
 let data_board;
 let timer_interval_id;
+let global_minutes = [null, null];
+let global_seconds = [null, null];
+let global_ms = [null, null];
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 const level = /[?&]level=([0-9]|1[0-9]|20)(\&|$)/.test(location.search) ? location.search.match(/level=(\d\d?)(\&|$)/)[1] : 20;
 console.log(bot);
@@ -71,7 +74,7 @@ function message(event, ws, player, events_listeners_red_squares){
         chess_html.update_board_sens(player);
 
         chess_ws_html.insert_message(false, result);
-        timer_interval_id = setInterval(()=>update_timer(data_board.moves), 1000);
+        timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
     }
     //if recieve message
     else if (/^M:/.test(event.data)){
@@ -101,22 +104,28 @@ function init_timer(minutes, seconds){
     const timer2 = document.querySelector("#timer2");
     timer1.textContent = timer;
     timer2.textContent = timer;
+    global_minutes = [Number(minutes), Number(minutes)];
+    global_seconds = [Number(seconds), Number(seconds)];
+    global_ms = [0, 0];
 }
 
-function update_timer(moves){
+function update_timer(moves, delay){
     if (moves.length<2)return;
-    const timer_el = document.getElementById("timer"+(moves.length%2+1));
-    const str_times = timer_el.textContent.split(":");
-    let minutes = Number(str_times[0]);
-    let seconds = Number(str_times[1]);
-    if (seconds!==0){
-        seconds--;
-        seconds = seconds<10 ? "0"+seconds : seconds;
-    }else if (minutes!==0){
-        minutes--;
-        seconds = 59;
+    const player_turn = moves.length%2;
+    const timer_el = document.getElementById("timer"+(player_turn+1));
+    if (global_ms[player_turn]!==0){
+        global_ms[player_turn]-=delay;
     }
-    const new_timer = minutes.toString()+":"+seconds;
+    else if (global_seconds[player_turn]!==0){
+        global_ms[player_turn] = 1000-delay;
+        global_seconds[player_turn]--;
+    }else if (global_minutes[player_turn]!==0){
+        global_minutes[player_turn]--;
+        global_seconds[player_turn] = 59;
+    }
+    const str_seconds = global_seconds[player_turn]<10 ? "0"+global_seconds[player_turn] : global_seconds[player_turn];
+    const str_minutes = global_minutes[player_turn]<10 ? "0"+global_minutes[player_turn] : global_minutes[player_turn];
+    const new_timer = str_minutes+":"+str_seconds;
     timer_el.textContent = new_timer;
 }
 
