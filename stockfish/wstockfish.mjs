@@ -51,9 +51,8 @@ async function join_game(socket, socket_id, msg, id_games, socket_games, sockets
     }
     
     const check_timeout_id = setInterval(function (){
-        const result = game.check_timeout(id_games, socket_games, sockets)
-        if (result){
-            sockets = result;
+        game.check_timeout(id_games, socket_games, sockets)
+        if (game.result){
             clearInterval(check_timeout_id);
         }
     }, 1000);
