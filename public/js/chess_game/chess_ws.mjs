@@ -18,22 +18,22 @@ function get_minutes(){return document.URL.match(/[?&]minutes=(\d*)/)[1];};
 function get_seconds(){return document.URL.match(/[?&]seconds=(\d*)/)[1];};
 
 function open(ws, bot=""){
+    const minutes = get_minutes();
+    const seconds = get_seconds();
+    init_timer(minutes, seconds)
     //against bot
     console.log(bot);
     if (bot.length!==0){
         console.log(bot+level);
-        ws.send(bot+level);
+        ws.send(bot+level+"|minutes:"+minutes+"|seconds:"+seconds);
         return;
     }
     //against other player
     const id = document.URL.match(/[?&]id_game=(\d*)/)[1];
-    const minutes = get_minutes();
-    const seconds = get_seconds();
     console.log("ID:"+id);
     console.log("minutes:"+minutes);
     console.log("seconds:"+seconds);
     ws.send("ID:"+id+"|minutes:"+minutes+"|seconds:"+seconds);
-    init_timer(minutes, seconds)
 }
 
 function message(event, ws, player, events_listeners_red_squares){

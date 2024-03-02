@@ -19,7 +19,9 @@ async function join_game(socket, socket_id, msg, id_games, socket_games, sockets
         }
     }
     //const id = msg.match(/(?<=ID:)\d*$/)[0];
-    const timer = 20 * 60 * 1000 //minutes * seconds * ms
+    const minutes = Number(msg.match(/minutes:(\d*)\|/)[1]);
+    const seconds = Number(msg.match(/seconds:(\d*)$/)[1]);
+    const timer = minutes * 60 * 1000 + seconds * 1000 //minutes * seconds * ms + (seconds * ms)
     if (id_games[id]!==undefined){
         socket.send("E:la partie est déjà complète");
         return;
@@ -39,7 +41,7 @@ async function join_game(socket, socket_id, msg, id_games, socket_games, sockets
         game.player_2.socket.send("S:2");
         const move = await get_stockfish_move(game);
         socket.send(move);
-        game.moves.push(move);
+        game.moves.push(new Game.Move(move, Date.now(), 1));
     }
     else {
         game.player_1 = player;
@@ -119,11 +121,13 @@ async function controller(sockets, socket_games, id_games, socket, socket_id, ms
                 sockets = game.finish(null, "par pat", id_games, socket_games, sockets);
             }
             other_player.draw_proposal = false;//reset draw proposal
-            const stockfish_move = await get_stockfish_move(game, bot_level);
             if (game.result)return;
-            socket.send(stockfish_move);
+            const stockfish_move_notation = await get_stockfish_move(game, bot_level);
+            const stockfish_move = new Game.Move(stockfish_move_notation, Date.now(), player_turn%2+1)
+            socket.send(stockfish_move_notation);
             game.moves.push(stockfish_move);
-            if (stockfish_move.endsWith("#")){
+            other_player.total_timestamp-= game.moves.length<=2 ? 0 : stockfish_move.timestamp - game.moves.at(-2).timestamp;
+            if (stockfish_move_notation.endsWith("#")){
                 sockets = game.finish(other_player, "par mat", id_games, socket_games, sockets);
             }
         }else socket.send("E:C'est au tour de l'autre joueur");

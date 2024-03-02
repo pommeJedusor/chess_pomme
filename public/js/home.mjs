@@ -22,10 +22,10 @@ async function update_games(){
 }
 
 function launch_stockfish_game(){
-    const bot_level_input = document.querySelector("#bot-level");
-    if (!bot_level_input)return;
-    const bot_level = bot_level_input.value;
-    const url = "./stockfish?level="+bot_level;
+    const bot_level = document.querySelector("#bot-level").value;
+    const minutes = Number(document.querySelector("#minutes-game").value);
+    const seconds = Number(document.querySelector("#seconds-game").value);
+    const url = "./stockfish?level="+bot_level+"&minutes="+minutes+"&seconds="+seconds;
     location.href = url;
 }
 
@@ -37,6 +37,11 @@ function stockfish_popup(){
             <p>Level : <span id="level-bot">10</span></p>
             <label>Choix du level</label>
             <input type="range" name="" id="bot-level" min="0" max="20" oninput="document.querySelector('#level-bot').textContent=document.querySelector('#bot-level').value">
+            <h3>Choix de la cadence</h3>
+            <label for="minutes-game">minutes</label>
+            <input type="number" name="minutes-game" id="minutes-game" value="20" min="0" max="59">
+            <label for="seconds-game">minutes</label>
+            <input type="number" name="seconds-game" id="seconds-game" value="0" min="0" max="59">
         </form>
         <button id="stockfish-games-button">Lancer la partie</button>
         <button id="close-button"></button>

@@ -58,6 +58,7 @@ class Game{
         //if game finished
         if (!current_player)return;
         const total_timestamp = current_player.total_timestamp - (this.moves.length<2 ? 0 : Date.now() - this.moves.at(-2).timestamp);
+        console.log(total_timestamp);
         if (total_timestamp<=0){
             const winner = this.player_1===current_player ? this.player_2 : this.player_1;
             this.finish(winner, "time out", id_games, socket_games, sockets);
