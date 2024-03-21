@@ -81,6 +81,8 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
                 if (result){
                     sockets = result;
                     clearInterval(check_timeout_id);
+                }else if (game.result){
+                    clearInterval(check_timeout_id);
                 }
             }, 1000);
         }
