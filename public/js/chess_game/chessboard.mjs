@@ -8,6 +8,11 @@ let cursor_y = 0;
 let player_number = [];
 let events_listeners = [];
 
+function moveMouse(e){
+    cursor_x = e.pageX;
+    cursor_y = e.pageY;
+}
+let messageSend = null;
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
     html_chess.reset_red_squares(events_listeners);
@@ -184,17 +189,17 @@ function chessboard(href, ws ,data_board, player_num, events){
     const board = document.querySelector("#chessboard");
     if (!board)return;
     make_board(board, data_board, ws);
-    document.addEventListener("mousemove", function (e){
-        cursor_x = e.pageX;
-        cursor_y = e.pageY;
-    })
+    document.removeEventListener("mousemove", moveMouse);
+    document.addEventListener("mousemove", moveMouse);
     //send messages
-    document.querySelector("#message-form > input[type=submit]").addEventListener("click", function (){
+    document.querySelector("#message-form > input[type=submit]").removeEventListener("click", messageSend);
+    messageSend = ()=>{
         const message_input = document.querySelector("#send-message");
         const message = message_input.value;
         message_input.value = "";
-        ws.send("M:Anonyme|"+message);
-    });
+        if (message!=="")ws.send("M:Anonyme|"+message);
+    }
+    document.querySelector("#message-form > input[type=submit]").addEventListener("click", messageSend);
     html_chess.event_moves_buttons(ws);
 }
 export { chessboard };
