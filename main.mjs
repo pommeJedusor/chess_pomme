@@ -23,11 +23,14 @@ function get_waiting_games(number=10){
 	let results = [];
 	id_games.forEach((game, key)=>{
 		if (game && game.player_1 && !game.player_2){
+			console.log(id_games[key].player_1.total_timestamp)
 			results.push(key);
 		}
 		if (results.length>=number)return;
 	});
-	return results;
+	const seconds_from_timestamp = (timestamp)=>(timestamp/1000)%60;
+	const minutes_from_timestamp = (timestamp)=>(timestamp/60000);
+	return results.map((value)=>[value, `./game?id_game=${value}&minutes=${minutes_from_timestamp(id_games[value].player_1.total_timestamp)}&seconds=${seconds_from_timestamp(id_games[value].player_1.total_timestamp)}`]);
 }
 
 const server = http.createServer(function (req, res){
