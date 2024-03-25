@@ -14,8 +14,8 @@ async function update_games(){
     const games_section = document.querySelector("#waiting-games");
     for (const game of games){
         let game_a = document.createElement("a");
-        game_a.textContent = "partie numero : "+game;
-        game_a.href = "./game?id_game="+game;
+        game_a.textContent = "partie numero : "+game[0];
+        game_a.href = game[1];
         game_a.classList.add("waiting-game")
         games_section.insertAdjacentElement("beforeend", game_a);
     }
