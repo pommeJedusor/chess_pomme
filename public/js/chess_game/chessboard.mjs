@@ -149,22 +149,20 @@ function make_board(board, data_board, ws){
         board.insertAdjacentElement('beforeend', rank);
     }
     //pieces
-    let type;
+    const piece_set = html_chess.get_piece_set();
     for (let y=0;y<8;y++){
         for (let x=0;x<8;x++){
+            //add the piece
             const square = data_board.board[y][x];
             if (!square)continue;
-            if (square.type==="P")type="pawn";
-            if (square.type==="K")type="king";
-            if (square.type==="Q")type="queen";
-            if (square.type==="R")type="rook";
-            if (square.type==="N")type="knight";
-            if (square.type==="B")type="bishop";
             const piece = document.createElement("div");
-            piece.classList.add("piece", type);
+            piece.classList.add("piece");
+            //add the piece svg
+            const piece_color = square.color===WHITE ? "b" : "w";
+            const piece_img = document.createElement("img");
+            piece_img.src = `./piece/${piece_set}/${piece_color}${square.type}.svg`;
+            piece.insertAdjacentElement("beforeend", piece_img);
             //y is invered in the data_board
-            if (square.color!==WHITE)piece.classList.add("white");
-            else piece.classList.add("black");
             piece.draggable = true;
             piece.addEventListener("mousedown", function (e){
                 const piece_origin_pos = piece.getBoundingClientRect();

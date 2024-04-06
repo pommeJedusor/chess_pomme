@@ -119,17 +119,25 @@ function reset_red_squares(events_listeners){
 //makes changes on the html board for special moves (castle, promotion, en-passant)
 function special_change(the_move, piece_to_move, data_board){
         const notation_move = the_move.get_notation_move();
-        //castle
         if (/^O-O(-O)?[#+]?$/.test(notation_move)){
+            //castle
             const y = data_board.moves.length%2===0 ? 0 : 7;
             const x = /O-O-O/.test(notation_move) ? 0 : 7;
             const target_x = x===0 ? 3 : 5;
             move_piece(x, y, target_x, y);
         }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
+            //promotion
+            //update the class
             piece_to_move.classList.remove("pawn");
             const type_pieces = ["Q", "R", "B", "N"];
             const class_pieces = ["queen", "rook", "bishop", "knight"];
             piece_to_move.classList.add(class_pieces[type_pieces.indexOf(the_move.promotion[1])]);
+            //update the img
+            const piece_set = get_piece_set();
+            const piece_img = piece_to_move.querySelector("img");
+            const piece_color = the_move.target_y===7 ? "w" : "b";
+            piece_img.src = `./piece/${piece_set}/${piece_color}${the_move.promotion[1]}.svg`;
+            console.log(the_move);
         }else if (the_move.piece==="P" && the_move.is_taking && data_board.board[the_move.target_y][the_move.target_x]===0){
             //if en-passant
             get_html_piece(the_move.target_x, the_move.y).remove();
@@ -164,6 +172,11 @@ function event_moves_buttons(ws){
     })
 }
 
+function get_piece_set(){
+    return  "cburnett";
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, insert_move,
          get_width_squares, close_end_message, remove_draw_proposal, invert_board,
-         update_board_sens, reset_red_squares, special_change, event_moves_buttons };
+         update_board_sens, reset_red_squares, special_change, event_moves_buttons,
+         get_piece_set };
