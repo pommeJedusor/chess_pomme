@@ -60,7 +60,7 @@ function draws(socket, socket_id, msg, id_games, socket_games, sockets){
     if (/^DP$/.test(msg)){
         if (current_player.draw_proposal===false){
             if (other_player.draw_proposal===true){
-                game.finish(null, "par accord mutuel", id_games, socket_games, sockets);
+                game.finish(null, "mutual agreement", id_games, socket_games, sockets);
             }
             current_player.draw_proposal = true;
             current_player.socket.send("E:vous avez proposé nulle");
@@ -82,7 +82,7 @@ function draws(socket, socket_id, msg, id_games, socket_games, sockets){
     //draw accept
     else if (/^DA$/.test(msg)){
         if (other_player.draw_proposal){
-            game.finish(null, "par accord mutuel", id_games, socket_games, sockets)
+            game.finish(null, "mutual agreement", id_games, socket_games, sockets)
         }else {
             current_player.socket.send("E:pas d'offre de nulle valide pour le moment");
         }

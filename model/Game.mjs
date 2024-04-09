@@ -25,7 +25,8 @@ async function get_all_games(){
     SELECT id, white_player, black_player, pgn, winner,
     DATE_FORMAT(date, "%d/%m/%y %H:%i") AS date,
     status
-    FROM chess_game ORDER BY date DESC;`;
+    FROM chess_game
+    ORDER BY date DESC, id DESC;`;
     const rows = await con.query(sql);
 
     await con.end();

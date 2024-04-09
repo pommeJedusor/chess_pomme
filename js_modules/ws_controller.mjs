@@ -10,10 +10,10 @@ function close(sockets, socket_games, id_games, socket, socket_id){
     //if game was still playing
     if (game.player_1 && game.player_2 && !game.result){
         if (game.player_1.socket===socket){
-            game.finish(game.player_2, "the other player quit", id_games, socket_games, sockets);
+            game.finish(game.player_2, "by quit", id_games, socket_games, sockets);
             game.player_1 = null;
         }else{
-            game.finish(game.player_1, "the other player quit", id_games, socket_games, sockets);
+            game.finish(game.player_1, "by quit", id_games, socket_games, sockets);
             game.player_2 = null;
         }
     }
@@ -132,7 +132,7 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
             return;
         }
         const other_player = game.player_2.socket_id===socket_id ? game.player_1 : game.player_2;
-        game.finish(other_player, "par abandon", id_games, socket_games, sockets);
+        game.finish(other_player, "resign", id_games, socket_games, sockets);
     }
     else{
         let game = socket_games[socket_id];
@@ -150,16 +150,16 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
             current_player.total_timestamp-= game.moves.length<=2 ? 0 : move.timestamp - game.moves.at(-2).timestamp;
             if (current_player.total_timestamp<=0){
                 const winner = game.player_1===current_player ? game.player_2 : game.player_1;
-                game.finish(winner, "time out", id_games, socket_games, sockets);
+                game.finish(winner, "timeout", id_games, socket_games, sockets);
                 return;
             }
             (current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
             if (msg[msg.length-1]==="#"){
                 const winner = current_player;
-                game.finish(winner, "par mat", id_games, socket_games, sockets);
+                game.finish(winner, "checkmate", id_games, socket_games, sockets);
             }
             else if (game.board.get_every_moves().length===0){
-                game.finish(null, "par pat", id_games, socket_games, sockets);
+                game.finish(null, "stalemate", id_games, socket_games, sockets);
             }
             other_player.draw_proposal = false;//reset draw proposal
         }else socket.send("E:C'est au tour de l'autre joueur");

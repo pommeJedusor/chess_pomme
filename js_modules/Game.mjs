@@ -41,7 +41,7 @@ class Game{
 
         //insert in db
         const winner_db = this.result === "D" ? "draw" : "W" ? "white" : "black";
-        ModelGame.insert_game(this.get_pgn(), winner_db, "checkmate");
+        ModelGame.insert_game(this.get_pgn(), winner_db, message);
     }
     close(id_games, socket_games, sockets){
         const do_player_1 = this.player_1 && this.player_1.socket;
@@ -66,7 +66,7 @@ class Game{
         console.log(total_timestamp);
         if (total_timestamp<=0){
             const winner = this.player_1===current_player ? this.player_2 : this.player_1;
-            this.finish(winner, "time out", id_games, socket_games, sockets);
+            this.finish(winner, "timeout", id_games, socket_games, sockets);
         }
         console.log("pgn")
         console.log(this.get_pgn());

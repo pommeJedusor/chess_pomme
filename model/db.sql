@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS `chess_game` (
     `pgn` TEXT,
     `winner` ENUM('white', 'black', 'draw', 'still playing') NOT NULL,
     `date` TIMESTAMP DEFAULT NOW() NOT NULL,
-    `status` ENUM('checkmate', 'timeout', 'resign', 'by quit', 'mutual agreement', 'unsificient material', 'unsificient material and timeout')
+    `status` ENUM('checkmate', "stalemate", 'timeout', 'resign', 'by quit', 'mutual agreement', 'unsificient material', 'unsificient material and timeout')
 );
