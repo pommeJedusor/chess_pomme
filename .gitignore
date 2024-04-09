@@ -1,2 +1,4 @@
 node_modules/
+package-lock.json
 stockfish/stockfish
+config.json

@@ -1,11 +1,12 @@
 import fs from "fs";
 import http from "http";
 import * as ws from "ws";
+import * as ejs from "ejs";
 
-import * as Game from "./js_modules/Game.mjs";
 import * as ws_chess from "./js_modules/ws.mjs";
 import * as wstockfish from "./stockfish/wstockfish.mjs";
 import * as ws_controller from "./js_modules/ws_controller.mjs";
+import * as Game from "./model/Game.mjs";
 
 const port = 8080;
 
@@ -54,6 +55,15 @@ const server = http.createServer(function (req, res){
 		case "/get_games":
 			const games = get_waiting_games();
 			return_http_result(res, 200, {'Content-Type':'json'}, JSON.stringify(games));
+			return
+		case "/old_games":
+			async function send_response(){
+				const old_games = await Game.get_all_games();
+				const htmlContent = fs.readFileSync('./views/old_games.ejs', 'utf8');
+				const htmlRenderized = ejs.render(htmlContent, {filename: 'old_games.ejs', test: 'pomme', games: old_games});
+				return_http_result(res, 200, {'Content-Type':'text/html'}, htmlRenderized);
+			}
+			send_response();
 			return
 		case "/js/chess_game/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){
