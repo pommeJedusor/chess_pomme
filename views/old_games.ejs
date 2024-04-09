@@ -15,13 +15,13 @@
             <h2><span><%=game.white_player || "Anonyme"%></span> avec les blancs contre <span><%=game.black_player || "Anonyme"%></span> avec les noirs</h2>
             <% if (game.winner=="white") { %>
                 <!--if white victory-->
-                <h3>Victoire de <span><%=game.white_player || "Anonyme"%></span> avec les blancs par mat.</h3>
+                <h3>Victoire de <span><%=game.white_player || "Anonyme"%></span> avec les blancs par <%=game.status%>.</h3>
             <% } else if (game.winner=="black") { %>
                 <!--if black victory-->
-                <h3>Victoire de <span><%=game.black_player || "Anonyme"%></span> avec les noirs par mat.</h3>
+                <h3>Victoire de <span><%=game.black_player || "Anonyme"%></span> avec les noirs par <%=game.status%>.</h3>
             <% } else if (game.winner=="draw") { %>
                 <!--if draw-->
-                <h3>matche nulle <span> par accord mutuel.</h3>
+                <h3>matche nulle <span> <%=game.status%>.</h3>
             <% } %>
             <!-- date of the game -->
             <h3>Le <%=game.date%></h3>

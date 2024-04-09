@@ -60,7 +60,7 @@ const server = http.createServer(function (req, res){
 			async function send_response(){
 				const old_games = await Game.get_all_games();
 				const htmlContent = fs.readFileSync('./views/old_games.ejs', 'utf8');
-				const htmlRenderized = ejs.render(htmlContent, {filename: 'old_games.ejs', test: 'pomme', games: old_games});
+				const htmlRenderized = ejs.render(htmlContent, {filename: 'old_games.ejs', games: old_games});
 				return_http_result(res, 200, {'Content-Type':'text/html'}, htmlRenderized);
 			}
 			send_response();
