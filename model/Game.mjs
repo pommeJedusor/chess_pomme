@@ -21,7 +21,11 @@ class Game{
 
 async function get_all_games(){
     const con = await pool.getConnection();
-    const sql = "SELECT * FROM `chess_game` ORDER BY `date` ASC;";
+    const sql = `
+    SELECT id, white_player, black_player, pgn, winner,
+    DATE_FORMAT(date, "%d/%m/%y %H:%i") AS date,
+    status
+    FROM chess_game ORDER BY date DESC;`;
     const rows = await con.query(sql);
 
     await con.end();

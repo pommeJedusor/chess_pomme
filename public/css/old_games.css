@@ -1,0 +1,16 @@
+#old-games-header {
+    width: 80%;
+    margin: auto;
+}
+.old-game {
+    width: 80%;
+    margin: auto;
+    margin-bottom: 3em;
+    margin-top: 3em;
+}
+.old-game span {
+    color: var(--user-name);
+}
+.old-game span:hover {
+    cursor: pointer;
+}
