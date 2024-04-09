@@ -5,7 +5,8 @@ const pool = mariadb.createPool({
     host: config.host, 
     user: config.user, 
     password: config.password,
-    database: config.database
+    database: config.database,
+    port: config.port
 });
 
 class Game{
@@ -42,4 +43,11 @@ async function get_all_games(){
     return games;
 }
 
-export { get_all_games };
+async function insert_game(pgn, winner, status){
+    const con = await pool.getConnection();
+    const sql = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`) VALUES(?,?,?)";
+    const rows = await con.query(sql, [pgn, winner, status]);
+    console.log(rows);
+}
+
+export { get_all_games, insert_game };

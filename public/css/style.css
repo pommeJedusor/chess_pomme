@@ -96,6 +96,9 @@ a {
     transition-property: all;
     transition-timing-function: linear;
 }
+.piece:hover {
+    cursor: pointer;
+}
 .piece > img {
     width: 100%;
     height: 100%;
