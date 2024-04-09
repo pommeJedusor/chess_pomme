@@ -1,4 +1,5 @@
 import * as Board from "./Board.mjs";
+import * as ModelGame from "../model/Game.mjs";
 
 const STOCKFISH = -1
 
@@ -37,6 +38,10 @@ class Game{
             if (this.player_2 && this.player_2.socket)this.player_2.socket.send("R:W:"+message);
             this.result = "L";
         }
+
+        //insert in db
+        const winner_db = this.result === "D" ? "draw" : "W" ? "white" : "black";
+        ModelGame.insert_game(this.get_pgn(), winner_db, "checkmate");
     }
     close(id_games, socket_games, sockets){
         const do_player_1 = this.player_1 && this.player_1.socket;
@@ -63,6 +68,19 @@ class Game{
             const winner = this.player_1===current_player ? this.player_2 : this.player_1;
             this.finish(winner, "time out", id_games, socket_games, sockets);
         }
+        console.log("pgn")
+        console.log(this.get_pgn());
+    }
+    get_pgn(){
+        let pgn = "";
+        for (let i=0;i<this.moves.length;i++){
+            console.log(this.moves[i].move)
+            const move = this.moves[i].move;
+            if (i)pgn+=" ";
+            if (i%2===0)pgn+=`${i+1}. `;
+            pgn+=move;
+        }
+        return pgn;
     }
 }
 
