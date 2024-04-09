@@ -41,3 +41,5 @@ async function get_all_games(){
 
     return games;
 }
+
+export { get_all_games };
