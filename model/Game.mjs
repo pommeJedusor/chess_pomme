@@ -5,7 +5,8 @@ const pool = mariadb.createPool({
     host: config.host, 
     user: config.user, 
     password: config.password,
-    database: config.database
+    database: config.database,
+    port: config.port
 });
 
 class Game{
