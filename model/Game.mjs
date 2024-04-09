@@ -43,4 +43,11 @@ async function get_all_games(){
     return games;
 }
 
-export { get_all_games };
+async function insert_game(pgn, winner, status){
+    const con = await pool.getConnection();
+    const sql = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`) VALUES(?,?,?)";
+    const rows = await con.query(sql, [pgn, winner, status]);
+    console.log(rows);
+}
+
+export { get_all_games, insert_game };
