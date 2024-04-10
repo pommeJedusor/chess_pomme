@@ -370,3 +370,23 @@ span.user-name {
         margin-bottom: 4vw;
     }
 }
+/*old games*/
+#old-games-header {
+    width: 80%;
+    margin: auto;
+}
+#old-games-page .old-game {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.old-game {
+    margin-bottom: 3em;
+    margin-top: 3em;
+}
+.old-game span {
+    color: var(--user-name);
+}
+.old-game span:hover {
+    cursor: pointer;
+}

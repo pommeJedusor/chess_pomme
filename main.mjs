@@ -40,10 +40,13 @@ const server = http.createServer(function (req, res){
 
 	switch (parameters){
 		case "/":
-			fs.readFile("./public/html/index.html",function(err, data){
-				if (err)return_http_error(400, res, "file not found");
-				else return_http_result(res, 200, {'Content-Type':'text/html'}, data);
-			})
+			async function send_response_home(){
+				const old_games = await Game.get_all_games(5);
+				const htmlContent = fs.readFileSync('./views/home.ejs', 'utf8');
+				const htmlRenderized = ejs.render(htmlContent, {filename: 'home.ejs', games: old_games});
+				return_http_result(res, 200, {'Content-Type':'text/html'}, htmlRenderized);
+			}
+			send_response_home();
 			return
 		case "/stockfish":
 		case "/game":

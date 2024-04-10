@@ -77,7 +77,7 @@ class Game{
             console.log(this.moves[i].move)
             const move = this.moves[i].move;
             if (i)pgn+=" ";
-            if (i%2===0)pgn+=`${i+1}. `;
+            if (i%2===0)pgn+=`${Math.floor(i/2)+1}. `;
             pgn+=move;
         }
         return pgn;
