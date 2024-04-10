@@ -19,14 +19,16 @@ class Game{
     status;
 }
 
-async function get_all_games(){
+async function get_all_games(limit=Infinity){
     const con = await pool.getConnection();
+    const limit_sql = limit===Infinity ? "" : ` LIMIT ${limit}`;
     const sql = `
     SELECT id, white_player, black_player, pgn, winner,
     DATE_FORMAT(date, "%d/%m/%y %H:%i") AS date,
     status
     FROM chess_game
-    ORDER BY date DESC, id DESC;`;
+    ORDER BY date DESC, id DESC
+    ${limit_sql};`;
     const rows = await con.query(sql);
 
     await con.end();
