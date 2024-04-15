@@ -21,8 +21,10 @@ class Game{
 }
 
 async function get_all_games(limit=Infinity){
+    let conn;
+    let games = [];
     try {
-        const con = await pool.getConnection();
+        conn = await pool.getConnection();
         const limit_sql = limit === Infinity ? "" : ` LIMIT ${limit}`;
         const sql = `
             SELECT id, white_player, black_player, pgn, winner,
@@ -32,10 +34,9 @@ async function get_all_games(limit=Infinity){
             ORDER BY date DESC, id DESC
             ${limit_sql};
         `;
-        const rows = await con.query(sql);
-        con.release();
+        const rows = await conn.query(sql);
 
-        const games = rows.map((row)=>{
+        games = rows.map((row)=>{
             let game = new Game();
 
             game.id = row["id"];
@@ -48,19 +49,26 @@ async function get_all_games(limit=Infinity){
 
             return game;
         });
-        return games;
     }catch (error){
         console.error("Error retrieving games:", error);
-        return [];
+    }finally {
+        if (conn)conn.release();
+        return games;
     }
 }
 
 async function insert_game(pgn, winner, status){
-    const con = await pool.getConnection();
-    const sql = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`) VALUES(?,?,?)";
-    const rows = await con.query(sql, [pgn, winner, status]);
-    con.release()
-    console.log(rows);
+    let conn;
+    try {
+        const con = await pool.getConnection();
+        const sql = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`) VALUES(?,?,?)";
+        await con.query(sql, [pgn, winner, status]);
+    }catch (error) {
+        console.error("Error insering game:", error);
+        console.log(`pgn: ${pgn}`);
+    }finally {
+        if (conn)conn.release();
+    }
 }
 
 export { get_all_games, insert_game };
