@@ -8,11 +8,24 @@ const KNIGHT:string = "N";
 const QUEEN:string = "Q";
 const COLUMNS:string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
+type square = Piece | 0;
+type boardDatas = square[][];
+type color = 0|1
+type dir = number[];
+type dirs = dir[];
+
+interface piece{
+    x:number;
+    y:number;
+    color:color;
+    type:string;
+}
+
 function get_square(x:number, y:number):string{
     return COLUMNS[x] + (y+1);
 }
 
-function check_move_append(moves:Move[], pattern:string|RegExp, player:number):boolean{
+function check_move_append(moves:Move[], pattern:string|RegExp, player:color):boolean{
     if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
 
     for (let i = player;i<moves.length;i+=2){
@@ -21,66 +34,78 @@ function check_move_append(moves:Move[], pattern:string|RegExp, player:number):b
     return false;
 }
 
-function get_pieces(board, condition, deep=0){
+function get_pieces(board:boardDatas, condition:(square: square)=>boolean, deep:number=0):square[]{
     if (deep===board.length)return [];
-    const line = board[deep];
-    const line_pieces = line.filter(condition)
+    const line:square[] = board[deep];
+    const line_pieces:square[] = line.filter(condition)
     return line_pieces.concat(get_pieces(board, condition, deep+1));
 }
 
-function is_valid_square(x, y){
+function is_valid_square(x:number, y:number):boolean{
     if (x<0 || y<0 || x>7 || y>7)return false;
     return true;
 }
 
-function dir_to_square(old_x, old_y, dir, board){
+function dir_to_square(old_x:number, old_y:number, dir:dir, board:boardDatas):(number|boolean)[]{
     const x = old_x+dir[0];
     const y = old_y+dir[1];
     return [x, y, board[y][x]!==0];
 }
 
-function get_dirs_knight_king(piece, board, dirs){
-    const filter_square = function (piece, board, dir){
-        const target_x = piece.x+dir[0];
-        const target_y = piece.y+dir[1];
+function get_dirs_knight_king(piece:Piece, board:boardDatas, dirs:dirs):(number|boolean)[][]{
+    const filter_square = function (piece:Piece, board:boardDatas, dir:dir):boolean{
+        const target_x:number = piece.x+dir[0];
+        const target_y:number = piece.y+dir[1];
         if (!is_valid_square(target_x, target_y))return false;
-        const target_square = board[target_y][target_x];
+        const target_square:square = board[target_y][target_x];
         return target_square===0 || target_square.color!==piece.color;
     }
-    const get_dirs = function (piece, board, dirs){
+    const get_dirs = function (piece:Piece, board:boardDatas, dirs:dirs):dirs{
         return dirs.filter((dir)=>filter_square(piece, board, dir));
     }
-    const good_dirs = get_dirs(piece, board, dirs)
-    const squares = good_dirs.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
+    const good_dirs:dirs = get_dirs(piece, board, dirs)
+    const squares:(number|boolean)[][] = good_dirs.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
 
     return squares;
 }
 
-function get_dir_qrb(color, old_x, old_y, board, dir, deep=1){
-    const x = old_x+dir[0]*deep;
-    const y = old_y+dir[1]*deep;
+function get_dir_qrb(color:color, old_x:number, old_y:number, board:boardDatas, dir:dir, deep:number=1):dirs{
+    const x:number = old_x+dir[0]*deep;
+    const y:number = old_y+dir[1]*deep;
     if (!is_valid_square(x, y))return [];
     if (board[y][x]===0)return [[x, y]].concat(get_dir_qrb(color, old_x, old_y, board, dir, deep+1));
     if (board[y][x].color!==color)return [[x, y]];
     return [];
 }
+
 //get the directions for the queen, the rook and the bishop
-function get_dirs_qrb(piece, board, dirs){
-    const good_dirs = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
-    const good_dirs_filtered = good_dirs.filter((dir)=>dir.length>0);
+function get_dirs_qrb(piece:Piece, board:boardDatas, dirs:dirs):(number|boolean)[][]{
+    const good_dirs:dirs[] = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
+    const good_dirs_filtered:dirs[] = good_dirs.filter((dir)=>dir.length>0);
     //concat
-    let final_dirs = [];
+    let final_dirs:dirs = [];
     for (const dirs of good_dirs_filtered){
         for (const dir of dirs){
             final_dirs.push(dir);
         }
     }
-    const squares = final_dirs.map((dir)=>dir_to_square(0, 0, dir, board));
+    const squares:(number|boolean)[][] = final_dirs.map((dir)=>dir_to_square(0, 0, dir, board));
     return squares;
 }
 
 class Move{
-    constructor(piece, current_x, current_y, target_x, target_y, is_taking=false){
+    piece:string;
+    x:number;
+    y:number;
+    target_x:number;
+    target_y:number;
+    is_taking:boolean;
+    is_check:boolean;
+    is_mate:boolean;
+    is_draw:boolean;
+    precision:string;
+    promotion:string;
+    constructor(piece:string, current_x:number, current_y:number, target_x:number, target_y:number, is_taking:boolean=false){
         this.piece = piece;
         this.x = current_x;
         this.y = current_y;
@@ -93,22 +118,22 @@ class Move{
         this.precision = "";//if two piece of the same type can go on the same square
         this.promotion = "";
     }
-    get_target_square(){
+    get_target_square():string{
         return get_square(this.target_x, this.target_y);
     }
-    get_piece_notation(){
+    get_piece_notation():string{
         if (this.piece===PAWN && !this.is_taking)return "";
         else if (this.piece===PAWN)return COLUMNS[this.x];
         return this.piece;
     }
-    get_notation_move(){
-        const piece = this.get_piece_notation();
-        const precision = this.precision;
-        const taking = this.is_taking ? "x" : "";
-        const target_square = this.get_target_square();
-        const promotion = this.promotion;
-        const check = this.is_check ? "+" : "";
-        const mate = this.is_mate ? "#" : "";
+    get_notation_move():string{
+        const piece:string = this.get_piece_notation();
+        const precision:string = this.precision;
+        const taking:string = this.is_taking ? "x" : "";
+        const target_square:string = this.get_target_square();
+        const promotion:string = this.promotion;
+        const check:string = this.is_check ? "+" : "";
+        const mate:string = this.is_mate ? "#" : "";
         //check if castle
         if (this.piece===KING && this.target_x===this.x-2){
             return "O-O-O"+check+mate;
@@ -120,14 +145,18 @@ class Move{
 }
 
 class Board{
+    board:boardDatas;
+    moves:Move[];
+
     constructor(){
         this.board = this.get_new_board();
         this.moves = [];
     }
-    see_board(){
-        for (let i=this.board.length-1;i>=0;i--){
-            let text = "";
-            const squares = this.board[i];
+
+    see_board():void{
+        for (let i:number=this.board.length-1;i>=0;i--){
+            let text:string = "";
+            const squares:square[] = this.board[i];
             for (const square of squares){
                 if (square===0)text+=" ";
                 else text+=square.type;
@@ -135,19 +164,19 @@ class Board{
             console.log(text);
         }
     }
-    get_new_board(){
-        let board = [];
+    get_new_board():boardDatas{
+        let board:boardDatas = [];
         for (let i=0;i<8;i++){
-            let line = [];
-            for (let i=0;i<8;i++){
+            let line:square[] = [];
+            for (let i:number=0;i<8;i++){
                 line.push(0);
             }
             board.push(line);
         }
 
-        let pieces = [];
+        let pieces:Piece[] = [];
         //pawns
-        for (let i=0;i<8;i++){
+        for (let i:number=0;i<8;i++){
             pieces.push(new Pawn(i, 1, WHITE), new Pawn(i, 6, BLACK));
         }
         //queen
@@ -169,30 +198,33 @@ class Board{
         }
         return board;
     }
-    check_move_append(pattern, player){
+
+    check_move_append(pattern:string|RegExp, player:color):boolean{
         return check_move_append(this.moves, pattern, player);
     }
-    get_every_moves(deep=0){
-        let moves = [];
+
+    get_every_moves(deep:number=0):Move[]{
+        let moves:Move[] = [];
         for (const squares of this.board){
             for (const square of squares){
                 if (square===0 || square.color!==this.moves.length%2)continue;
                 moves.push(...square.get_moves(this.board, square, this.moves, deep));
             }
         }
-        let moves_hashtable = [];
+
+        let moves_hashtable:Record<string, Move[]> = {};
         for (const move of moves){
-            const notation = move.get_notation_move();
+            const notation:string = move.get_notation_move();
             if (!moves_hashtable[notation])moves_hashtable[notation]=[move];
             else moves_hashtable[notation].push(move);
         }
         for (const [notation, moves] of Object.entries(moves_hashtable)) {
             if (moves.length<2)continue;
-            for (let i=0;i<moves.length;i++){
-                const move = moves_hashtable[notation][i];
-                let same_column = false;
-                let same_line = false;
-                for (let j=0;j<moves.length;j++){
+            for (let i:number=0;i<moves.length;i++){
+                const move:Move = moves_hashtable[notation][i];
+                let same_column:boolean = false;
+                let same_line:boolean = false;
+                for (let j:number=0;j<moves.length;j++){
                     if (j===i)continue;
                     if (moves[i].x===moves[j].x)same_column=true;
                     if (moves[i].y===moves[j].y)same_line=true;
@@ -206,15 +238,22 @@ class Board{
     }
 }
 
-class Piece{
-    constructor(x, y, color, type){
+class Piece implements piece{
+    x:number;
+    y:number;
+    color:color;
+    type:string;
+    constructor(x:number, y:number, color:color, type:string){
         this.x = x;
         this.y = y;
         this.color = color;
         this.type = type;
     }
-    is_legal_move(board, move, moves, deep){
+    is_legal_move(board:boardDatas, move:Move, moves:square[], deep:number){
         const piece = board[move.y][move.x];
+        //check if there is a piece to move
+        if (piece===0)return;
+
         const new_board = piece.do_move(board, move, this.edit_func);
         const king = get_pieces(new_board ,(square)=>square && square.color===piece.color && square.type===KING)[0];
         const other_king = get_pieces(new_board ,(square)=>square && square.color!==piece.color && square.type===KING)[0];
