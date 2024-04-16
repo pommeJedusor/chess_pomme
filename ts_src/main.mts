@@ -8,43 +8,45 @@ import * as wstockfish from "./stockfish/wstockfish.mjs";
 import * as ws_controller from "./js_modules/ws_controller.mjs";
 import * as Game from "./model/Game.mjs";
 
-const port = 8080;
+const port:number = 8080;
 
-function return_http_error(error_code, res, status_message=null){
-	if (status_message)res.writeHead(error_code, status_message);
-	else res.writeHead(error_code);
+function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
+	res.writeHead(error_code, status_message);
 	res.end();
 }
-function return_http_result(res, code, headers, data){
+function return_http_result(code:number, res:http.ServerResponse<http.IncomingMessage>, headers:http.OutgoingHttpHeaders, data:string|Buffer):void{
 	res.writeHead(code, headers);
 	res.write(data);
 	res.end();
 }
-function get_waiting_games(number=10){
-	let results = [];
-	id_games.forEach((game, key)=>{
+function get_waiting_games(number:number=10):(number|string)[][]{
+	let results:number[] = [];
+	id_games.forEach((game:any, key:number)=>{
 		if (game && game.player_1 && !game.player_2){
 			console.log(id_games[key].player_1.total_timestamp)
 			results.push(key);
 		}
 		if (results.length>=number)return;
 	});
-	const seconds_from_timestamp = (timestamp)=>(timestamp/1000)%60;
-	const minutes_from_timestamp = (timestamp)=>(timestamp/60000);
-	return results.map((value)=>[value, `./game?id_game=${value}&minutes=${minutes_from_timestamp(id_games[value].player_1.total_timestamp)}&seconds=${seconds_from_timestamp(id_games[value].player_1.total_timestamp)}`]);
+	const seconds_from_timestamp = (timestamp:number)=>(timestamp/1000)%60;
+	const minutes_from_timestamp = (timestamp:number)=>(timestamp/60000);
+	return results.map((id:number)=>[
+        id,
+        `./game?id_game=${id}&minutes=${minutes_from_timestamp(id_games[id].player_1.total_timestamp)}&seconds=${seconds_from_timestamp(id_games[id].player_1.total_timestamp)}`
+    ]);
 }
 
 const server = http.createServer(function (req, res){
-	const url = req.url;
-	const parameters = url.replace(/\?.*/gm, "");
+	const url:string = req.url || "";
+	const parameters:string = url.replace(/\?.*/gm, "");
 
 	switch (parameters){
 		case "/":
 			async function send_response_home(){
-				const old_games = await Game.get_all_games(5);
-				const htmlContent = fs.readFileSync('./views/home.ejs', 'utf8');
-				const htmlRenderized = ejs.render(htmlContent, {filename: 'home.ejs', games: old_games});
-				return_http_result(res, 200, {'Content-Type':'text/html'}, htmlRenderized);
+				const old_games:Game.Game[] = await Game.get_all_games(5);
+				const htmlContent:string = fs.readFileSync('./views/home.ejs', 'utf8');
+				const htmlRenderized:string = ejs.render(htmlContent, {filename: 'home.ejs', games: old_games});
+				return_http_result(200, res, {'Content-Type':'text/html'}, htmlRenderized);
 			}
 			send_response_home();
 			return
@@ -52,32 +54,32 @@ const server = http.createServer(function (req, res){
 		case "/game":
 			fs.readFile("./public/html/game.html",function(err, data){
 				if (err)return_http_error(400, res, "file not found");
-				else return_http_result(res, 200, {'Content-Type':'text/html'}, data);
+				else return_http_result(200, res, {'Content-Type':'text/html'}, data);
 			})
 			return
 		case "/get_games":
-			const games = get_waiting_games();
-			return_http_result(res, 200, {'Content-Type':'json'}, JSON.stringify(games));
+			const games:(string|number)[][] = get_waiting_games();
+			return_http_result(200, res, {'Content-Type':'json'}, JSON.stringify(games));
 			return
 		case "/old_games":
 			async function send_response(){
-				const old_games = await Game.get_all_games();
-				const htmlContent = fs.readFileSync('./views/old_games.ejs', 'utf8');
-				const htmlRenderized = ejs.render(htmlContent, {filename: 'old_games.ejs', games: old_games});
-				return_http_result(res, 200, {'Content-Type':'text/html'}, htmlRenderized);
+				const old_games:Game.Game[] = await Game.get_all_games();
+				const htmlContent:string = fs.readFileSync('./views/old_games.ejs', 'utf8');
+				const htmlRenderized:string = ejs.render(htmlContent, {filename: 'old_games.ejs', games: old_games});
+				return_http_result(200, res, {'Content-Type':'text/html'}, htmlRenderized);
 			}
 			send_response();
 			return
 		case "/js/chess_game/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){
 				if (err)return_http_error(400, res, "file not found");
-				else return_http_result(res, 200, {'Content-Type':'text/javascript'}, data);
+				else return_http_result(200, res, {'Content-Type':'text/javascript'}, data);
 			})
 			return
 		case "/favicon.ico":
 			fs.readFile("./public/img/apple.svg",function(err, data){
 				if (err)return_http_error(400, res, "file not found");
-				else return_http_result(res, 200, {'Content-Type':'image/svg+xml'}, data);
+				else return_http_result(200, res, {'Content-Type':'image/svg+xml'}, data);
 			})
 			return
 	}
@@ -112,17 +114,13 @@ const server = http.createServer(function (req, res){
 
 	fs.readFile(path, function(err, data){
 		if (err)return_http_error(404, res, "file not found");
-		else return_http_result(res, 200, headers, data);
+		else return_http_result(200, res, headers, data);
 	});
 })
 
-server.listen(port, function(error){
-	if (error) {
-		console.log(error);
-	}else {
-		console.log("server is listening on port: " + port);
-	}
-})
+server.listen(port, ():void=>{
+    console.log("server is listening on port: " + port);
+});
 
 
 const ws_server = new ws.WebSocketServer({
@@ -130,19 +128,19 @@ const ws_server = new ws.WebSocketServer({
 });
 
 let sockets = [];
-let socket_games = [];
-let id_games = [];
-let bot_id_games = [];
+let socket_games:any = [];
+let id_games:any = [];
+let bot_id_games:any = [];
 
 ws_server.on('connection', function(socket) {
 	sockets.push(socket);
 	const socket_id = Math.floor(Math.random()*1000000)
-	let is_against_bot;
-	let is_against_player;
-	let bot_level;
+	let is_against_bot:boolean = false;
+	let is_against_player:boolean = false;
+	let bot_level:number;
 
-	socket.on('message', function(msg) {
-		msg = msg.toString();
+	socket.on('message', function(m) {
+		const msg:string = m.toString();
 		//init games
 		//against player
 		if (/^ID:/.test(msg)){
@@ -163,7 +161,7 @@ ws_server.on('connection', function(socket) {
 			}
 			else {
 				if (msg==="stockfish:")bot_level = 20;
-				else bot_level = Number(msg.match(/^stockfish:(\d*)/)[1]);
+				else bot_level = Number((msg.match(/^stockfish:(\d*)/) || ["","10"])[1]);
 				wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
 				is_against_bot = true;
 				is_against_player = false;

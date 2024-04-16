@@ -69,4 +69,4 @@ async function insert_game(pgn:string, winner:string, status:string){
     }
 }
 
-export { get_all_games, insert_game };
+export { get_all_games, insert_game, Game };
