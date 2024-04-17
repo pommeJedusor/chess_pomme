@@ -16,11 +16,16 @@ class Game{
     play(move, filter_good_move=(m)=>m.get_notation_move()===move){
         const moves = this.board.get_every_moves();
         const good_moves = moves.filter(filter_good_move);
-        if (good_moves.length===0)return false;
+        if (good_moves.length===0){
+            console.log(moves.map((move)=>move.get_notation_move()));
+            console.log(move)
+            return false;
+        }
         const good_move = good_moves[0];
+
         const piece = this.board.board[good_move.y][good_move.x];
-        this.board.board = piece.do_move(this.board.board, good_move, piece.edit_func)
-        this.board.moves.push(good_move);
+        this.board.make_move(piece, good_move);
+        console.log(good_move.get_notation_move());
         return true;
     }
     finish(winner, message, id_games, socket_games, sockets){
@@ -63,13 +68,10 @@ class Game{
         //if game finished
         if (!current_player)return;
         const total_timestamp = current_player.total_timestamp - (this.moves.length<2 ? 0 : Date.now() - this.moves.at(-2).timestamp);
-        console.log(total_timestamp);
         if (total_timestamp<=0){
             const winner = this.player_1===current_player ? this.player_2 : this.player_1;
             this.finish(winner, "timeout", id_games, socket_games, sockets);
         }
-        console.log("pgn")
-        console.log(this.get_pgn());
     }
     get_pgn(){
         let pgn = "";

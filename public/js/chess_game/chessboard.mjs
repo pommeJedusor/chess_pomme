@@ -52,8 +52,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             html_chess.move_piece(move.x, move.y, move.target_x, move.target_y, player_number[0]);
             //update datas board
             const data_piece = data_board.board[move.y][move.x];
-            data_board.moves.push(move);
-            data_board.board = data_piece.do_move(data_board.board, move, data_piece.edit_func);
+            data_board.make_move(data_piece, move);
             //send move to server
             ws.send(move.get_notation_move());
             clearInterval(animation_piece_cursor);

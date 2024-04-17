@@ -127,8 +127,7 @@ function make_move(data_board, notation_move, events_listeners, player_number){
     chess_html.special_change(the_move, chess_html.get_html_piece(the_move.x, the_move.y), data_board);
     //make the move in the datas
     const piece = data_board.board[the_move.y][the_move.x];
-    data_board.board = piece.do_move(data_board.board, the_move, piece.edit_func);
-    data_board.moves.push(the_move);
+    data_board.make_move(piece, the_move);
 }
 
 function switch_moves_buttons(ws){
