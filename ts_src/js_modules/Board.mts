@@ -53,6 +53,8 @@ interface board {
     get_new_board:()=>boardDatas;
     check_move_append:(pattern:string|RegExp, player:color)=>boolean;
     get_every_moves:(deep:number)=>Move[];
+    make_move:(piece:piece, move:Move)=>void;
+    make_move_notation:(piece:piece, move:string)=>void;
 }
 
 function get_square(x:number, y:number):string{
@@ -284,6 +286,61 @@ class Board implements board{
             }
         }
         return moves;
+    }
+
+    make_move(piece: piece, move: Move):void{
+        //update the board with the move
+        this.board = piece.do_move(this.board, move, piece.edit_func);
+        this.moves.push(move);
+        //update player turn
+        this.current_player = (this.current_player+1)%2 as color;
+        //castle
+        //king move
+        if (piece.type==="K"){
+            if (this.current_player===WHITE){
+                this.castles.white_kingside = false;
+                this.castles.white_queenside = false;
+            }else if (this.current_player===BLACK){
+                this.castles.black_kingside = false;
+                this.castles.black_queenside = false;
+            }
+        }
+        //h rook move
+        else if (piece.type==="R" && move.x===7 && move.y===7*piece.color || move.target_x===7 && move.target_y===7*piece.color){
+            if (this.current_player===WHITE){
+                this.castles.white_kingside = false;
+            }else if (this.current_player===BLACK){
+                this.castles.black_kingside = false;
+            }
+        }
+        //a rook move
+        else if (piece.type==="R" && move.x===0 && move.y===7*piece.color || move.target_x===7 && move.target_y===7*piece.color){
+            if (this.current_player===WHITE){
+                this.castles.white_queenside = false;
+            }else if (this.current_player===BLACK){
+                this.castles.black_queenside = false;
+            }
+        }
+        //en-passant
+        this.en_passant = undefined;
+        if (piece.type==="P" && (move.y===1 && move.target_y===3 || move.y===6 && move.target_y===4)){
+            this.en_passant = get_square(move.x, move.y===1 ? 2 : 5);
+        }
+        //50 moves rule
+        if (piece.type==="P" || move.is_taking){
+            this.halfmove_clock++;
+        }
+        //full moves number
+        if (piece.color===BLACK){
+            this.fullmove_number++;
+        }
+    }
+    make_move_notation(piece: piece, notation: string):void{
+        const every_moves:Move[] = this.get_every_moves();
+        const moves = every_moves.filter((move)=>move.get_notation_move()===notation);
+        if (moves.length===0)throw Error(`move: ${notation} not found in the position`);
+        const move = moves[0];
+        this.make_move(piece, move);
     }
 }
 
