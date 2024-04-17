@@ -275,9 +275,6 @@ class Board implements board{
     }
 
     make_move(piece: piece, move: Move):void{
-        //update the board with the move
-        this.board = piece.do_move(this.board, move, piece.edit_func);
-        this.moves.push(move);
         //castle
         //king move
         if (piece.type==="K"){
@@ -311,13 +308,17 @@ class Board implements board{
             this.en_passant = get_square(move.x, move.y===1 ? 2 : 5);
         }
         //50 moves rule
+        this.halfmove_clock++;
         if (piece.type==="P" || move.is_taking){
-            this.halfmove_clock++;
+            this.halfmove_clock = 0;
         }
         //full moves number
         if (piece.color===BLACK){
             this.fullmove_number++;
         }
+        //update the board with the move
+        this.board = piece.do_move(this.board, move, piece.edit_func);
+        this.moves.push(move);
         //update player turn
         this.current_player = (this.current_player+1)%2 as color;
     }

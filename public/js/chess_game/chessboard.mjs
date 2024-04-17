@@ -115,8 +115,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
         html_chess.special_change(move_found, piece, data_board)
         //datas
         const data_piece = data_board.board[old_y][old_x];
-        data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
-        data_board.moves.push(move_found);
+        data_board.make_move(data_piece, move_found);
         ws.send(move_found.get_notation_move());
         html_chess.remove_draw_proposal();
     }

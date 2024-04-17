@@ -120,6 +120,8 @@ function make_move(data_board, notation_move, events_listeners, player_number){
     }
     if (!the_move){
         console.log("move : "+notation_move+" non trouvé")
+        console.log(data_board.get_every_moves().map(move=>move.get_notation_move()));
+        console.log(data_board);
         return;
     }
     //make the html move
