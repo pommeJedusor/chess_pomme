@@ -36,6 +36,25 @@ interface piece {
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
 }
 
+interface board {
+    board:boardDatas;
+    moves:Move[];
+    //current_player: next player to play
+    current_player:color;
+    //castles: ability for the king to castle in the futur
+    castles:{"white_kingside":boolean, "white_queenside":boolean, "black_kingside":boolean, "black_queenside":boolean}
+    //en_passant: the square over which a pawn has just passed while moving two squares;
+    en_passant:string|undefined;
+    //halfmove_clock: The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
+    halfmove_clock:number;
+    //fullmove_number: The number of the full moves. It starts at 1 and is incremented after Black's move.
+    fullmove_number:number;
+    see_board:()=>void;
+    get_new_board:()=>boardDatas;
+    check_move_append:(pattern:string|RegExp, player:color)=>boolean;
+    get_every_moves:(deep:number)=>Move[];
+}
+
 function get_square(x:number, y:number):string{
     return COLUMNS[x] + (y+1);
 }
@@ -164,9 +183,19 @@ class Move{
     }
 }
 
-class Board{
+class Board implements board{
     board:boardDatas;
     moves:Move[];
+    current_player:color=WHITE;
+    castles:{"white_kingside":boolean, "white_queenside":boolean, "black_kingside":boolean, "black_queenside":boolean}={
+        "white_kingside": true,
+        "white_queenside": true,
+        "black_kingside": true,
+        "black_queenside": true
+    }
+    en_passant:string|undefined;
+    halfmove_clock:number=0;
+    fullmove_number:number=1;
 
     constructor(){
         this.board = this.get_new_board();
