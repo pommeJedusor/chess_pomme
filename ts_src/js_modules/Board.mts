@@ -287,7 +287,7 @@ class Board implements board{
             }
         }
         //h rook move
-        else if (piece.type==="R" && move.x===7 && move.y===7*piece.color || move.target_x===7 && move.target_y===7*piece.color){
+        else if (piece.type==="R" && move.x===7 && move.y===7*piece.color){
             if (this.current_player===WHITE){
                 this.castles.white_kingside = false;
             }else if (this.current_player===BLACK){
@@ -295,11 +295,27 @@ class Board implements board{
             }
         }
         //a rook move
-        else if (piece.type==="R" && move.x===0 && move.y===7*piece.color || move.target_x===0 && move.target_y===7*piece.color){
+        else if (piece.type==="R" && move.x===0 && move.y===7*piece.color){
             if (this.current_player===WHITE){
                 this.castles.white_queenside = false;
             }else if (this.current_player===BLACK){
                 this.castles.black_queenside = false;
+            }
+        }
+        //take h rook
+        if (move.target_x===7 && move.target_y===(7*piece.color+7)%14){
+            if (this.current_player===WHITE){
+                this.castles.black_kingside = false;
+            }else if (this.current_player===BLACK){
+                this.castles.white_kingside = false;
+            }
+        }
+        //take a rook
+        else if (move.target_x===0 && move.target_y===(7*piece.color+7)%14){
+            if (this.current_player===WHITE){
+                this.castles.black_queenside = false;
+            }else if (this.current_player===BLACK){
+                this.castles.white_queenside = false;
             }
         }
         //en-passant
