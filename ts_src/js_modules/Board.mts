@@ -278,8 +278,6 @@ class Board implements board{
         //update the board with the move
         this.board = piece.do_move(this.board, move, piece.edit_func);
         this.moves.push(move);
-        //update player turn
-        this.current_player = (this.current_player+1)%2 as color;
         //castle
         //king move
         if (piece.type==="K"){
@@ -300,7 +298,7 @@ class Board implements board{
             }
         }
         //a rook move
-        else if (piece.type==="R" && move.x===0 && move.y===7*piece.color || move.target_x===7 && move.target_y===7*piece.color){
+        else if (piece.type==="R" && move.x===0 && move.y===7*piece.color || move.target_x===0 && move.target_y===7*piece.color){
             if (this.current_player===WHITE){
                 this.castles.white_queenside = false;
             }else if (this.current_player===BLACK){
@@ -320,6 +318,8 @@ class Board implements board{
         if (piece.color===BLACK){
             this.fullmove_number++;
         }
+        //update player turn
+        this.current_player = (this.current_player+1)%2 as color;
     }
     make_move_notation(piece: piece, notation: string):void{
         const every_moves:Move[] = this.get_every_moves();
