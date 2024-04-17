@@ -31,7 +31,7 @@ interface piece {
     do_move:(board:boardDatas, move:Move, edit_func:Piece["edit_func"])=>boardDatas;
     move:(board:boardDatas, x:number, y:number)=>square;
     undo_move:(board:boardDatas, x:number, y:number, piece:piece)=>void;
-    get_moves:(board:boardDatas, piece:piece, all_moves:Move[], deep:number)=>Move[];
+    get_moves:(board:board, piece:piece, all_moves:Move[], deep:number)=>Move[];
     edit_func:(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move)=>square;
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
 }
@@ -51,7 +51,6 @@ interface board {
     fullmove_number:number;
     see_board:()=>void;
     get_new_board:()=>boardDatas;
-    check_move_append:(pattern:string|RegExp, player:color)=>boolean;
     get_every_moves:(deep:number)=>Move[];
     make_move:(piece:piece, move:Move)=>void;
     make_move_notation:(piece:piece, move:string)=>void;
@@ -59,15 +58,6 @@ interface board {
 
 function get_square(x:number, y:number):string{
     return COLUMNS[x] + (y+1);
-}
-
-function check_move_append(moves:Move[], pattern:string|RegExp, player:color):boolean{
-    if (typeof pattern === "string")pattern = new RegExp("^"+pattern+"$");
-
-    for (let i = player;i<moves.length;i+=2){
-        if (pattern.test(moves[i].get_notation_move()))return true;
-    }
-    return false;
 }
 
 function get_pieces(board:boardDatas, condition:(square: square)=>boolean, deep:number=0):square[]{
@@ -250,16 +240,12 @@ class Board implements board{
         return board;
     }
 
-    check_move_append(pattern:string|RegExp, player:color):boolean{
-        return check_move_append(this.moves, pattern, player);
-    }
-
     get_every_moves(deep:number=0):Move[]{
         let moves:Move[] = [];
         for (const squares of this.board){
             for (const square of squares){
                 if (square===0 || square.color!==this.moves.length%2)continue;
-                moves.push(...square.get_moves(this.board, square, this.moves, deep));
+                moves.push(...square.get_moves(this, square, this.moves, deep));
             }
         }
 
@@ -412,11 +398,11 @@ class Piece implements piece{
         this.y = y;
         this.x = x;
     }
-    get_moves(board:boardDatas, piece:piece, all_moves:Move[], deep:number=0){
+    get_moves(board:board, piece:piece, all_moves:Move[], deep:number=0){
         if (!piece.get_squares)throw Error("Board.mts: line 320: the object piece doesn't have the get_squares method");
-        const squares:squaremove[] = piece.get_squares(board, piece);
+        const squares:squaremove[] = piece.get_squares(board.board, piece);
         const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square.x, square.y, square.is_taking));
-        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board.board, move, all_moves, deep));
         return legal_moves;
     }
 }
@@ -460,15 +446,15 @@ class Pawn extends Piece implements piece{
         }
         return moves;
     }
-    get_moves(board:boardDatas, piece:piece, all_moves:Move[], deep:number=0):Move[] {
+    get_moves(board:board, piece:piece, all_moves:Move[], deep:number=0):Move[] {
         let moves = [];
         const x:number = piece.x;
         const y:number = piece.y;
         const direction:1|-1 = piece.color ? -1 : 1;
         //single and double push
-        if (board[y+direction][x]===0){
+        if (board.board[y+direction][x]===0){
             moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction,false));
-            if (((y+direction*2===4 && y===6) || (y+direction*2==3 && y===1)) && board[y+direction*2][x]===0){
+            if (((y+direction*2===4 && y===6) || (y+direction*2==3 && y===1)) && board.board[y+direction*2][x]===0){
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction*2,false));
             }
         }
@@ -478,7 +464,7 @@ class Pawn extends Piece implements piece{
             const x:number = xy[0];
             const y:number = xy[1];
             if (!is_valid_square(x, y))continue;
-            const square:square = board[y][x];
+            const square:square = board.board[y][x];
             if (square && square.color!==piece.color){
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
             }
@@ -490,14 +476,11 @@ class Pawn extends Piece implements piece{
             if (!last_move || (piece.color===WHITE && piece.y!==4) || (piece.color===BLACK && piece.y!==3))break;
             const x:number = piece.x + move;
             const y:number = piece.y + direction;
-            const test_last_move:RegExp = new RegExp("^"+get_square(x, piece.y)+"[+#]?$");
-            if (test_last_move.test(last_move.get_notation_move())){
-                if (!check_move_append(all_moves, get_square(x, y)+"[+#]?", (piece.color+1)%2 as color)){
-                    moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
-                }
+            if (get_square(x, y)===board.en_passant){
+                moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
             }
         }
-        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
+        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board.board, move, all_moves, deep));
         return legal_moves;
     }
 }
@@ -518,7 +501,7 @@ class King extends Piece implements piece{
         if (x===move.target_x && y===move.target_y)return new King(x, y, piece.color);
         else return square;
     }
-    get_moves(board:boardDatas, temp_piece:piece, all_moves:Move[], deep:number=0):Move[] {
+    get_moves(board:board, temp_piece:piece, all_moves:Move[], deep:number=0):Move[] {
         let piece:King = temp_piece as King;
         let moves:Move[] = [];
         const dirs:(-1|0|1)[] = [-1, 0, 1];
@@ -528,37 +511,35 @@ class King extends Piece implements piece{
                 const x:number = piece.x+x_dir;
                 if (!is_valid_square(x, y))continue;
                 const move:Move = new Move(piece.type, piece.x, piece.y, x, y);
-                const square:square = board[y][x];
+                const square:square = board.board[y][x];
                 if (square===0 || square.color!==piece.color){
                     if (square!==0)move.is_taking=true;
                     moves.push(move);
                 }
             }
         }
-        //check castle
-        if (check_move_append(all_moves, /^[KO]/, piece.color) || piece.is_in_check(board)){
-            return moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
-        }
         //check kingside castle
         const king_y:string = (piece.y+1).toString();
-        const pattern_kingside:RegExp = new RegExp("^Rh?"+king_y+"?(h[1-8](?<!"+king_y+")|[fg]"+king_y+")$");
-        if (!check_move_append(all_moves, pattern_kingside, piece.color)){
-            if (board[piece.y][5]===board[piece.y][6] && board[piece.y][5]===0){
-                if (piece.is_legal_move(board ,new Move(piece.type, piece.x, piece.y, piece.x+1, piece.y), all_moves, deep)){
+        if (board.current_player===WHITE && board.castles.white_kingside || board.current_player===BLACK && board.castles.black_kingside){
+            //check if (f1 and g1 || f8 and g8) are free
+            if (board.board[piece.y][5]===board.board[piece.y][6] && board.board[piece.y][5]===0){
+                //check if (f1 || f8) is controlled by an opponent piece
+                if (piece.is_legal_move(board.board ,new Move(piece.type, piece.x, piece.y, piece.x+1, piece.y), all_moves, deep)){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
                 }
             }
         }
         //check queenside castle
-        const pattern_queenside = new RegExp("^Ra?"+king_y+"?(a[1-8](?<!"+king_y+")|[bcd]"+king_y+")$");
-        if (!check_move_append(all_moves, pattern_queenside, piece.color)){
-            if (board[piece.y][1]===board[piece.y][2] && board[piece.y][3]===0 && board[piece.y][1]===0){
-                if (piece.is_legal_move(board ,new Move(piece.type, piece.x, piece.y, piece.x-1, piece.y), all_moves, deep)){
+        if (board.current_player===WHITE && board.castles.white_queenside || board.current_player===BLACK && board.castles.black_queenside){
+            //check if (b1, c1 and d1 || b8, c8 and d8) are free
+            if (board.board[piece.y][1]===board.board[piece.y][2] && board.board[piece.y][3]===0 && board.board[piece.y][1]===0){
+                //check if (d1 || d8) is controlled by an opponent piece
+                if (piece.is_legal_move(board.board ,new Move(piece.type, piece.x, piece.y, piece.x-1, piece.y), all_moves, deep)){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
                 }
             }
         }
-        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
+        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board.board, move, all_moves, deep));
         return legal_moves;
     }
     is_in_check(board:boardDatas){
@@ -687,4 +668,4 @@ class Queen extends Piece {
         return get_dirs_qrb(piece, board, dirs);
     }
 }
-export { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK, check_move_append, get_square};
+export { Board, Pawn, King, Bishop, Rook, Knight, Queen, WHITE, BLACK, get_square};
