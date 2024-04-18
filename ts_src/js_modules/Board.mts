@@ -1,11 +1,5 @@
 const WHITE:color = 0;
 const BLACK:color = 1;
-const PAWN:piecetype = "P";
-const KING:piecetype = "K";
-const BISHOP:piecetype = "B";
-const ROOK:piecetype = "R";
-const KNIGHT:piecetype = "N";
-const QUEEN:piecetype = "Q";
 const COLUMNS:string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 type square = piece | 0;
@@ -13,7 +7,15 @@ type boardDatas = square[][];
 type color = 0|1
 type dir = number[];
 type dirs = dir[];
-type piecetype = "P"|"K"|"Q"|"R"|"B"|"N"
+enum piecetype {
+    Pawn = "P",
+    King = "K",
+    Queen = "Q",
+    Rook = "R",
+    Bishop = "B",
+    Knight = "N"
+};
+
 
 interface castles{
     white_kingside:boolean,
@@ -34,9 +36,9 @@ interface piece {
     color:color;
     type:piecetype;
     is_legal_move:(board:board, move:Move, moves:Move[], deep:number)=>boolean;
-    do_move:(board:boardDatas, move:Move, edit_func:Piece["edit_func"])=>boardDatas;
-    get_moves:(board:board, piece:piece, all_moves:Move[], deep:number)=>Move[];
     edit_func:(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move)=>square;
+    do_move:(board:boardDatas, move:Move, edit_func:piece["edit_func"])=>boardDatas;
+    get_moves:(board:board, piece:piece, all_moves:Move[], deep:number)=>Move[];
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
 }
 
@@ -162,8 +164,8 @@ class Move{
         return get_square(this.target_x, this.target_y);
     }
     get_piece_notation():string{
-        if (this.piece===PAWN && !this.is_taking)return "";
-        else if (this.piece===PAWN)return COLUMNS[this.x];
+        if (this.piece===piecetype.Pawn && !this.is_taking)return "";
+        else if (this.piece===piecetype.Pawn)return COLUMNS[this.x];
         return this.piece;
     }
     get_notation_move():string{
@@ -175,9 +177,9 @@ class Move{
         const check:string = this.is_check ? "+" : "";
         const mate:string = this.is_mate ? "#" : "";
         //check if castle
-        if (this.piece===KING && this.target_x===this.x-2){
+        if (this.piece===piecetype.King && this.target_x===this.x-2){
             return "O-O-O"+check+mate;
-        }else if (this.piece===KING && this.target_x===this.x+2){
+        }else if (this.piece===piecetype.King && this.target_x===this.x+2){
             return "O-O"+check+mate;
         }
         return piece+precision+taking+target_square+promotion+check+mate;
@@ -213,17 +215,17 @@ class Board implements board{
             return line.map((square)=>{
                 if (square===0)return square;
                 switch (square.type){
-                    case "P":
+                    case piecetype.Pawn:
                         return new Pawn(square.x, square.y, square.color);
-                    case "K":
+                    case piecetype.King:
                         return new King(square.x, square.y, square.color);
-                    case "Q":
+                    case piecetype.Queen:
                         return new Queen(square.x, square.y, square.color);
-                    case "R":
+                    case piecetype.Rook:
                         return new Rook(square.x, square.y, square.color);
-                    case "B":
+                    case piecetype.Bishop:
                         return new Bishop(square.x, square.y, square.color);
-                    case "N":
+                    case piecetype.Knight:
                         return new Knight(square.x, square.y, square.color);
                 }
             })
@@ -423,8 +425,8 @@ class Piece implements piece{
 
         board.make_move(piece, move);
 
-        const king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color===piece.color && square.type===KING)[0] as King;
-        const other_king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color!==piece.color && square.type===KING)[0] as King;
+        const king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color===piece.color && square.type===piecetype.King)[0] as King;
+        const other_king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color!==piece.color && square.type===piecetype.King)[0] as King;
 
         const is_legal:boolean = !king.is_in_check(board.board);
         if (!is_legal)return false;
@@ -463,7 +465,7 @@ class Piece implements piece{
 
 class Pawn extends Piece implements piece{
     constructor(x:number, y:number, color:color){
-        super(x, y, color, PAWN);
+        super(x, y, color, piecetype.Pawn);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         if (piece===square)return 0;
@@ -536,7 +538,7 @@ class Pawn extends Piece implements piece{
 }
 class King extends Piece implements piece{
     constructor(x:number, y:number, color:color){
-        super(x, y, color, KING);
+        super(x, y, color, piecetype.King);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         const is_castle_king:boolean = move.x-move.target_x===-2;
@@ -604,7 +606,7 @@ class King extends Piece implements piece{
             const x:number = pawn_dir[0];
             const y:number = pawn_dir[1];
             const square:square = board[y][x];
-            if (square!==0 && square.type===PAWN && square.color!==this.color)return true;
+            if (square!==0 && square.type===piecetype.Pawn && square.color!==this.color)return true;
         }
         //rook
         const rook_dirs = [[1, 0], [-1, 0], [0, -1], [0, 1]];
@@ -613,7 +615,7 @@ class King extends Piece implements piece{
             let x:number = this.x+rook_dir[1];
             while (is_valid_square(x, y)){
                 const square:square = board[y][x];
-                if (square && square.color!==this.color && (square.type===ROOK || square.type===QUEEN))return true;
+                if (square && square.color!==this.color && (square.type===piecetype.Rook || square.type===piecetype.Queen))return true;
                 else if (square)break;
                 y += rook_dir[0];
                 x += rook_dir[1];
@@ -626,7 +628,7 @@ class King extends Piece implements piece{
             let x:number = this.x+bishop_dir[1];
             while (is_valid_square(x, y)){
                 const square = board[y][x];
-                if (square && square.color!==this.color && (square.type===BISHOP || square.type===QUEEN))return true;
+                if (square && square.color!==this.color && (square.type===piecetype.Bishop || square.type===piecetype.Queen))return true;
                 else if (square)break;
                 y += bishop_dir[0];
                 x += bishop_dir[1];
@@ -642,7 +644,7 @@ class King extends Piece implements piece{
             const y:number = knight_square[0];
             const x:number = knight_square[1];
             const square:square = board[y][x];
-            if (square && square.color!==this.color && square.type===KNIGHT)return true;
+            if (square && square.color!==this.color && square.type===piecetype.Knight)return true;
         }
         //king
         const king_dirs = [-1, 0, 1];
@@ -652,7 +654,7 @@ class King extends Piece implements piece{
                 const x:number = this.x+dir2;
                 if (!is_valid_square(x, y))continue;
                 const square:square = board[y][x];
-                if (square && square.color!==this.color && square.type===KING)return true;
+                if (square && square.color!==this.color && square.type===piecetype.King)return true;
             }
         }
         return false;
@@ -660,7 +662,7 @@ class King extends Piece implements piece{
 }
 class Bishop extends Piece implements piece{
     constructor(x:number, y:number, color:color){
-        super(x, y, color, BISHOP);
+        super(x, y, color, piecetype.Bishop);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         if (piece===square)return 0;
@@ -674,7 +676,7 @@ class Bishop extends Piece implements piece{
 }
 class Rook extends Piece {
     constructor(x:number, y:number, color:color){
-        super(x, y, color, ROOK);
+        super(x, y, color, piecetype.Rook);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         if (piece===square)return 0;
@@ -688,7 +690,7 @@ class Rook extends Piece {
 }
 class Knight extends Piece {
     constructor(x:number, y:number, color:color){
-        super(x, y, color, KNIGHT);
+        super(x, y, color, piecetype.Knight);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         if (piece===square)return 0;
@@ -706,7 +708,7 @@ class Knight extends Piece {
 }
 class Queen extends Piece {
     constructor(x:number, y:number, color:color){
-        super(x, y, color, QUEEN);
+        super(x, y, color, piecetype.Queen);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         if (piece===square)return 0;
