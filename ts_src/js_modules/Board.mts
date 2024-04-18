@@ -33,7 +33,7 @@ interface piece {
     y:number;
     color:color;
     type:piecetype;
-    is_legal_move:(board:boardDatas, move:Move, moves:Move[], deep:number)=>boolean;
+    is_legal_move:(board:board, move:Move, moves:Move[], deep:number)=>boolean;
     do_move:(board:boardDatas, move:Move, edit_func:Piece["edit_func"])=>boardDatas;
     move:(board:boardDatas, x:number, y:number)=>square;
     undo_move:(board:boardDatas, x:number, y:number, piece:piece)=>void;
@@ -60,6 +60,8 @@ interface board {
     get_every_moves:(deep:number)=>Move[];
     make_move:(piece:piece, move:Move)=>void;
     make_move_notation:(piece:piece, move:string)=>void;
+    get_board_copy:()=>boardDatas;
+    get_copy:()=>board;
 }
 
 function get_square(x:number, y:number):string{
@@ -298,7 +300,7 @@ class Board implements board{
         let moves:Move[] = [];
         for (const squares of this.board){
             for (const square of squares){
-                if (square===0 || square.color!==this.moves.length%2)continue;
+                if (square===0 || square.color!==this.current_player)continue;
                 moves.push(...square.get_moves(this, square, this.moves, deep));
             }
         }
@@ -415,32 +417,26 @@ class Piece implements piece{
         this.color = color;
         this.type = type;
     }
-    is_legal_move(board:boardDatas, move:Move, moves:Move[], deep:number):boolean{
-        const piece = board[move.y][move.x];
+    is_legal_move(origin_board:board, move:Move, moves:Move[], deep:number):boolean{
+        let board:board = origin_board.get_copy();
+        const piece:square = board.board[move.y][move.x];
         //check if there is a piece to move
         if (piece===0)return false;
 
-        const new_board:boardDatas = piece.do_move(board, move, this.edit_func);
-        const king:King = get_pieces(new_board ,(square:square)=>square!==0 && square.color===piece.color && square.type===KING)[0] as King;
-        const other_king:King = get_pieces(new_board ,(square:square)=>square!==0 && square.color!==piece.color && square.type===KING)[0] as King;
-        const is_legal:boolean = !king.is_in_check(new_board);
+        board.make_move(piece, move);
+
+        const king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color===piece.color && square.type===KING)[0] as King;
+        const other_king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color!==piece.color && square.type===KING)[0] as King;
+        const is_legal:boolean = !king.is_in_check(board.board);
         if (!is_legal)return is_legal;
-        move.is_check = other_king.is_in_check(new_board);
+        move.is_check = other_king.is_in_check(board.board);
         if (move.is_check && deep===0){
-            let temp_board:Board = new Board();
-            temp_board.moves = moves.map((square)=>square);
-            temp_board.moves.push(move);
-            temp_board.board = new_board;
-            if (temp_board.get_every_moves(deep+1).length===0){
+            if (board.get_every_moves(deep+1).length===0){
                 move.is_check = false;
                 move.is_mate = true;
             }
         }else if (deep===0){
-            let temp_board:Board = new Board();
-            temp_board.moves = moves.map((square)=>square);
-            temp_board.moves.push(move);
-            temp_board.board = new_board;
-            if (temp_board.get_every_moves(deep+1).length===0){
+            if (board.get_every_moves(deep+1).length===0){
                 move.is_draw = true;
             }
         }
@@ -473,7 +469,7 @@ class Piece implements piece{
         if (!piece.get_squares)throw Error("Board.mts: line 320: the object piece doesn't have the get_squares method");
         const squares:squaremove[] = piece.get_squares(board.board, piece);
         const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square.x, square.y, square.is_taking));
-        const legal_moves = moves.filter((move)=>piece.is_legal_move(board.board, move, all_moves, deep));
+        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
         return legal_moves;
     }
 }
@@ -551,7 +547,7 @@ class Pawn extends Piece implements piece{
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
             }
         }
-        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board.board, move, all_moves, deep));
+        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
         return legal_moves;
     }
 }
@@ -595,7 +591,7 @@ class King extends Piece implements piece{
             //check if (f1 and g1 || f8 and g8) are free
             if (board.board[piece.y][5]===board.board[piece.y][6] && board.board[piece.y][5]===0){
                 //check if (f1 || f8) is controlled by an opponent piece
-                if (piece.is_legal_move(board.board ,new Move(piece.type, piece.x, piece.y, piece.x+1, piece.y), all_moves, deep)){
+                if (piece.is_legal_move(board, new Move(piece.type, piece.x, piece.y, piece.x+1, piece.y), all_moves, deep)){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x+2, piece.y, false));
                 }
             }
@@ -605,12 +601,12 @@ class King extends Piece implements piece{
             //check if (b1, c1 and d1 || b8, c8 and d8) are free
             if (board.board[piece.y][1]===board.board[piece.y][2] && board.board[piece.y][3]===0 && board.board[piece.y][1]===0){
                 //check if (d1 || d8) is controlled by an opponent piece
-                if (piece.is_legal_move(board.board ,new Move(piece.type, piece.x, piece.y, piece.x-1, piece.y), all_moves, deep)){
+                if (piece.is_legal_move(board, new Move(piece.type, piece.x, piece.y, piece.x-1, piece.y), all_moves, deep)){
                     moves.push(new Move(piece.type, piece.x, piece.y, piece.x-2, piece.y, false));
                 }
             }
         }
-        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board.board, move, all_moves, deep));
+        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
         return legal_moves;
     }
     is_in_check(board:boardDatas){
