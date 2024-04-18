@@ -539,20 +539,22 @@ class King extends Piece implements piece{
         super(x, y, color, KING);
     }
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
-        const is_castle_king = move.x-move.target_x===-2;
-        const is_castle_queen = move.x-move.target_x===2;
-        const rook_x = is_castle_king ? 7 : 0;
-        const new_rook_x = is_castle_king ? 5 : 3;
+        const is_castle_king:boolean = move.x-move.target_x===-2;
+        const is_castle_queen:boolean = move.x-move.target_x===2;
+        const rook_x:0|7 = is_castle_king ? 7 : 0;
+        const new_rook_x:3|5 = is_castle_king ? 5 : 3;
         if ((is_castle_king || is_castle_queen) && y===move.y && x===rook_x)return 0;
         if ((is_castle_king || is_castle_queen) && y===move.y && x===new_rook_x){
             return new Rook(new_rook_x, y, piece.color);
         }
+
         if (piece===square)return 0;
         if (x===move.target_x && y===move.target_y)return new King(x, y, piece.color);
+
         else return square;
     }
-    get_moves(board:board, temp_piece:piece, all_moves:Move[], deep:number=0):Move[] {
-        let piece:King = temp_piece as King;
+    get_moves(board:board, _:piece, all_moves:Move[], deep:number=0):Move[] {
+        let piece:King = this;
         let moves:Move[] = [];
         const dirs:(-1|0|1)[] = [-1, 0, 1];
         for (const y_dir of dirs){
@@ -569,7 +571,6 @@ class King extends Piece implements piece{
             }
         }
         //check kingside castle
-        const king_y:string = (piece.y+1).toString();
         if (board.current_player===WHITE && board.castles.white_kingside || board.current_player===BLACK && board.castles.black_kingside){
             //check if (f1 and g1 || f8 and g8) are free
             if (board.board[piece.y][5]===board.board[piece.y][6] && board.board[piece.y][5]===0){
@@ -594,63 +595,63 @@ class King extends Piece implements piece{
     }
     is_in_check(board:boardDatas){
         //check pawn
-        const pawn_y = [1, -1][this.color];
-        const pawn_dirs = [[pawn_y, 1], [pawn_y, -1]];
-        for (const pawn_dir of pawn_dirs){
-            const y = this.y+pawn_dir[0];
-            const x = this.x+pawn_dir[1];
-            if (!is_valid_square(x, y))continue;
-            const square = board[y][x];
+        const pawn_y:number = [1, -1][this.color];
+        const pawn_dirs:number[][] = [[1, pawn_y], [-1, pawn_y]];
+        const pawn_squares = pawn_dirs.map((dir)=>[this.x+dir[0], this.y+dir[1]]);
+        const pawn_good_squares = pawn_squares.filter((square)=>is_valid_square(square[0],square[1]));
+
+        for (const pawn_dir of pawn_good_squares){
+            const x:number = pawn_dir[0];
+            const y:number = pawn_dir[1];
+            const square:square = board[y][x];
             if (square!==0 && square.type===PAWN && square.color!==this.color)return true;
         }
         //rook
         const rook_dirs = [[1, 0], [-1, 0], [0, -1], [0, 1]];
         for (const rook_dir of rook_dirs){
-            let i = 1;
-            let y = this.y+rook_dir[0];
-            let x = this.x+rook_dir[1];
+            let y:number = this.y+rook_dir[0];
+            let x:number = this.x+rook_dir[1];
             while (is_valid_square(x, y)){
-                const square = board[y][x];
-                if (square && square.color!==this.color && [ROOK, QUEEN].includes(square.type))return true;
+                const square:square = board[y][x];
+                if (square && square.color!==this.color && (square.type===ROOK || square.type===QUEEN))return true;
                 else if (square)break;
-                i++;
-                y = this.y+(rook_dir[0]*i);
-                x = this.x+(rook_dir[1]*i);
+                y += rook_dir[0];
+                x += rook_dir[1];
             }
         }
         //bishop
         const bishop_dirs = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
         for (const bishop_dir of bishop_dirs){
-            let i = 1;
-            let y = this.y+bishop_dir[0];
-            let x = this.x+bishop_dir[1];
+            let y:number = this.y+bishop_dir[0];
+            let x:number = this.x+bishop_dir[1];
             while (is_valid_square(x, y)){
                 const square = board[y][x];
-                if (square && square.color!==this.color && [BISHOP, QUEEN].includes(square.type))return true;
+                if (square && square.color!==this.color && (square.type===BISHOP || square.type===QUEEN))return true;
                 else if (square)break;
-                i++;
-                y = this.y+(bishop_dir[0]*i);
-                x = this.x+(bishop_dir[1]*i);
+                y += bishop_dir[0];
+                x += bishop_dir[1];
             }
         }
         //knight
-        const knight_dirs = [[-1, 2], [-1, -2], [1, 2], [1, -2],
+        const knight_dirs:dirs = [[-1, 2], [-1, -2], [1, 2], [1, -2],
                              [-2, 1], [-2, -1], [2, 1], [2, -1]];
-        for (const knight_dir of knight_dirs){
-            const y = this.y+knight_dir[0];
-            const x = this.x+knight_dir[1];
-            if (!is_valid_square(x, y))continue;
-            const square = board[y][x];
+        const knight_squares:dirs = knight_dirs.map((dir)=>[this.y+dir[0], this.x+dir[1]]);
+        const knight_good_squares:number[][] = knight_squares.filter((dir)=>is_valid_square(dir[1],dir[0]));
+
+        for (const knight_square of knight_good_squares){
+            const y:number = knight_square[0];
+            const x:number = knight_square[1];
+            const square:square = board[y][x];
             if (square && square.color!==this.color && square.type===KNIGHT)return true;
         }
         //king
         const king_dirs = [-1, 0, 1];
         for (const dir1 of king_dirs){
             for (const dir2 of king_dirs){
-                const y = this.y+dir1;
-                const x = this.x+dir2;
+                const y:number = this.y+dir1;
+                const x:number = this.x+dir2;
                 if (!is_valid_square(x, y))continue;
-                const square = board[y][x];
+                const square:square = board[y][x];
                 if (square && square.color!==this.color && square.type===KING)return true;
             }
         }
