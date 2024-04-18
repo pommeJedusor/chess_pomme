@@ -187,20 +187,25 @@ class Move{
 class Board implements board{
     board:boardDatas;
     moves:Move[];
-    current_player:color=WHITE;
-    castles:{"white_kingside":boolean, "white_queenside":boolean, "black_kingside":boolean, "black_queenside":boolean}={
-        "white_kingside": true,
-        "white_queenside": true,
-        "black_kingside": true,
-        "black_queenside": true
-    }
+    current_player:color;
+    castles:castles;
     en_passant:string|undefined;
-    halfmove_clock:number=0;
-    fullmove_number:number=1;
+    halfmove_clock:number;
+    fullmove_number:number;
 
-    constructor(){
-        this.board = this.get_new_board();
-        this.moves = [];
+    constructor(board?:boardDatas, moves?:Move[], current_player?:color, castles?:castles, en_passant?:string, halfmove_clock?:number, fullmove_number?:number){
+        this.board = board || this.get_new_board();
+        this.moves = moves || [];
+        this.current_player = current_player || WHITE;
+        this.castles = castles || {
+            "white_kingside": true,
+            "white_queenside": true,
+            "black_kingside": true,
+            "black_queenside": true
+        };
+        this.en_passant = en_passant;
+        this.halfmove_clock = halfmove_clock || 0;
+        this.fullmove_number = fullmove_number || 1;
     }
 
     see_board():void{
@@ -215,14 +220,7 @@ class Board implements board{
         }
     }
     get_new_board():boardDatas{
-        let board:boardDatas = [];
-        for (let i=0;i<8;i++){
-            let line:square[] = [];
-            for (let i:number=0;i<8;i++){
-                line.push(0);
-            }
-            board.push(line);
-        }
+        let board:boardDatas = Array.from(Array(8), ()=>Array(8).fill(0));
 
         let pieces:piece[] = [];
         //pawns
