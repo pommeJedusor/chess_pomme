@@ -136,11 +136,11 @@ function get_dirs_qrb(piece:piece, board:boardDatas, dirs:dirs):squaremove[]{
 }
 
 class Move{
-    piece:string;
-    x:number;
-    y:number;
-    target_x:number;
-    target_y:number;
+    readonly piece:string;
+    readonly x:number;
+    readonly y:number;
+    readonly target_x:number;
+    readonly target_y:number;
     is_taking:boolean;
     is_check:boolean;
     is_mate:boolean;
@@ -404,10 +404,10 @@ class Board implements board{
 }
 
 class Piece implements piece{
-    x:number;
-    y:number;
-    color:color;
-    type:piecetype;
+    readonly x:number;
+    readonly y:number;
+    readonly color:color;
+    readonly type:piecetype;
     edit_func(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move):square{
         return 0;
     };
