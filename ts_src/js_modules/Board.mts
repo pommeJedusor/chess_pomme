@@ -8,13 +8,19 @@ const KNIGHT:piecetype = "N";
 const QUEEN:piecetype = "Q";
 const COLUMNS:string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-//type piece = King | Queen | Rook | Bishop | Knight | Pawn | Piece
 type square = piece | 0;
 type boardDatas = square[][];
 type color = 0|1
 type dir = number[];
 type dirs = dir[];
 type piecetype = "P"|"K"|"Q"|"R"|"B"|"N"
+
+interface castles{
+    white_kingside:boolean,
+    white_queenside:boolean,
+    black_kingside:boolean,
+    black_queenside:boolean
+}
 
 interface squaremove{
     x:number;
@@ -42,7 +48,7 @@ interface board {
     //current_player: next player to play
     current_player:color;
     //castles: ability for the king to castle in the futur
-    castles:{"white_kingside":boolean, "white_queenside":boolean, "black_kingside":boolean, "black_queenside":boolean}
+    castles:castles
     //en_passant: the square over which a pawn has just passed while moving two squares;
     en_passant:string|undefined;
     //halfmove_clock: The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
@@ -60,11 +66,9 @@ function get_square(x:number, y:number):string{
     return COLUMNS[x] + (y+1);
 }
 
-function get_pieces(board:boardDatas, condition:(square: square)=>boolean, deep:number=0):square[]{
-    if (deep===board.length)return [];
-    const line:square[] = board[deep];
-    const line_pieces:square[] = line.filter(condition)
-    return line_pieces.concat(get_pieces(board, condition, deep+1));
+function get_pieces(board:boardDatas, condition:(square: square)=>boolean):square[]{
+    const pieces:square[] = board.flat(1);
+    return pieces.filter(condition);
 }
 
 function is_valid_square(x:number, y:number):boolean{
@@ -73,8 +77,8 @@ function is_valid_square(x:number, y:number):boolean{
 }
 
 function dir_to_square(old_x:number, old_y:number, dir:dir, board:boardDatas):squaremove{
-    const x = old_x+dir[0];
-    const y = old_y+dir[1];
+    const x:number = old_x+dir[0];
+    const y:number = old_y+dir[1];
     return {
         x: x,
         y: y,
@@ -83,45 +87,50 @@ function dir_to_square(old_x:number, old_y:number, dir:dir, board:boardDatas):sq
 }
 
 function get_dirs_knight_king(piece:piece, board:boardDatas, dirs:dirs):squaremove[]{
-    const filter_square = function (piece:piece, board:boardDatas, dir:dir):boolean{
+    //check if the destination of the dir is valid for the piece
+    const is_valid_dir = function (dir:dir):boolean{
         const target_x:number = piece.x+dir[0];
         const target_y:number = piece.y+dir[1];
         if (!is_valid_square(target_x, target_y))return false;
         const target_square:square = board[target_y][target_x];
         return target_square===0 || target_square.color!==piece.color;
     }
-    const get_dirs = function (piece:piece, board:boardDatas, dirs:dirs):dirs{
-        return dirs.filter((dir)=>filter_square(piece, board, dir));
-    }
-    const good_dirs:dirs = get_dirs(piece, board, dirs)
+
+    const good_dirs:dirs = dirs.filter(is_valid_dir);
+
     const squares:squaremove[] = good_dirs.map((dir)=>dir_to_square(piece.x, piece.y, dir, board));
 
     return squares;
 }
 
-function get_dir_qrb(color:color, old_x:number, old_y:number, board:boardDatas, dir:dir, deep:number=1):dirs{
-    const x:number = old_x+dir[0]*deep;
-    const y:number = old_y+dir[1]*deep;
-    if (!is_valid_square(x, y))return [];
-    if (board[y][x]===0)return [[x, y]].concat(get_dir_qrb(color, old_x, old_y, board, dir, deep+1));
-    const current_square = board[y][x] as piece;
-    if (current_square.color!==color)return [[x, y]];
-    return [];
+function get_dir_qrb(color:color, old_x:number, old_y:number, board:boardDatas, dir:dir):squaremove[]{
+    let squares:squaremove[] = [];
+    for (let i=1;;i++){
+        const x:number = old_x + dir[0]*i;
+        const y:number = old_y + dir[1]*i;
+        //outside the board
+        if (!is_valid_square(x, y))break;
+
+        const current_square = board[y][x];
+        //piece of the same color
+        if (current_square!==0 && current_square.color===color)break;
+
+        squares.push({
+            x: x,
+            y: y,
+            is_taking: board[y][x]!==0
+        });
+        //piece of the other color
+        if (current_square!==0)break;
+    }
+    return squares;
 }
 
 //get the directions for the queen, the rook and the bishop
 function get_dirs_qrb(piece:piece, board:boardDatas, dirs:dirs):squaremove[]{
-    const good_dirs:dirs[] = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
-    const good_dirs_filtered:dirs[] = good_dirs.filter((dir)=>dir.length>0);
-    //concat
-    let final_dirs:dirs = [];
-    for (const dirs of good_dirs_filtered){
-        for (const dir of dirs){
-            final_dirs.push(dir);
-        }
-    }
-    const squares:squaremove[] = final_dirs.map((dir)=>dir_to_square(0, 0, dir, board));
-    return squares;
+    //get the coords ([x, y]) for each dir
+    const squares:squaremove[][] = dirs.map((dir)=>get_dir_qrb(piece.color, piece.x, piece.y, board, dir));
+    return squares.flat(1);
 }
 
 class Move{
