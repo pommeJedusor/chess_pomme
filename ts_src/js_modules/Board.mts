@@ -481,24 +481,23 @@ class Pawn extends Piece implements piece{
             }
         }
         //en-passant
-        const dir:1|-1 = piece.color ? 1 : -1;
-        if (x===move.target_x && y===move.target_y+dir && board[move.target_y][move.target_x]===0)return 0;
+        if (x===move.target_x && y===move.y && board[move.target_y][move.target_x]===0)return 0;
 
         return square;
     }
-    check_promotion(piece_type:piecetype, piece_x:number, piece_y:number, x:number, y:number, is_taking:boolean){
-        let moves:Move[];
+    check_promotion(piece_type:piecetype, piece_x:number, piece_y:number, x:number, y:number, is_taking:boolean):Move[]{
         if (y===7 || y===0){
             let promotions = ["=Q", "=R", "=N", "=B"];
-            moves = promotions.map(function (promotion){
+            const moves = promotions.map(function (promotion){
                 const move = new Move(piece_type, piece_x, piece_y, x, y, is_taking);
                 move.promotion = promotion;
                 return move;
             });
+            return moves;
         }else {
-            moves = [new Move(piece_type, piece_x, piece_y, x, y, is_taking)];
+            const moves = [new Move(piece_type, piece_x, piece_y, x, y, is_taking)];
+            return moves;
         }
-        return moves;
     }
     get_moves(board:board, piece:piece, all_moves:Move[], deep:number=0):Move[] {
         let moves = [];
@@ -508,29 +507,26 @@ class Pawn extends Piece implements piece{
         //single and double push
         if (board.board[y+direction][x]===0){
             moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction,false));
-            if (((y+direction*2===4 && y===6) || (y+direction*2==3 && y===1)) && board.board[y+direction*2][x]===0){
+            if ((piece.color===WHITE && y===1 || piece.color===BLACK && y===6) && board.board[y+direction*2][x]===0){
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y+direction*2,false));
             }
         }
         //normal takes
-        const xys:number[][] = [[x-1, y+direction], [x+1, y+direction]]
+        const xys:number[][] = [[x-1, y+direction], [x+1, y+direction]].filter((xy)=>is_valid_square(xy[0], xy[1]));
         for (const xy of xys){
             const x:number = xy[0];
             const y:number = xy[1];
-            if (!is_valid_square(x, y))continue;
             const square:square = board.board[y][x];
+
             if (square && square.color!==piece.color){
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
             }
-            
         }
         //en-passant
-        const last_move:Move = all_moves.at(-1) as Move;
         for (const move of [-1, 1]){
-            if (!last_move || (piece.color===WHITE && piece.y!==4) || (piece.color===BLACK && piece.y!==3))break;
             const x:number = piece.x + move;
             const y:number = piece.y + direction;
-            if (get_square(x, y)===board.en_passant){
+            if (is_valid_square(x, y) && get_square(x, y)===board.en_passant){
                 moves.push(...this.check_promotion(piece.type, piece.x, piece.y, x, y,true));
             }
         }
