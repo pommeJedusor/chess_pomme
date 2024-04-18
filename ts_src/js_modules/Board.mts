@@ -313,14 +313,14 @@ class Board implements board{
         }
         for (const [notation, moves] of Object.entries(moves_hashtable)) {
             if (moves.length<2)continue;
-            for (let i:number=0;i<moves.length;i++){
-                const move:Move = moves_hashtable[notation][i];
+            for (let i=0;i<moves.length;i++){
+                const move:Move = moves[i];
                 let same_column:boolean = false;
                 let same_line:boolean = false;
-                for (let j:number=0;j<moves.length;j++){
+                for (let j=0;j<moves.length;j++){
                     if (j===i)continue;
-                    if (moves[i].x===moves[j].x)same_column=true;
-                    if (moves[i].y===moves[j].y)same_line=true;
+                    if (move.x===moves[j].x)same_column=true;
+                    if (move.y===moves[j].y)same_line=true;
                 }
                 if (same_line && same_column)move.precision=get_square(move.x, move.y);
                 else if (same_column)move.precision=(move.y+1).toString();
