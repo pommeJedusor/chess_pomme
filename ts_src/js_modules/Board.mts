@@ -35,8 +35,6 @@ interface piece {
     type:piecetype;
     is_legal_move:(board:board, move:Move, moves:Move[], deep:number)=>boolean;
     do_move:(board:boardDatas, move:Move, edit_func:Piece["edit_func"])=>boardDatas;
-    move:(board:boardDatas, x:number, y:number)=>square;
-    undo_move:(board:boardDatas, x:number, y:number, piece:piece)=>void;
     get_moves:(board:board, piece:piece, all_moves:Move[], deep:number)=>Move[];
     edit_func:(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move)=>square;
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
@@ -427,8 +425,10 @@ class Piece implements piece{
 
         const king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color===piece.color && square.type===KING)[0] as King;
         const other_king:King = get_pieces(board.board ,(square:square)=>square!==0 && square.color!==piece.color && square.type===KING)[0] as King;
+
         const is_legal:boolean = !king.is_in_check(board.board);
-        if (!is_legal)return is_legal;
+        if (!is_legal)return false;
+
         move.is_check = other_king.is_in_check(board.board);
         if (move.is_check && deep===0){
             if (board.get_every_moves(deep+1).length===0){
@@ -440,7 +440,7 @@ class Piece implements piece{
                 move.is_draw = true;
             }
         }
-        return is_legal;
+        return true;
     }
     do_move(board:boardDatas, move:Move, edit_func:Piece["edit_func"]):boardDatas{
         const piece:Piece = this;
@@ -451,25 +451,12 @@ class Piece implements piece{
         });
         return new_board;
     }
-    move(board:boardDatas, x:number, y:number):square{
-        const square:square = board[y][x];
-        board[y][x] = this;
-        board[this.y][this.x] = 0;
-        this.y = y;
-        this.x = x;
-        return square;
-    }
-    undo_move(board:boardDatas, x:number, y:number, piece:piece):void{
-        board[y][x] = this;
-        board[this.y][this.x] = piece;
-        this.y = y;
-        this.x = x;
-    }
     get_moves(board:board, piece:piece, all_moves:Move[], deep:number=0){
         if (!piece.get_squares)throw Error("Board.mts: line 320: the object piece doesn't have the get_squares method");
+
         const squares:squaremove[] = piece.get_squares(board.board, piece);
-        const moves = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square.x, square.y, square.is_taking));
-        const legal_moves = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
+        const moves:Move[] = squares.map((square)=>new Move(piece.type, piece.x, piece.y, square.x, square.y, square.is_taking));
+        const legal_moves:Move[] = moves.filter((move)=>piece.is_legal_move(board, move, all_moves, deep));
         return legal_moves;
     }
 }
