@@ -208,6 +208,53 @@ class Board implements board{
         this.fullmove_number = fullmove_number || 1;
     }
 
+    get_board_copy():boardDatas{
+        const new_board = this.board.map((line)=>{
+            return line.map((square)=>{
+                if (square===0)return square;
+                switch (square.type){
+                    case "P":
+                        return new Pawn(square.x, square.y, square.color);
+                    case "K":
+                        return new King(square.x, square.y, square.color);
+                    case "Q":
+                        return new Queen(square.x, square.y, square.color);
+                    case "R":
+                        return new Rook(square.x, square.y, square.color);
+                    case "B":
+                        return new Bishop(square.x, square.y, square.color);
+                    case "N":
+                        return new Knight(square.x, square.y, square.color);
+                }
+            })
+        })
+        return new_board;
+    }
+
+    get_copy():board{
+        const board_datas:boardDatas = this.get_board_copy();
+        const moves = this.moves.map((move)=>move);
+        const player = this.current_player
+        const castles = {
+            "white_kingside": this.castles.white_kingside,
+            "white_queenside": this.castles.white_queenside,
+            "black_kingside": this.castles.black_kingside,
+            "black_queenside": this.castles.black_queenside
+        };
+        const passant = this.en_passant;
+        const halfmove = this.halfmove_clock;
+        const fullmove = this.fullmove_number;
+        return new Board(
+            board_datas,
+            moves,
+            player,
+            castles,
+            passant,
+            halfmove,
+            fullmove
+        );
+    }
+
     see_board():void{
         for (let i:number=this.board.length-1;i>=0;i--){
             let text:string = "";
