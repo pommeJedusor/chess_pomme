@@ -1,5 +1,4 @@
-import { square, boardDatas, color, dir, dirs, piecetype, castles, squaremove, piece, move, board } from "./chesstypes.mjs"
-
+import { board, boardDatas, castles, color, dir, dirs, move, piece, piecetype, square, squaremove } from "../types";
 const WHITE:color = 0;
 const BLACK:color = 1;
 const COLUMNS:string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -9,7 +8,7 @@ function get_square(x:number, y:number):string{
     return COLUMNS[x] + (y+1);
 }
 
-function get_pieces(board:boardDatas, condition:(square: square)=>boolean):square[]{
+function get_pieces(board:boardDatas, condition:(square:square)=>boolean):square[]{
     const pieces:square[] = board.flat(1);
     return pieces.filter(condition);
 }

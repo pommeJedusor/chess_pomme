@@ -9,6 +9,9 @@ import * as ws_controller from "./js_modules/ws_controller.mjs";
 import * as Game from "./model/Game.mjs";
 
 const port:number = 8080;
+const DEFAULT_STOCKFISH_LEVEL:number = 20;
+const MAX_STOCKFISH_LEVEL:number = 20;
+const MIN_STOCKFISH_LEVEL:number = 0;
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
@@ -133,29 +136,28 @@ const ws_server = new ws.WebSocketServer({
 	port: 3000
 });
 
-let sockets = [];
-let socket_games:any = [];
-let id_games:any = [];
+let sockets:ws.WebSocket[] = [];
+let socket_games:Game.Game[] = [];
+let id_games:any[] = [];
 let bot_id_games:any = [];
 
-ws_server.on('connection', function(socket) {
+ws_server.on('connection', function(socket:ws.WebSocket) {
 	sockets.push(socket);
-	const socket_id = Math.floor(Math.random()*1000000)
+	const socket_id:number = Math.floor(Math.random()*1000000)
 	let is_against_bot:boolean = false;
 	let is_against_player:boolean = false;
 	let bot_level:number;
 
-	socket.on('message', function(m) {
+	socket.on('message', function(m:ws.RawData) {
 		const msg:string = m.toString();
 		//init games
 		//against player
 		if (/^ID:/.test(msg)){
 			if (is_against_bot || is_against_player){
-				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre game");
+				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre partie");
 			}
 			else {
 				ws_chess.join_create_game(socket, socket_id, msg, id_games, socket_games, sockets);
-				is_against_bot = false;
 				is_against_player = true;
 			}
 			return;
@@ -163,15 +165,18 @@ ws_server.on('connection', function(socket) {
 		//against stockfish
 		else if (/^stockfish:/.test(msg)){
 			if (is_against_bot || is_against_player){
-				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre game");
+				socket.send("vous ne pouvez pas rejoindre une partie avec la même ws que vous utiliser pour une autre partie");
+				return;
 			}
-			else {
-				if (msg==="stockfish:")bot_level = 20;
-				else bot_level = Number((msg.match(/^stockfish:(\d*)/) || ["","10"])[1]);
-				wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
-				is_against_bot = true;
-				is_against_player = false;
-			}
+			//get the level (default => 20)
+			const str_level:string = msg.slice("stockfish:".length);
+			let level:number = DEFAULT_STOCKFISH_LEVEL;
+			//if level is number
+			if (/^\d+$/.test(str_level))level = Number(str_level);
+			if (level>MAX_STOCKFISH_LEVEL || level<MIN_STOCKFISH_LEVEL)level = DEFAULT_STOCKFISH_LEVEL;
+
+			wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
+			is_against_bot = true;
 			return;
 		}
 		//redirect to the controller needed

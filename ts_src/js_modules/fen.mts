@@ -1,4 +1,4 @@
-import { square, boardDatas, color, dir, dirs, piecetype, castles, squaremove, piece } from "./chesstypes.mjs"
+import { boardDatas, castles, color, square } from "../types";
 
 import * as Game from "./Board.mjs";
 

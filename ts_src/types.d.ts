@@ -1,16 +1,17 @@
+type pomme = number;
 type square = piece | 0;
 type boardDatas = square[][];
 type color = 0|1
 type dir = number[];
 type dirs = dir[];
-enum piecetype {
+export enum piecetype {
     Pawn = "P",
     King = "K",
     Queen = "Q",
     Rook = "R",
     Bishop = "B",
     Knight = "N"
-};
+}
 
 
 interface castles{
@@ -67,5 +68,3 @@ interface piece {
     get_moves:(board:board, piece:piece, all_moves:move[], deep:number)=>move[];
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
 }
-
-export { square, boardDatas, color, dir, dirs, piecetype, castles, squaremove, piece, move, board };
