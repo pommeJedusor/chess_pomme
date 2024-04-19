@@ -1,4 +1,13 @@
-import { board, boardDatas, castles, color, dir, dirs, move, piece, piecetype, square, squaremove } from "../types";
+import { board, boardDatas, castles, color, dir, dirs, move, piece, square, squaremove } from "../types";
+enum piecetype {
+    Pawn = "P",
+    King = "K",
+    Queen = "Q",
+    Rook = "R",
+    Bishop = "B",
+    Knight = "N"
+}
+
 const WHITE:color = 0;
 const BLACK:color = 1;
 const COLUMNS:string[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
@@ -172,6 +181,8 @@ class Board implements board{
                         return new Bishop(square.x, square.y, square.color);
                     case piecetype.Knight:
                         return new Knight(square.x, square.y, square.color);
+                    default:
+                        return 0;
                 }
             })
         })

@@ -1,20 +1,11 @@
-type pomme = number;
-type square = piece | 0;
-type boardDatas = square[][];
-type color = 0|1
-type dir = number[];
-type dirs = dir[];
-export enum piecetype {
-    Pawn = "P",
-    King = "K",
-    Queen = "Q",
-    Rook = "R",
-    Bishop = "B",
-    Knight = "N"
-}
+export type pomme = number;
+export type square = piece | 0;
+export type boardDatas = square[][];
+export type color = 0|1
+export type dir = number[];
+export type dirs = dir[];
 
-
-interface castles{
+export interface castles{
     white_kingside:boolean,
     white_queenside:boolean,
     black_kingside:boolean,
@@ -27,7 +18,7 @@ interface squaremove{
     is_taking:boolean;
 }
 
-interface move{
+export interface move{
     readonly piece:string;
     readonly x:number;
     readonly y:number;
@@ -42,7 +33,7 @@ interface move{
     get_notation_move:()=>string;
 }
 
-interface board{
+export interface board{
     board:boardDatas;
     moves:move[];
     current_player:color;
@@ -57,7 +48,7 @@ interface board{
     get_copy:()=>board;
 }
 
-interface piece {
+export interface piece {
     x:number;
     y:number;
     color:color;
@@ -69,7 +60,7 @@ interface piece {
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
 }
 
-interface game {
+export interface game {
     player_1:Player;
     player_2:Player|undefined;
     id:number;
