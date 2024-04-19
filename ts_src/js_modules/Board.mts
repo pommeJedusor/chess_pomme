@@ -35,33 +35,11 @@ interface piece {
     y:number;
     color:color;
     type:piecetype;
-    is_legal_move:(board:board, move:Move, moves:Move[], deep:number)=>boolean;
+    is_legal_move:(board:Board, move:Move, moves:Move[], deep:number)=>boolean;
     edit_func:(piece:piece, square:square, x:number, y:number, board:boardDatas, move:Move)=>square;
     do_move:(board:boardDatas, move:Move, edit_func:piece["edit_func"])=>boardDatas;
-    get_moves:(board:board, piece:piece, all_moves:Move[], deep:number)=>Move[];
+    get_moves:(board:Board, piece:piece, all_moves:Move[], deep:number)=>Move[];
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
-}
-
-interface board {
-    board:boardDatas;
-    moves:Move[];
-    //current_player: next player to play
-    current_player:color;
-    //castles: ability for the king to castle in the futur
-    castles:castles
-    //en_passant: the square over which a pawn has just passed while moving two squares;
-    en_passant:string|undefined;
-    //halfmove_clock: The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
-    halfmove_clock:number;
-    //fullmove_number: The number of the full moves. It starts at 1 and is incremented after Black's move.
-    fullmove_number:number;
-    see_board:()=>void;
-    get_new_board:()=>boardDatas;
-    get_every_moves:(deep:number)=>Move[];
-    make_move:(piece:piece, move:Move)=>void;
-    make_move_notation:(piece:piece, move:string)=>void;
-    get_board_copy:()=>boardDatas;
-    get_copy:()=>board;
 }
 
 function get_square(x:number, y:number):string{
@@ -160,15 +138,15 @@ class Move{
         this.precision = "";//if two piece of the same type can go on the same square
         this.promotion = "";
     }
-    get_target_square():string{
+    private get_target_square():string{
         return get_square(this.target_x, this.target_y);
     }
-    get_piece_notation():string{
+    private get_piece_notation():string{
         if (this.piece===piecetype.Pawn && !this.is_taking)return "";
         else if (this.piece===piecetype.Pawn)return COLUMNS[this.x];
         return this.piece;
     }
-    get_notation_move():string{
+    public get_notation_move():string{
         const piece:string = this.get_piece_notation();
         const precision:string = this.precision;
         const taking:string = this.is_taking ? "x" : "";
@@ -186,13 +164,18 @@ class Move{
     }
 }
 
-class Board implements board{
+class Board{
     board:boardDatas;
     moves:Move[];
+    //current_player: next player to play
     current_player:color;
+    //castles: ability for the king to castle in the futur
     castles:castles;
+    //en_passant: the square over which a pawn has just passed while moving two squares;
     en_passant:string|undefined;
+    //halfmove_clock: The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
     halfmove_clock:number;
+    //fullmove_number: The number of the full moves. It starts at 1 and is incremented after Black's move.
     fullmove_number:number;
 
     constructor(board?:boardDatas, moves?:Move[], current_player?:color, castles?:castles, en_passant?:string, halfmove_clock?:number, fullmove_number?:number){
@@ -233,7 +216,7 @@ class Board implements board{
         return new_board;
     }
 
-    get_copy():board{
+    get_copy():Board{
         const board_datas:boardDatas = this.get_board_copy();
         const moves = this.moves.map((move)=>move);
         const player = this.current_player
@@ -417,8 +400,8 @@ class Piece implements piece{
         this.color = color;
         this.type = type;
     }
-    is_legal_move(origin_board:board, move:Move, moves:Move[], deep:number):boolean{
-        let board:board = origin_board.get_copy();
+    is_legal_move(origin_board:Board, move:Move, moves:Move[], deep:number):boolean{
+        let board:Board = origin_board.get_copy();
         const piece:square = board.board[move.y][move.x];
         //check if there is a piece to move
         if (piece===0)return false;
@@ -453,7 +436,7 @@ class Piece implements piece{
         });
         return new_board;
     }
-    get_moves(board:board, piece:piece, all_moves:Move[], deep:number=0){
+    get_moves(board:Board, piece:piece, all_moves:Move[], deep:number=0){
         if (!piece.get_squares)throw Error("Board.mts: line 320: the object piece doesn't have the get_squares method");
 
         const squares:squaremove[] = piece.get_squares(board.board, piece);
@@ -501,7 +484,7 @@ class Pawn extends Piece implements piece{
             return moves;
         }
     }
-    get_moves(board:board, piece:piece, all_moves:Move[], deep:number=0):Move[] {
+    get_moves(board:Board, piece:piece, all_moves:Move[], deep:number=0):Move[] {
         let moves = [];
         const x:number = piece.x;
         const y:number = piece.y;
@@ -555,7 +538,7 @@ class King extends Piece implements piece{
 
         else return square;
     }
-    get_moves(board:board, _:piece, all_moves:Move[], deep:number=0):Move[] {
+    get_moves(board:Board, _:piece, all_moves:Move[], deep:number=0):Move[] {
         let piece:King = this;
         let moves:Move[] = [];
         const dirs:(-1|0|1)[] = [-1, 0, 1];
