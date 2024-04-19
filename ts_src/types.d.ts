@@ -68,3 +68,18 @@ interface piece {
     get_moves:(board:board, piece:piece, all_moves:move[], deep:number)=>move[];
     get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
 }
+
+interface game {
+    player_1:Player;
+    player_2:Player|undefined;
+    id:number;
+    board:board;
+    moves:Move[];
+    result:string|null;
+    timestamp;//ms
+    play:(move:string, filter_good_move:(m:move)=>boolean)=>boolean;
+    finish:(winner:Player, message:string)=>void;
+    close:(id_games:(game|undefined), socket_games:(game|undefined)[], sockets:(WebSocket|undefined)[])=>void;
+    check_timeout:()=>void;
+    get_pgn:()=>string;
+}

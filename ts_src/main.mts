@@ -7,6 +7,7 @@ import * as ws_chess from "./js_modules/ws.mjs";
 import * as wstockfish from "./stockfish/wstockfish.mjs";
 import * as ws_controller from "./js_modules/ws_controller.mjs";
 import * as Game from "./model/Game.mjs";
+import { game } from "./types";
 
 const port:number = 8080;
 const DEFAULT_STOCKFISH_LEVEL:number = 20;
@@ -137,9 +138,9 @@ const ws_server = new ws.WebSocketServer({
 });
 
 let sockets:ws.WebSocket[] = [];
-let socket_games:Game.Game[] = [];
-let id_games:any[] = [];
-let bot_id_games:any = [];
+let socket_games:game[] = [];
+let id_games:game[] = [];
+let bot_id_games:game[] = [];
 
 ws_server.on('connection', function(socket:ws.WebSocket) {
 	sockets.push(socket);

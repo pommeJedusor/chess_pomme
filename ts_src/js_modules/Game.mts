@@ -1,4 +1,4 @@
-import { board, move, piece } from "../types";
+import { board, color, game, move, piece } from "../types";
 
 import * as Board from "./Board.mjs";
 import * as ModelGame from "../model/Game.mjs";
@@ -35,7 +35,7 @@ class Game{
         console.log(good_move.get_notation_move());
         return true;
     }
-    finish(winner:Player, message:string, id_games:number[], socket_games, sockets:WebSocket){
+    finish(winner:Player, message:string):void{
         if (winner===null){
             if (this.player_1 && this.player_1.socket)this.player_1.socket.send("R:D:"+message);
             if (this.player_2 && this.player_2.socket)this.player_2.socket.send("R:D:"+message);
@@ -55,36 +55,38 @@ class Game{
         const winner_db = this.result === "D" ? "draw" : "W" ? "white" : "black";
         ModelGame.insert_game(this.get_pgn(), winner_db, message);
     }
-    close(id_games, socket_games, sockets){
-        const do_player_1 = this.player_1 && this.player_1.socket;
-        const do_player_2 = this.player_2 && this.player_2.socket;
-
-        if (do_player_1)this.player_1.socket.close();
-        if (do_player_2)this.player_2.socket.close();
-        //delete the game
+    close(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(WebSocket|undefined)[]):void{
         id_games[this.id] = undefined;
-        if (do_player_1)socket_games[this.player_1.socket_id] = undefined;
-        if (do_player_2)socket_games[this.player_2.socket_id] = undefined;
-        //delete sockets
-        if (do_player_1)sockets[this.player_1.socket_id] = undefined;
-        if (do_player_2)sockets[this.player_2.socket_id] = undefined;
-    }
-    check_timeout(id_games, socket_games, sockets){
-        const player_turn = this.moves.length%2+1;
-        const current_player = [this.player_1, this.player_2][player_turn-1];
-        //if game finished
-        if (!current_player)return;
-        const total_timestamp = current_player.total_timestamp - (this.moves.length<2 ? 0 : Date.now() - this.moves.at(-2).timestamp);
-        if (total_timestamp<=0){
-            const winner = this.player_1===current_player ? this.player_2 : this.player_1;
-            this.finish(winner, "timeout", id_games, socket_games, sockets);
+
+        //player 1
+        if (this.player_1 && this.player_1.socket){
+            this.player_1.socket.close();
+            socket_games[this.player_1.socket_id] = undefined;
+            sockets[this.player_1.socket_id] = undefined;
+        }
+        //player 2
+        if (this.player_2 && this.player_2.socket){
+            this.player_2.socket.close();
+            socket_games[this.player_2.socket_id] = undefined;
+            sockets[this.player_2.socket_id] = undefined;
         }
     }
-    get_pgn(){
-        let pgn = "";
+    check_timeout():void{
+        const player_turn:color = this.board.current_player;
+        const current_player:Player|undefined = [this.player_1, this.player_2][player_turn];
+        //if game finished
+        if (!current_player)return;
+        const total_timestamp:number = current_player.total_timestamp - (this.moves.length<2 ? 0 : Date.now() - this.moves.at(-2)!.timestamp);
+        if (total_timestamp<=0){
+            const winner:Player|undefined = this.player_1===current_player ? this.player_2 : this.player_1;
+            if (winner)this.finish(winner, "timeout");
+        }
+    }
+    get_pgn():string{
+        let pgn:string = "";
         for (let i=0;i<this.moves.length;i++){
             console.log(this.moves[i].move)
-            const move = this.moves[i].move;
+            const move:string = this.moves[i].move;
             if (i)pgn+=" ";
             if (i%2===0)pgn+=`${Math.floor(i/2)+1}. `;
             pgn+=move;
@@ -94,7 +96,12 @@ class Game{
 }
 
 class Player{
-    constructor(socket,socket_id, total_timestamp){
+    socket:WebSocket;
+    socket_id:number;
+    total_timestamp:number;
+    draw_proposal:boolean;
+    rematch_proposal:boolean;
+    constructor(socket:WebSocket, socket_id:number, total_timestamp:number){
         this.socket = socket;
         this.socket_id = socket_id;
         this.total_timestamp = total_timestamp;
@@ -104,10 +111,10 @@ class Player{
 }
 
 class Move{
-    move;
+    move:string;
     timestamp:number;
     player:Player;
-    constructor(move, timestamp:number, player:Player){
+    constructor(move:string, timestamp:number, player:Player){
         this.move = move;
         this.timestamp = timestamp;
         this.player = player;
