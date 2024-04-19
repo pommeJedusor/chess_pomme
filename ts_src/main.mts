@@ -76,6 +76,12 @@ const server = http.createServer(function (req, res){
 				else return_http_result(200, res, {'Content-Type':'text/javascript'}, data);
 			})
 			return
+		case "/js/chess_game/chesstypes.mjs":
+			fs.readFile("./js_modules/chesstypes.mjs",function(err, data){
+				if (err)return_http_error(400, res, "file not found");
+				else return_http_result(200, res, {'Content-Type':'text/javascript'}, data);
+			})
+			return
 		case "/favicon.ico":
 			fs.readFile("./public/img/apple.svg",function(err, data){
 				if (err)return_http_error(400, res, "file not found");

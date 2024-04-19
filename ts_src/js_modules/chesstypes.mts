@@ -1,0 +1,71 @@
+type square = piece | 0;
+type boardDatas = square[][];
+type color = 0|1
+type dir = number[];
+type dirs = dir[];
+enum piecetype {
+    Pawn = "P",
+    King = "K",
+    Queen = "Q",
+    Rook = "R",
+    Bishop = "B",
+    Knight = "N"
+};
+
+
+interface castles{
+    white_kingside:boolean,
+    white_queenside:boolean,
+    black_kingside:boolean,
+    black_queenside:boolean
+}
+
+interface squaremove{
+    x:number;
+    y:number;
+    is_taking:boolean;
+}
+
+interface move{
+    readonly piece:string;
+    readonly x:number;
+    readonly y:number;
+    readonly target_x:number;
+    readonly target_y:number;
+    is_taking:boolean;
+    is_check:boolean;
+    is_mate:boolean;
+    is_draw:boolean;
+    precision:string;
+    promotion:string;
+    get_notation_move:()=>string;
+}
+
+interface board{
+    board:boardDatas;
+    moves:move[];
+    current_player:color;
+    castles:castles;
+    en_passant:string|undefined;
+    halfmove_clock:number;
+    fullmove_number:number;
+    see_board:()=>void;
+    get_every_moves:(deep:number)=>move[];
+    make_move:(piece: piece, move: move)=>void;
+    make_move_notation:(piece: piece, notation: string)=>void;
+    get_copy:()=>board;
+}
+
+interface piece {
+    x:number;
+    y:number;
+    color:color;
+    type:piecetype;
+    is_legal_move:(board:board, move:move, moves:move[], deep:number)=>boolean;
+    edit_func:(piece:piece, square:square, x:number, y:number, board:boardDatas, move:move)=>square;
+    do_move:(board:boardDatas, move:move, edit_func:piece["edit_func"])=>boardDatas;
+    get_moves:(board:board, piece:piece, all_moves:move[], deep:number)=>move[];
+    get_squares?:(board:boardDatas, piece:piece)=>squaremove[];
+}
+
+export { square, boardDatas, color, dir, dirs, piecetype, castles, squaremove, piece, move, board };
