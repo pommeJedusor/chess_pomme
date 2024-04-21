@@ -34,7 +34,7 @@ function get_active_color(current_player:color):string{
 }
 
 function get_castling(castles:castles):string{
-    let result = "";
+    let result:string = "";
     //white
     result+=castles.white_kingside ? "K" : "";
     result+=castles.white_queenside ? "Q" : "";
@@ -45,12 +45,12 @@ function get_castling(castles:castles):string{
 }
 
 function get_fen(game:Game.Board):string{
-    const placement_data = get_placement_data(game.board);
-    const active_color = get_active_color(game.current_player);
-    const castling = get_castling(game.castles);
-    const en_passant = game.en_passant;
-    const halfmove_clock = game.halfmove_clock;
-    const full_move_number = game.fullmove_number;
+    const placement_data:string = get_placement_data(game.board);
+    const active_color:string = get_active_color(game.current_player);
+    const castling:string = get_castling(game.castles);
+    const en_passant:string = game.en_passant || "-";
+    const halfmove_clock:string = game.halfmove_clock.toString();
+    const full_move_number:string = game.fullmove_number.toString();
     return placement_data+" "+active_color+" "+castling+" "+en_passant+" "+halfmove_clock+" "+full_move_number;
 }
 
