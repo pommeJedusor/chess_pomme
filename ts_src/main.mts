@@ -7,6 +7,11 @@ import * as ws_chess from "./js_modules/ws.mjs";
 import * as wstockfish from "./stockfish/wstockfish.mjs";
 import * as ws_controller from "./js_modules/ws_controller.mjs";
 import * as Game from "./model/Game.mjs";
+
+//controller
+import * as login_controller from "./controller/login.mjs";
+import * as signup_controller from "./controller/signup.mjs";
+
 import { game } from "./types";
 
 const port:number = 8080;
@@ -73,6 +78,12 @@ const server = http.createServer(function (req, res){
 				return_http_result(200, res, {'Content-Type':'text/html'}, htmlRenderized);
 			}
 			send_response();
+			return
+		case "/login":
+			login_controller.main(res);
+			return
+		case "/signup":
+			signup_controller.main(req, res);
 			return
 		case "/js/chess_game/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){

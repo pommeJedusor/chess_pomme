@@ -2,10 +2,11 @@ node_modules/
 package-lock.json
 stockfish/stockfish
 config.json
-model/Game.mjs
+model/*.mjs
 main.mjs
 js_modules/Board.mjs
 js_modules/fen.mjs
 js_modules/chesstypes.mjs
 js_modules/Game.mjs
 js_modules/ws.mjs
+controller/*.mjs
