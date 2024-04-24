@@ -8,3 +8,4 @@ js_modules/Board.mjs
 js_modules/fen.mjs
 js_modules/chesstypes.mjs
 js_modules/Game.mjs
+js_modules/ws.mjs

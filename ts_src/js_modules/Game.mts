@@ -2,8 +2,9 @@ import { board, color, game, move, piece } from "../types";
 
 import * as Board from "./Board.mjs";
 import * as ModelGame from "../model/Game.mjs";
+import ws from "ws";
 
-class Game{
+class Game implements game{
     player_1:Player;
     player_2:Player|undefined;
     id:number;
@@ -35,7 +36,7 @@ class Game{
         console.log(good_move.get_notation_move());
         return true;
     }
-    finish(winner:Player, message:string):void{
+    finish(winner:Player|null, message:string):void{
         if (winner===null){
             if (this.player_1 && this.player_1.socket)this.player_1.socket.send("R:D:"+message);
             if (this.player_2 && this.player_2.socket)this.player_2.socket.send("R:D:"+message);
@@ -55,7 +56,7 @@ class Game{
         const winner_db = this.result === "D" ? "draw" : "W" ? "white" : "black";
         ModelGame.insert_game(this.get_pgn(), winner_db, message);
     }
-    close(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(WebSocket|undefined)[]):void{
+    close(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(ws.WebSocket|undefined)[]):void{
         id_games[this.id] = undefined;
 
         //player 1
@@ -96,12 +97,12 @@ class Game{
 }
 
 class Player{
-    socket:WebSocket;
+    socket:ws.WebSocket;
     socket_id:number;
     total_timestamp:number;
     draw_proposal:boolean;
     rematch_proposal:boolean;
-    constructor(socket:WebSocket, socket_id:number, total_timestamp:number){
+    constructor(socket:ws.WebSocket, socket_id:number, total_timestamp:number){
         this.socket = socket;
         this.socket_id = socket_id;
         this.total_timestamp = total_timestamp;
