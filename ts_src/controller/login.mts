@@ -22,22 +22,22 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
             const json_response = JSON.parse(text_response);
             const username = json_response.username;
             const password = json_response.password;
-            const result = await UserModel.is_correct_login(username, password);
-            if (!result){
+            const user = await UserModel.is_correct_login(username, password);
+            if (!user){
                 return return_http_error(400, res, "wrong credentials");
             }
-            res.setHeader("Set-Cookie", `username=${username}`);
+
+			const auth_cookie:string = await user.set_cookie();
+
+			res.setHeader("Set-Cookie", `auth_cookie=${auth_cookie}`);
 			res.writeHead(301, {
 				Location: `http://localhost:8080/`
 			}).end();
 
+			console.log(user);
         }catch (error){
             return return_http_error(405, res, "fail to login");
         }
-		//const htmlContent:string = fs.readFileSync('../views/login.ejs', 'utf8');
-		//const htmlRenderized:string = ejs.render(htmlContent, {filename: 'login.ejs'});
-		//return_http_result(200, res, {'Content-Type':'text/html'}, htmlRenderized);
-		//return return_http_result(200, res, {"Content-Type":"text"}, "salut");
     });
 }
 

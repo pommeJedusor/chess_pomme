@@ -80,7 +80,7 @@ const server = http.createServer(function (req, res){
 			send_response();
 			return
 		case "/login":
-			login_controller.main(res);
+			login_controller.main(req, res);
 			return
 		case "/signup":
 			signup_controller.main(req, res);

@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import mariadb from "mariadb";
 import fs from "fs"; 
+import crypto from "crypto";
 
 //config pool
 let pool:mariadb.Pool|undefined;
@@ -17,6 +18,24 @@ class User {
     constructor(id:number, username:string){
         this.id = id;
         this.username = username;
+    }
+    private async generate_cookie():Promise<string> {
+        return crypto.randomBytes(32).toString('hex').toString();
+    }
+    public async set_cookie():Promise<string>{
+        const cookie:string = await this.generate_cookie();
+        const sql:string = "INSERT INTO `auth_cookie`(`user_id`, `cookie`) VALUES(?,?)";
+        let conn:mariadb.PoolConnection|undefined;
+        try {
+            if (pool===undefined)throw Error("not connected to the db");
+            conn = await pool.getConnection();
+            await conn.query(sql, [this.id, cookie])
+        }catch (error){
+            console.log(`Error while insering the cookie: ${error}`);
+        }finally {
+            if (conn!==undefined)conn.release();
+        }
+        return cookie;
     }
 }
 
