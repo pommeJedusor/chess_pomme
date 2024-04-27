@@ -54,7 +54,7 @@ class Game implements game{
 
         //insert in db
         const winner_db = this.result === "D" ? "draw" : "W" ? "white" : "black";
-        ModelGame.insert_game(this.get_pgn(), winner_db, message);
+        if (this.moves.length>1)ModelGame.insert_game(this.get_pgn(), winner_db, message);
     }
     close(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(ws.WebSocket|undefined)[]):void{
         id_games[this.id] = undefined;
