@@ -12,7 +12,7 @@ export interface castles{
     black_queenside:boolean
 }
 
-interface squaremove{
+export interface squaremove{
     x:number;
     y:number;
     is_taking:boolean;
@@ -73,4 +73,10 @@ export interface game {
     close:(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(ws.WebSocket|undefined)[])=>void;
     check_timeout:()=>void;
     get_pgn:()=>string;
+}
+
+export interface User {
+    username:string;
+    id:number;
+    set_cookie:()=>Promise<string>;
 }

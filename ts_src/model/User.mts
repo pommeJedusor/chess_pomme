@@ -12,7 +12,7 @@ fs.readFile("./config.json", function(err, data) {
     pool = mariadb.createPool(config);
 }); 
 
-class User {
+class User implements User{
     username:string;
     id:number;
     constructor(id:number, username:string){
@@ -27,7 +27,7 @@ class User {
         const sql:string = "INSERT INTO `auth_cookie`(`user_id`, `cookie`) VALUES(?,?)";
         let conn:mariadb.PoolConnection|undefined;
         try {
-            if (pool===undefined)throw Error("not connected to the db");
+            if (pool===undefined)throw "not connected to the db";
             conn = await pool.getConnection();
             await conn.query(sql, [this.id, cookie])
         }catch (error){
@@ -49,7 +49,7 @@ async function check_valid_hash(password:string, hash:string):Promise<boolean>{
 async function insert_user(username:string, password:string):Promise<void>{
     const hash:string = await get_hash(password);
     if (pool===undefined){
-        throw Error("insert user: not connected to the db");
+        throw "insert user: not connected to the db";
     }
     //query
     const sql:string = "INSERT INTO `user` (`username`, `password`) VALUES(?,?)";
@@ -60,7 +60,7 @@ async function insert_user(username:string, password:string):Promise<void>{
         conn = await pool.getConnection();
         await conn.query(sql, [username, hash]);
     }catch (error) {
-        throw Error("failed to insert the user in the db");
+        throw "failed to insert the user in the db";
     }finally {
         if (conn!==undefined)conn.release();
     }
@@ -68,10 +68,10 @@ async function insert_user(username:string, password:string):Promise<void>{
 
 async function signup(username:string, password:string){
     if (pool===undefined){
-        throw Error("not connected to the db");
+        throw "not connected to the db";
     }
-    if (!/^[a-zA-Z0-9 éèàêâôî']*$/.test(username))throw Error("unvalid caracters in the username");
-    if (username.length>30)throw Error("max 30 caracters for the username");
+    if (!/^[a-zA-Z0-9 éèàêâôî']*$/.test(username))throw "unvalid caracters in the username";
+    if (username.length>30)throw "max 30 caracters for the username";
     let conn:mariadb.PoolConnection|undefined;
     const sql_insert_user:string = "INSERT INTO `user`(`username`,`password) VALUES(?,?)";
     const sql_insert_cookie:string = "INSERT INTO `user`(`username`,`password) VALUES(?,?)";
@@ -79,9 +79,9 @@ async function signup(username:string, password:string){
     await conn.beginTransaction();
 }
 
-async function is_correct_login(username:string, password:string):Promise<false|User>{
+async function is_correct_login(username:string, password:string):Promise<User>{
     if (pool===undefined){
-        throw Error("is_correct_login: not connected to the db");
+        throw "is_correct_login: not connected to the db";
     }
     let conn:mariadb.PoolConnection|undefined;
 
@@ -92,11 +92,11 @@ async function is_correct_login(username:string, password:string):Promise<false|
         conn = await pool.getConnection();
         const res = await conn.query(sql, [username]);
         const hash = res[0].password;
-        if (!await check_valid_hash(password, hash))return false;
+        if (!await check_valid_hash(password, hash))throw "wrong credentials";
         return new User(res[0].id, res[0].username);
     }catch (error){
-        console.error("Error retrieving games:", error);
-        return false;
+        if (typeof error === "string")throw error;
+        throw `Error : ${error}`
     }finally {
         if (conn!==undefined)conn.release();
     }
