@@ -22,17 +22,13 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
         try {
             if (!text_response)throw "";
             const datas:Array<string> = text_response.split("&");
-            let user:User;
-            try {
-                const username:string = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
-                const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
-                await UserModel.insert_user(username, password);
-            }catch (error){
-                return return_http_error(400, res, error as string);
-            }
+            const username:string = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
+            const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
+            await UserModel.insert_user(username, password);
             res.writeHead(307, {
                 Location: `http://localhost:8080/login`
             }).end();
+            return;
         }catch (error){
             const htmlContent:string = fs.readFileSync("./views/signup.ejs", "utf8");
             const htmlRenderized:string = ejs.render(htmlContent, {

@@ -1,0 +1,41 @@
+#sign-form {
+    width: 75%;
+    height: 50vh;
+    margin: auto;
+    margin-top: 25vh;
+}
+h1 {
+    margin: 5px;
+}
+#username, #password {
+    height: 4vh;
+    width: calc(100% - 20px - 64px);/*max width - padding*/
+    padding: 0 64px 0 20px;
+    background-color: var(--dark-dark);
+    color: var(--light-light);
+    border: none;
+    border: 1px solid var(--light-dark);
+    border-radius: 15px;
+    text-wrap: wrap;
+    margin-bottom: 2vh;
+}
+#username:focus, #password:focus {
+    background-color: var(--light-dark);
+    outline: none;
+}
+#username:focus::placeholder, #password:focus::placeholder {
+    color: var(--light-dark);
+}
+.error-message {
+    color: var(--user-name);
+}
+input[type="submit"] {
+    width: 40%;
+    height: 4vh;
+    margin-left: 30%;
+    margin-right: 30%;
+    background-color: var(--dark-light);
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+}

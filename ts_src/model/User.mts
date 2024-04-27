@@ -47,10 +47,12 @@ async function check_valid_hash(password:string, hash:string):Promise<boolean>{
 }
 
 async function insert_user(username:string, password:string):Promise<void>{
+    if (await is_username_taken(username))throw "username already exists";
     const hash:string = await get_hash(password);
     if (pool===undefined)throw "insert user: not connected to the db";
     if (!/^[a-zA-Z0-9 éèàêâôî']*$/.test(username))throw "unvalid caracters in the username";
     if (username.length>30)throw "max 30 caracters for the username";
+    if (username.length<3)throw "min 3 caracters for the username";
     //query
     const sql:string = "INSERT INTO `user` (`username`, `password`) VALUES(?,?)";
 
@@ -78,12 +80,33 @@ async function is_correct_login(username:string, password:string):Promise<User>{
         //request
         conn = await pool.getConnection();
         const res = await conn.query(sql, [username]);
+        if (res.length===0)throw "wrong credentials";
         const hash = res[0].password;
         if (!await check_valid_hash(password, hash))throw "wrong credentials";
         return new User(res[0].id, res[0].username);
     }catch (error){
         if (typeof error === "string")throw error;
         throw `Error : ${error}`
+    }finally {
+        if (conn!==undefined)conn.release();
+    }
+}
+
+async function is_username_taken(username:string):Promise<boolean>{
+    if (pool===undefined){
+        throw "is_correct_login: not connected to the db";
+    }
+    let conn:mariadb.PoolConnection|undefined;
+    try {
+        //query
+        const sql:string = "SELECT * FROM `user` WHERE `username`=?;";
+        //request
+        conn = await pool.getConnection();
+        const res = await conn.query(sql, [username]);
+        if (res.length===0)return false;
+        return true;
+    }catch (error){
+        throw error;
     }finally {
         if (conn!==undefined)conn.release();
     }
