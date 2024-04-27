@@ -2,6 +2,7 @@ import fs from "fs";
 import http from "http";
 import * as ejs from "ejs";
 import * as UserModel from "../model/User.mjs";
+import { User } from "../types";
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
@@ -19,10 +20,12 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
     req.on("data", (data)=>text_response+=data)
     .on("end", async ()=>{
         try {
-            const json_response = JSON.parse(text_response);
-            const username = json_response.username;
-            const password = json_response.password;
+            if (!text_response)throw "";
+            const datas:Array<string> = text_response.split("&");
+            let user:User;
             try {
+                const username:string = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
+                const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
                 await UserModel.insert_user(username, password);
             }catch (error){
                 return return_http_error(400, res, error as string);
@@ -31,7 +34,12 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
                 Location: `http://localhost:8080/login`
             }).end();
         }catch (error){
-            return return_http_error(405, res, "fail to signup");
+            const htmlContent:string = fs.readFileSync("./views/signup.ejs", "utf8");
+            const htmlRenderized:string = ejs.render(htmlContent, {
+                filename: "signup.ejs",
+                error: `${error}`
+            });
+            return return_http_result(200, res, {"Content-Type":"text/html"}, htmlRenderized);
         }
     });
 }

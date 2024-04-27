@@ -48,9 +48,9 @@ async function check_valid_hash(password:string, hash:string):Promise<boolean>{
 
 async function insert_user(username:string, password:string):Promise<void>{
     const hash:string = await get_hash(password);
-    if (pool===undefined){
-        throw "insert user: not connected to the db";
-    }
+    if (pool===undefined)throw "insert user: not connected to the db";
+    if (!/^[a-zA-Z0-9 éèàêâôî']*$/.test(username))throw "unvalid caracters in the username";
+    if (username.length>30)throw "max 30 caracters for the username";
     //query
     const sql:string = "INSERT INTO `user` (`username`, `password`) VALUES(?,?)";
 
@@ -64,19 +64,6 @@ async function insert_user(username:string, password:string):Promise<void>{
     }finally {
         if (conn!==undefined)conn.release();
     }
-}
-
-async function signup(username:string, password:string){
-    if (pool===undefined){
-        throw "not connected to the db";
-    }
-    if (!/^[a-zA-Z0-9 éèàêâôî']*$/.test(username))throw "unvalid caracters in the username";
-    if (username.length>30)throw "max 30 caracters for the username";
-    let conn:mariadb.PoolConnection|undefined;
-    const sql_insert_user:string = "INSERT INTO `user`(`username`,`password) VALUES(?,?)";
-    const sql_insert_cookie:string = "INSERT INTO `user`(`username`,`password) VALUES(?,?)";
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
 }
 
 async function is_correct_login(username:string, password:string):Promise<User>{

@@ -15,7 +15,6 @@ function return_http_result(code:number, res:http.ServerResponse<http.IncomingMe
 }
 
 async function main(req:http.IncomingMessage, res:http.ServerResponse<http.IncomingMessage>){
-    console.log(req.headers.cookie);
     let text_response = "";
     req.on("data", (data)=>text_response+=data)
     .on("end", async ()=>{
@@ -25,12 +24,11 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
             let user:User;
             try {
                 console.log(datas);
-                const username = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
-                const password = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
+                const username:string = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
+                const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
                 user = await UserModel.is_correct_login(username, password);
                 if (!user)throw "";
             }catch (error){
-                if (typeof error === "string")throw error;
                 throw error;
             }
 
