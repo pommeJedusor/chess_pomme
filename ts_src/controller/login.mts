@@ -38,10 +38,9 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
 			res.writeHead(301, {
 				Location: `http://localhost:8080/`
 			}).end();
-			console.log(user);
             return;
         }catch (error){
-            console.log(`${error}`)
+            if (error)console.log(error);
             const htmlContent:string = fs.readFileSync("./views/login.ejs", "utf8");
             const htmlRenderized:string = ejs.render(htmlContent, {
                 filename: "login.ejs",

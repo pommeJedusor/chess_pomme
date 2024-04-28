@@ -133,7 +133,6 @@ async function get_user_by_cookies(all_cookies:string|undefined):Promise<false|U
         //request
         conn = await pool.getConnection();
         const res = await conn.query(sql, [cookie]);
-        console.log(res);
         if (res.length===0)return false;
         return new User(res[0].id, res[0].username);
     }catch (error){

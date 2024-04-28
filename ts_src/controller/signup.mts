@@ -15,7 +15,6 @@ function return_http_result(code:number, res:http.ServerResponse<http.IncomingMe
 }
 
 async function main(req:http.IncomingMessage, res:http.ServerResponse<http.IncomingMessage>, user:User|false){
-    console.log(req.headers.cookie);
     let text_response = "";
     req.on("data", (data)=>text_response+=data)
     .on("end", async ()=>{
