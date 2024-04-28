@@ -6,8 +6,10 @@
     <title>signup</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/sign.css">
+    <link rel="stylesheet" href="/css/navbar.css">
 </head>
 <body>
+    <%- include("./views/inc/navbar.ejs"); %>
     <form method="POST" id="sign-form">
         <%if (error) { %>
             <h2 class="error-message"><%=error%></h2>
