@@ -27,6 +27,7 @@
 }
 #navbar a:hover {
     color: var(--user-name);
+    cursor: pointer;
 }
 @media (max-width: 800px) {
     #navbar > ul {

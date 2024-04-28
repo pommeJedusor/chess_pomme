@@ -111,4 +111,36 @@ async function is_username_taken(username:string):Promise<boolean>{
         if (conn!==undefined)conn.release();
     }
 }
-export { insert_user, is_correct_login };
+
+async function get_auth_cookie(all_cookies:string|undefined):Promise<string|undefined>{
+    if (!all_cookies)return;
+    const cookies = all_cookies.split("; ").filter((cookie)=>/auth_cookie=/.test(cookie));
+    if (cookies.length===0)return;
+    return cookies[0].substring("auth_cookie=".length);
+}
+
+async function get_user_by_cookies(all_cookies:string|undefined):Promise<false|User>{
+    const cookie:string|undefined = await get_auth_cookie(all_cookies);
+    if (!cookie)return false;
+
+    if (pool===undefined){
+        throw "get_user_by_cookies: not connected to the db";
+    }
+    let conn:mariadb.PoolConnection|undefined;
+    try {
+        //query
+        const sql:string = "SELECT `user`.`id` AS id, `user`.`username` AS username FROM `auth_cookie` JOIN `user` ON `auth_cookie`.`user_id`=`user`.`id` WHERE `auth_cookie`.`cookie` = ?;";
+        //request
+        conn = await pool.getConnection();
+        const res = await conn.query(sql, [cookie]);
+        console.log(res);
+        if (res.length===0)return false;
+        return new User(res[0].id, res[0].username);
+    }catch (error){
+        throw error;
+    }finally {
+        if (conn!==undefined)conn.release();
+    }
+}
+
+export { insert_user, is_correct_login, get_user_by_cookies };

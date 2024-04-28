@@ -7,13 +7,14 @@ import * as ws_chess from "./js_modules/ws.mjs";
 import * as wstockfish from "./stockfish/wstockfish.mjs";
 import * as ws_controller from "./js_modules/ws_controller.mjs";
 import * as Game from "./model/Game.mjs";
+import * as UserModel from "./model/User.mjs";
 
 //controller
 import * as login_controller from "./controller/login.mjs";
 import * as signup_controller from "./controller/signup.mjs";
 import * as game_controller from "./controller/game.mjs";
 
-import { game } from "./types";
+import { game, User } from "./types";
 
 const port:number = 8080;
 const DEFAULT_STOCKFISH_LEVEL:number = 20;
@@ -46,23 +47,30 @@ function get_waiting_games(number:number=10):(number|string)[][]{
     ]);
 }
 
-const server = http.createServer(function (req, res){
+const server = http.createServer(async function (req, res){
 	const url:string = req.url || "";
 	const parameters:string = url.replace(/\?.*/gm, "");
+	let user:User|false;
+	try {
+		user = await UserModel.get_user_by_cookies(req.headers.cookie);
+	}catch(error){
+		console.log(error);
+		return return_http_error(500, res, "error intern");
+	}
 
 	switch (parameters){
 		case "/":
 			async function send_response_home(){
 				const old_games:Game.Game[] = await Game.get_all_games(5);
 				const htmlContent:string = fs.readFileSync('./views/home.ejs', 'utf8');
-				const htmlRenderized:string = ejs.render(htmlContent, {filename: 'home.ejs', games: old_games});
+				const htmlRenderized:string = ejs.render(htmlContent, {filename: 'home.ejs', games: old_games, user: user});
 				return_http_result(200, res, {'Content-Type':'text/html'}, htmlRenderized);
 			}
 			send_response_home();
 			return
 		case "/stockfish":
 		case "/game":
-			game_controller.main(req, res);
+			game_controller.main(req, res, user);
 			return;
 		case "/get_games":
 			const games:(string|number)[][] = get_waiting_games();
@@ -72,16 +80,16 @@ const server = http.createServer(function (req, res){
 			async function send_response(){
 				const old_games:Game.Game[] = await Game.get_all_games();
 				const htmlContent:string = fs.readFileSync('./views/old_games.ejs', 'utf8');
-				const htmlRenderized:string = ejs.render(htmlContent, {filename: 'old_games.ejs', games: old_games});
+				const htmlRenderized:string = ejs.render(htmlContent, {filename: 'old_games.ejs', games: old_games, user: user});
 				return_http_result(200, res, {'Content-Type':'text/html'}, htmlRenderized);
 			}
 			send_response();
 			return
 		case "/login":
-			login_controller.main(req, res);
+			login_controller.main(req, res, user);
 			return
 		case "/signup":
-			signup_controller.main(req, res);
+			signup_controller.main(req, res, user);
 			return
 		case "/js/chess_game/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){

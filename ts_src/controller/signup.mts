@@ -14,7 +14,7 @@ function return_http_result(code:number, res:http.ServerResponse<http.IncomingMe
 	res.end();
 }
 
-async function main(req:http.IncomingMessage, res:http.ServerResponse<http.IncomingMessage>){
+async function main(req:http.IncomingMessage, res:http.ServerResponse<http.IncomingMessage>, user:User|false){
     console.log(req.headers.cookie);
     let text_response = "";
     req.on("data", (data)=>text_response+=data)
@@ -33,7 +33,8 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
             const htmlContent:string = fs.readFileSync("./views/signup.ejs", "utf8");
             const htmlRenderized:string = ejs.render(htmlContent, {
                 filename: "signup.ejs",
-                error: `${error}`
+                error: `${error}`,
+                user: user
             });
             return return_http_result(200, res, {"Content-Type":"text/html"}, htmlRenderized);
         }
