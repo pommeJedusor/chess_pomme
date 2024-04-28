@@ -11,6 +11,7 @@ import * as Game from "./model/Game.mjs";
 //controller
 import * as login_controller from "./controller/login.mjs";
 import * as signup_controller from "./controller/signup.mjs";
+import * as game_controller from "./controller/game.mjs";
 
 import { game } from "./types";
 
@@ -61,11 +62,8 @@ const server = http.createServer(function (req, res){
 			return
 		case "/stockfish":
 		case "/game":
-			fs.readFile("./public/html/game.html",function(err, data){
-				if (err)return_http_error(400, res, "file not found");
-				else return_http_result(200, res, {'Content-Type':'text/html'}, data);
-			})
-			return
+			game_controller.main(req, res);
+			return;
 		case "/get_games":
 			const games:(string|number)[][] = get_waiting_games();
 			return_http_result(200, res, {'Content-Type':'json'}, JSON.stringify(games));
