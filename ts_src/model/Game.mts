@@ -32,10 +32,11 @@ async function get_all_games(limit:number=Infinity):Promise<Game[]>{
         const limit_sql:string = limit === Infinity ? "" : ` LIMIT ${limit}`;
         const sql:string = `
             SELECT id, white_player, black_player, pgn, winner,
+            date AS date_timestamp,
             DATE_FORMAT(date, "%d/%m/%y %H:%i") AS date,
             status
             FROM chess_game
-            ORDER BY date DESC, id DESC
+            ORDER BY date_timestamp DESC, id DESC
             ${limit_sql};
         `;
         //request
