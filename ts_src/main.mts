@@ -13,6 +13,7 @@ import * as UserModel from "./model/User.mjs";
 import * as login_controller from "./controller/login.mjs";
 import * as signup_controller from "./controller/signup.mjs";
 import * as game_controller from "./controller/game.mjs";
+import * as api_controller from "./controller/api.mjs";
 
 import { game, User } from "./types";
 
@@ -109,6 +110,11 @@ const server = http.createServer(async function (req, res){
 				else return_http_result(200, res, {'Content-Type':'image/svg+xml'}, data);
 			})
 			return
+    default:
+      if (/^\/api\//.test(parameters)){
+        api_controller.main(req, res, user, sockets, socket_games, id_games, bot_id_games);
+        return
+    }
 	}
 
 	if (parameters.length>50)return return_http_error(400, res, "url too long");

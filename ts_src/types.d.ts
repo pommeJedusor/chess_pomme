@@ -61,7 +61,7 @@ export interface piece {
 }
 
 export interface game {
-    player_1:Player;
+    player_1:Player|undefined;
     player_2:Player|undefined;
     id:number;
     board:board;

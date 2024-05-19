@@ -5,21 +5,21 @@ import * as ModelGame from "../model/Game.mjs";
 import ws from "ws";
 
 class Game implements game{
-    player_1:Player;
+    player_1:Player|undefined;
     player_2:Player|undefined;
     id:number;
     board:board;
     moves:Move[];
     result:string|null;
     timestamp; //minutes * seconds * ms
-    constructor(player_1:Player, id:number){
-        this.player_1 = player_1;
+    constructor(id:number, timer:number = 20 * 60 * 1000){
+        this.player_1 = undefined;
         this.player_2 = undefined;
         this.id = id;
         this.board = new Board.Board();
         this.moves = [];
         this.result = null;
-        this.timestamp = 20 * 60 * 1000; //minutes * seconds * ms
+        this.timestamp = timer;// ms
     }
     play(move:string, filter_good_move=(m:move)=>m.get_notation_move()===move):boolean{
         const moves:move[] = this.board.get_every_moves(0);
