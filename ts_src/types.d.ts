@@ -75,6 +75,12 @@ export interface game {
     get_pgn:()=>string;
 }
 
+export interface Move {
+  move:string;
+  timestamp:number;
+  player:Player;
+}
+
 export interface User {
     username:string;
     id:number;

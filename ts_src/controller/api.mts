@@ -4,7 +4,7 @@ import * as ws from "ws";
 import * as ejs from "ejs";
 import * as UserModel from "../model/User.mjs";
 import * as Game from "../js_modules/Game.mjs"
-import { User, game } from "../types";
+import { User, game, Move } from "../types";
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
@@ -29,25 +29,52 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
   const url:string = req.url || "";
 	const parameters:string = url.replace(/\?.*/gm, "").substring(4);
   console.log(parameters);
+  let text_response = "";
   switch (parameters){
     case "/init_game":
-      let text_response = "";
       req.on("data", (data)=>text_response+=data)
       .on("end", async ()=>{
         const datas:Array<string> = text_response.split("&");
-        const timer:number = Number(datas.filter((data)=>/^timer=/.test(data))[0].replace(/^timer=/, "")) || 20 * 60 * 1000;
+        const timer:number = Number(datas.filter((data)=>/^timer=/.test(data))[0]?.replace(/^timer=/, "")) || 20 * 60 * 1000;
         const id:number = get_free_id(id_games);
 
         if (timer < 5000){
           return return_http_error(400,res,"timer is too short, 5 seconds is the minimum required");
         }
 
-        const game = new Game.Game(id, timer);
+        const game:game = new Game.Game(id, timer);
         id_games[id] = game;
 
-        return return_http_result(200, res,{'Content-Type':'json'}, JSON.stringify({"id_game": id}))
+        return return_http_result(200, res,{'Content-Type':'json'}, JSON.stringify({"id_game": id}));
       });
       break;
+    case "/get_game_datas":
+      req.on("data", (data)=>text_response+=data)
+      .on("end", async ()=>{
+        const datas:Array<string> = text_response.split("&");
+        const id:number = Number(datas.filter((data)=>/^id=/.test(data))[0]?.replace(/^id=/, ""));
+
+        if (id !== id){
+          return return_http_error(400, res, "the id of the game is not valid");
+        }
+        if (!id_games[id]){
+          return return_http_error(400, res, "the id of the game does not corresponsd with any of the games currently existing");
+        }
+
+        const game:game = id_games[id];
+        // format the move to only give the move and timestamp
+        const moves:{"move":string, "timestamp":number}[] = game.moves.map((move:Move)=>{
+          return {
+            "move": move.move,
+            "timestamp": move.timestamp,
+        }});
+
+        return return_http_result(200, res,{'Content-Type':'json'}, JSON.stringify({
+          "id_game": game.id,
+          "timer": game.timestamp,
+          "moves": moves
+        }));
+      });
   }
 }
 
