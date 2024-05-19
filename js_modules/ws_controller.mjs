@@ -7,18 +7,8 @@ function close(sockets, socket_games, id_games, socket, socket_id){
         sockets = sockets.filter(s => s !== socket);
         return;
     }
-    //if game was still playing
-    if (game.player_1 && game.player_2 && !game.result){
-        if (game.player_1.socket===socket){
-            game.finish(game.player_2, "by quit", id_games, socket_games, sockets);
-            game.player_1 = null;
-        }else{
-            game.finish(game.player_1, "by quit", id_games, socket_games, sockets);
-            game.player_2 = null;
-        }
-    }
     //if game was finished
-    else if (game.player_1 && game.player_2 && game.result){
+    if (game.player_1 && game.player_2 && game.result){
         if (game.player_1===socket){
             game.player_1 = null;
         }else{
@@ -26,7 +16,7 @@ function close(sockets, socket_games, id_games, socket, socket_id){
         }
     }
     //if only one player left
-    else {
+    else if(!game.player_1 === !!game.player_2){
         game.close(id_games, socket_games, sockets);
     }
 }

@@ -60,9 +60,11 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
     case "/join_game":
       req.on("data", (data)=>text_response+=data)
       .on("end", async ()=>{
-        let datas:{"id":any};
+        let datas:{"id":any, "player_id_game"?:any};
+        let player_id_game:string|null;
         try {
           datas = JSON.parse(text_response);
+          player_id_game = typeof datas.player_id_game === "string" ? datas.player_id_game : null;
           if (!/^\d+$/.test(datas.id)){
             throw "";
           }
@@ -70,13 +72,11 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
           return return_http_error(400, res, "the datas is not valid json");
         }
         const id_game:number = Number(datas.id);
+        const game:game = id_games[id_game];
 
-        if (!id_games[id_game]){
+        if (!game){
           return return_http_error(400, res, "the id of the game does not corresponsd with any of the games currently existing");
         }
-
-        const game:game = id_games[id_game];
-        let player_id_game:string|null = null;
 
         if (game.player_1 === undefined){
           game.player_1 = new Game.Player(game.timestamp, user ? user : undefined);

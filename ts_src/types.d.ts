@@ -61,8 +61,8 @@ export interface piece {
 }
 
 export interface game {
-    player_1:Player|undefined;
-    player_2:Player|undefined;
+    player_1:player|undefined;
+    player_2:player|undefined;
     id:number;
     board:board;
     moves:Move[];

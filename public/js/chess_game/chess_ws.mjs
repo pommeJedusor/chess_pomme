@@ -40,10 +40,11 @@ function open(ws, bot=""){
     "headers": {
       "Content-Type": "application/json"
     },
-    "body": JSON.stringify({"id": id_game}),
+    "body": JSON.stringify({"id": id_game, "player_id_game": sessionStorage.getItem(id_game)}),
   }).then(async (res)=>{
     const datas = await res.json();
     const player_id_game = datas.player_id_game;
+    sessionStorage.setItem(id_game, player_id_game);
     const timestamp = datas.timestamp;
     global_timestamp = timestamp;
     const minutes = Math.floor(timestamp / 60 / 1000);
