@@ -4,14 +4,10 @@ import { game } from "../types";
 
 function chose_first_player(game:game):void{
   const player_1 = game.player_1;
-  const player_2 = game.player_1;
+  const player_2 = game.player_2;
   //chose first player
   const pile_face:number = Math.floor(Math.random()*2);
   if (pile_face===0){
-    game.player_1 = player_1;
-    game.player_2 = player_2;
-  }
-  else {
     game.player_1 = player_2;
     game.player_2 = player_1;
   }
@@ -84,7 +80,9 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
 
   // launch the game
   if (game.player_2 && game.player_2.socket_id && game.player_1 && game.player_1.socket_id){
+    console.log(game.player_1 === game.player_2);
     chose_first_player(game)
+    console.log(game.player_1 === game.player_2);
     game.player_1.socket.send("S:1");
     game.player_2.socket.send("S:2");
     // check if there is a timeout

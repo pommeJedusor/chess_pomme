@@ -60,12 +60,17 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
     case "/join_game":
       req.on("data", (data)=>text_response+=data)
       .on("end", async ()=>{
-        const datas:Array<string> = text_response.split("&");
-        const id_game:number = Number(datas.filter((data)=>/^id=/.test(data))[0]?.replace(/^id=/, ""));
-
-        if (id_game !== id_game){
-          return return_http_error(400, res, "the id of the game is not valid");
+        let datas:{"id":any};
+        try {
+          datas = JSON.parse(text_response);
+          if (!/^\d+$/.test(datas.id)){
+            throw "";
+          }
+        }catch{
+          return return_http_error(400, res, "the datas is not valid json");
         }
+        const id_game:number = Number(datas.id);
+
         if (!id_games[id_game]){
           return return_http_error(400, res, "the id of the game does not corresponsd with any of the games currently existing");
         }

@@ -18,22 +18,39 @@ function get_minutes(){return document.URL.match(/[?&]minutes=(\d*)/)[1];};
 function get_seconds(){return document.URL.match(/[?&]seconds=(\d*)/)[1];};
 
 function open(ws, bot=""){
+  //against bot
+  if (bot.length!==0){
     const minutes = get_minutes();
     const seconds = get_seconds();
     init_timer(minutes, seconds)
-    //against bot
     console.log(bot);
-    if (bot.length!==0){
-        console.log(bot+level);
-        ws.send(bot+level+"|minutes:"+minutes+"|seconds:"+seconds);
-        return;
-    }
-    //against other player
-    const id = document.URL.match(/[?&]id_game=(\d*)/)[1];
-    console.log("ID:"+id);
+    console.log(bot+level);
+    ws.send(bot+level+"|minutes:"+minutes+"|seconds:"+seconds);
+    return;
+  }
+  // against other player
+  const url = "./api/join_game";
+  const id_game = document.URL.match(/[?&]id_game=(\d*)/)[1];
+  console.log(id_game);
+  fetch(url, {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": JSON.stringify({"id": id_game}),
+  }).then(async (res)=>{
+    const datas = await res.json();
+    const player_id_game = datas.player_id_game;
+    const timestamp = datas.timestamp;
+    const minutes = Math.floor(timestamp / 60 / 1000);
+    const seconds = Math.floor(timestamp / 1000) % 60;
+    console.log("ID:"+id_game);
     console.log("minutes:"+minutes);
     console.log("seconds:"+seconds);
-    ws.send("ID:"+id+"|minutes:"+minutes+"|seconds:"+seconds);
+    init_timer(minutes, seconds)
+    ws.send(`ID:${id_game}|player_id_game:${player_id_game}`);
+  });
+  return;
 }
 
 function message(event, ws, player, events_listeners_red_squares){
