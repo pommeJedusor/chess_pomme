@@ -1,4 +1,4 @@
-import { board, color, game, move, piece } from "../types";
+import { board, color, game, move, piece, User } from "../types";
 
 import * as Board from "./Board.mjs";
 import * as ModelGame from "../model/Game.mjs";
@@ -97,17 +97,27 @@ class Game implements game{
 }
 
 class Player{
-    socket:ws.WebSocket;
-    socket_id:number;
+    socket:ws.WebSocket|undefined;
+    socket_id:number|undefined;
     total_timestamp:number;
     draw_proposal:boolean;
     rematch_proposal:boolean;
-    constructor(socket:ws.WebSocket, socket_id:number, total_timestamp:number){
-        this.socket = socket;
-        this.socket_id = socket_id;
+    player_id_game:string;
+    user:User|undefined;
+    constructor(total_timestamp:number, user?:User){
         this.total_timestamp = total_timestamp;
         this.draw_proposal = false;
         this.rematch_proposal = false;
+        this.player_id_game = this.generate_player_id_game();
+        this.user = user;
+    }
+    generate_player_id_game():string{
+      let id = "";
+      const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      for (let i=0;i<10;i++){
+        id += ALLOWED_CHARS[Math.floor(Math.random() * ALLOWED_CHARS.length)];
+      }
+      return id;
     }
 }
 

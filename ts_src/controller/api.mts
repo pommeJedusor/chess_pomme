@@ -48,31 +48,32 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
         return return_http_result(200, res,{'Content-Type':'json'}, JSON.stringify({"id_game": id}));
       });
       break;
-    case "/get_game_datas":
+    case "/join_game":
       req.on("data", (data)=>text_response+=data)
       .on("end", async ()=>{
         const datas:Array<string> = text_response.split("&");
-        const id:number = Number(datas.filter((data)=>/^id=/.test(data))[0]?.replace(/^id=/, ""));
+        const id_game:number = Number(datas.filter((data)=>/^id=/.test(data))[0]?.replace(/^id=/, ""));
 
-        if (id !== id){
+        if (id_game !== id_game){
           return return_http_error(400, res, "the id of the game is not valid");
         }
-        if (!id_games[id]){
+        if (!id_games[id_game]){
           return return_http_error(400, res, "the id of the game does not corresponsd with any of the games currently existing");
         }
 
-        const game:game = id_games[id];
-        // format the move to only give the move and timestamp
-        const moves:{"move":string, "timestamp":number}[] = game.moves.map((move:Move)=>{
-          return {
-            "move": move.move,
-            "timestamp": move.timestamp,
-        }});
+        const game:game = id_games[id_game];
+        let player_id_game:string|null = null;
+
+        if (game.player_1 === undefined){
+          game.player_1 = new Game.Player(game.timestamp, user ? user : undefined);
+          player_id_game = game.player_1.player_id_game;
+        }else if (game.player_2 === undefined){
+          game.player_2 = new Game.Player(game.timestamp, user ? user : undefined);
+          player_id_game = game.player_2.player_id_game;
+        }
 
         return return_http_result(200, res,{'Content-Type':'json'}, JSON.stringify({
-          "id_game": game.id,
-          "timer": game.timestamp,
-          "moves": moves
+          "player_id_game": player_id_game
         }));
       });
   }
