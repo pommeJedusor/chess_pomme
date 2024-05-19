@@ -10,12 +10,15 @@ let timer_interval_id;
 let global_minutes = [null, null];
 let global_seconds = [null, null];
 let global_ms = [null, null];
+let global_timestamp;
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 const level = /[?&]level=([0-9]|1[0-9]|20)(\&|$)/.test(location.search) ? location.search.match(/level=(\d\d?)(\&|$)/)[1] : 20;
 console.log(bot);
 
 function get_minutes(){return document.URL.match(/[?&]minutes=(\d*)/)[1];};
 function get_seconds(){return document.URL.match(/[?&]seconds=(\d*)/)[1];};
+function get_minutes_from_timestamp(timestamp){return Math.floor(timestamp / 1000 / 60)}
+function get_seconds_from_timestamp(timestamp){return Math.floor(timestamp / 1000) % 60}
 
 function open(ws, bot=""){
   //against bot
@@ -42,6 +45,7 @@ function open(ws, bot=""){
     const datas = await res.json();
     const player_id_game = datas.player_id_game;
     const timestamp = datas.timestamp;
+    global_timestamp = timestamp;
     const minutes = Math.floor(timestamp / 60 / 1000);
     const seconds = Math.floor(timestamp / 1000) % 60;
     console.log("ID:"+id_game);
@@ -78,7 +82,7 @@ function message(event, ws, player, events_listeners_red_squares){
         if (player){
             //reset timer
             if (timer_interval_id)clearInterval(timer_interval_id);
-            init_timer(get_minutes(), get_seconds());
+            init_timer(get_minutes_from_timestamp(global_timestamp), get_seconds_from_timestamp(global_timestamp));
 
             data_board = new Board.Board();
             chessboard(location.href, ws, data_board, player_number, events_listeners);

@@ -67,11 +67,12 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
             current_player.total_timestamp = game.timestamp;
             other_player.total_timestamp = game.timestamp;
 
-            let new_game = new Game.Game(current_player, game.id);
+            let new_game = new Game.Game(game.id, game.timestamp);
+            new_game.player_1 = game.player_2;
+            new_game.player_2 = game.player_1;
             socket_games[current_player.socket_id] = new_game;
             socket_games[other_player.socket_id] = new_game;
             id_games[new_game.id] = new_game
-            ws_chess.chose_first_player(new_game, current_player, other_player);
             new_game.player_1.socket.send("S:1");
             new_game.player_2.socket.send("S:2");
 
