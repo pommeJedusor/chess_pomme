@@ -73,7 +73,8 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
         }
 
         return return_http_result(200, res,{'Content-Type':'json'}, JSON.stringify({
-          "player_id_game": player_id_game
+          "player_id_game": player_id_game,
+          "timestamp": game.timestamp
         }));
       });
   }

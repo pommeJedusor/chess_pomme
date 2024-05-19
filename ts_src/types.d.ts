@@ -75,6 +75,16 @@ export interface game {
     get_pgn:()=>string;
 }
 
+export interface Player {
+    socket:ws.WebSocket|undefined;
+    socket_id:number|undefined;
+    total_timestamp:number;
+    draw_proposal:boolean;
+    rematch_proposal:boolean;
+    player_id_game:string;
+    user:User|undefined;
+}
+
 export interface Move {
   move:string;
   timestamp:number;

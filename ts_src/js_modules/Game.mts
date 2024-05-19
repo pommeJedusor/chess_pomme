@@ -111,7 +111,7 @@ class Player{
         this.player_id_game = this.generate_player_id_game();
         this.user = user;
     }
-    generate_player_id_game():string{
+    private generate_player_id_game():string{
       let id = "";
       const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       for (let i=0;i<10;i++){
