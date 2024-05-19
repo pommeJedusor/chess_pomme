@@ -61,7 +61,7 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     socket_games[socket_id] = game;
     if (joined_back){
       // send game datas
-      socket.send(JSON.stringify({
+      socket.send("DATAS:"+JSON.stringify({
         "color": "black",
         "timestamp": game.timestamp,
         "moves": game.moves.map((move)=>{

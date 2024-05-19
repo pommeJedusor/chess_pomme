@@ -60,6 +60,7 @@ function open(ws, bot=""){
 
 function message(event, ws, player, events_listeners_red_squares){
     console.log("recieve: "+event.data);
+    console.log(player);
     //remove last error message
     const last_error = document.querySelector(".error");
     if (last_error)last_error.remove();
@@ -109,9 +110,25 @@ function message(event, ws, player, events_listeners_red_squares){
     else if (/^DP$/.test(event.data)){
         chess_ws_html.insert_draw_proposal(ws);
     }
+    // rematch proposal
     else if (/^RP:/.test(event.data)){
         chess_ws_html.insert_rematch_proposal(ws);
     }
+    // got datas game init
+    else if (/^DATAS:/.test(event.data)){
+      const datas = JSON.parse(event.data.substring(6));
+      console.log(datas);
+      player_number[0] = datas.color === "white" ? 1 : 2;
+      player = player_number;
+      chess_html.update_board_sens(player);
+
+      timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
+      for (let i=0;i<datas.moves.length;i++){
+        const move = datas.moves[i]
+        chess_ws_html.make_move(data_board, move.move, events_listeners_red_squares, player);
+      }
+    }
+    // insert move
     else {
         chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
     }
