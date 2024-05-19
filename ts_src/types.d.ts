@@ -69,13 +69,13 @@ export interface game {
     result:string|null;
     timestamp;//ms
     play:(move:string, filter_good_move:(m:move)=>boolean)=>boolean;
-    finish:(winner:Player, message:string)=>void;
+    finish:(winner:Player|null, message:string)=>void;
     close:(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(ws.WebSocket|undefined)[])=>void;
     check_timeout:()=>void;
     get_pgn:()=>string;
 }
 
-export interface Player {
+export interface player {
     socket:ws.WebSocket|undefined;
     socket_id:number|undefined;
     total_timestamp:number;

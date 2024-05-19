@@ -55,15 +55,28 @@ function stockfish_popup(){
 }
 
 function launch_game(){
-    const minutes = Number(document.querySelector("#minutes-game").value);
-    const seconds = Number(document.querySelector("#seconds-game").value);
-    if (seconds<0 || seconds>59 || minutes<0 || minutes>60){
-        alert("cadence invalide");
-        return;
-    }
-    const id_game = Math.floor(Math.random()*1000);
-    const url = "./game?id_game="+id_game+"&minutes="+minutes+"&seconds="+seconds;
-    location.href = url;
+  const minutes = Number(document.querySelector("#minutes-game").value);
+  const seconds = Number(document.querySelector("#seconds-game").value);
+  if (seconds<0 || seconds>59 || minutes<0 || minutes>60){
+    alert("cadence invalide");
+    return;
+  }
+
+  const timer = (minutes * 60 + seconds) * 1000;
+  const url = "./api/init_game";
+
+  fetch(url, {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": JSON.stringify({"timer": timer}),
+  }).then(async (res)=>{
+    const datas = await res.json();
+    const id_game = datas.id_game;
+    const target_url = `./game?id_game=${id_game}`;
+    location.href = target_url;
+  });
 }
 
 function create_game_popup(){

@@ -1,4 +1,4 @@
-import { board, color, game, move, piece, User } from "../types";
+import { board, color, game, move, piece, User, player } from "../types";
 
 import * as Board from "./Board.mjs";
 import * as ModelGame from "../model/Game.mjs";
@@ -36,7 +36,7 @@ class Game implements game{
         console.log(good_move.get_notation_move());
         return true;
     }
-    finish(winner:Player|null, message:string):void{
+    finish(winner:player|null, message:string):void{
         if (winner===null){
             if (this.player_1 && this.player_1.socket)this.player_1.socket.send("R:D:"+message);
             if (this.player_2 && this.player_2.socket)this.player_2.socket.send("R:D:"+message);
@@ -96,7 +96,7 @@ class Game implements game{
     }
 }
 
-class Player{
+class Player implements player{
     socket:ws.WebSocket|undefined;
     socket_id:number|undefined;
     total_timestamp:number;

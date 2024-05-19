@@ -34,8 +34,17 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
     case "/init_game":
       req.on("data", (data)=>text_response+=data)
       .on("end", async ()=>{
-        const datas:Array<string> = text_response.split("&");
-        const timer:number = Number(datas.filter((data)=>/^timer=/.test(data))[0]?.replace(/^timer=/, "")) || 20 * 60 * 1000;
+        let datas:{"timer":any};
+        try {
+          datas = JSON.parse(text_response);
+          if (typeof datas.timer !== "number"){
+            throw "";
+          }
+        }catch{
+          return return_http_error(400, res, "the datas is not valid json");
+        }
+        const timer:number = datas.timer;
+        console.log(timer);
         const id:number = get_free_id(id_games);
 
         if (timer < 5000){
