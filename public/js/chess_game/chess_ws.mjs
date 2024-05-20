@@ -53,7 +53,11 @@ function open(ws, bot=""){
     console.log("minutes:"+minutes);
     console.log("seconds:"+seconds);
     init_timer(minutes, seconds)
-    ws.send(`ID:${id_game}|player_id_game:${player_id_game}`);
+    if (player_id_game !== "null"){
+      ws.send(`ID:${id_game}|player_id_game:${player_id_game}`);
+    }else{
+      ws.send(`ID:${id_game}`);
+    }
   });
   return;
 }

@@ -152,7 +152,16 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
                 game.finish(winner, "timeout", id_games, socket_games, sockets);
                 return;
             }
+            // send move
             (current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
+            for (const spectator of game.spectators){
+              try {
+                spectator.send(msg);
+              }catch (error){
+                console.log("tried to send the move to a spectator and got an error");
+                console.log(error);
+              }
+            }
             if (msg[msg.length-1]==="#"){
                 const winner = current_player;
                 game.finish(winner, "checkmate", id_games, socket_games, sockets);

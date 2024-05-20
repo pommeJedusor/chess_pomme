@@ -68,6 +68,7 @@ export interface game {
     moves:Move[];
     result:string|null;
     timestamp;//ms
+    spectators:ws.WebSocket[];
     play:(move:string, filter_good_move:(m:move)=>boolean)=>boolean;
     finish:(winner:Player|null, message:string)=>void;
     close:(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(ws.WebSocket|undefined)[])=>void;

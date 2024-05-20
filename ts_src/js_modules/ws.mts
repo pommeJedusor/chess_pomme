@@ -16,7 +16,9 @@ function chose_first_player(game:game):void{
 function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(WebSocket|undefined)[]){
     // spectator mode
   if (/^ID:\d{1,5}$/.test(msg)){
-    socket.send("E: spectator mode isn't yet enable");
+    const id:number = Number(msg.match(/ID:(\d*)$/)![1]);
+    const game = id_games[id]
+    game?.spectators.push(socket);
     return;
   }
   if (!/^ID:\d{1,5}|player_id_game:[a-zA-Z0-9]{10}$/.test(msg)){

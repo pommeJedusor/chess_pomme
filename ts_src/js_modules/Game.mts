@@ -12,6 +12,7 @@ class Game implements game{
     moves:Move[];
     result:string|null;
     timestamp; //minutes * seconds * ms
+    spectators:ws.WebSocket[];
     constructor(id:number, timer:number = 20 * 60 * 1000){
         this.player_1 = undefined;
         this.player_2 = undefined;
@@ -20,6 +21,7 @@ class Game implements game{
         this.moves = [];
         this.result = null;
         this.timestamp = timer;// ms
+        this.spectators = [];
     }
     play(move:string, filter_good_move=(m:move)=>m.get_notation_move()===move):boolean{
         const moves:move[] = this.board.get_every_moves(0);
