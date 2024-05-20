@@ -97,7 +97,7 @@ function message(event, ws, player, events_listeners_red_squares){
             chess_ws_html.switch_moves_buttons(ws);
         }
         player = Number(event.data[2]);
-        let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
+        let result = "The game has started";
         console.log("player : "+player)
         sessionStorage.setItem("chessboard_sens", player);
         chess_html.update_board_sens(player);
