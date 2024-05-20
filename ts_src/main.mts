@@ -31,6 +31,8 @@ function return_http_result(code:number, res:http.ServerResponse<http.IncomingMe
 	res.write(data);
 	res.end();
 }
+function return_http_redirection(code:number, res:http.ServerResponse<http.IncomingMessage>):void{
+}
 function get_waiting_games(number:number=10):(number|string)[][]{
   console.log(get_playing_games());
 	let results:number[] = [];
@@ -117,6 +119,9 @@ const server = http.createServer(async function (req, res){
 		case "/signup":
 			signup_controller.main(req, res, user);
 			return
+		case "/logout":
+      UserModel.remove_user_cookie(req.headers.cookie);
+			return return_http_error(302, res, "logout achieved");
 		case "/js/chess_game/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){
 				if (err)return_http_error(400, res, "file not found");

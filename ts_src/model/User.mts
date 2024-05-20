@@ -86,7 +86,7 @@ async function is_correct_login(username:string, password:string):Promise<User>{
         return new User(res[0].id, res[0].username);
     }catch (error){
         if (typeof error === "string")throw error;
-        throw `Error : ${error}`
+        throw "Error : "+error;
     }finally {
         if (conn!==undefined)conn.release();
     }
@@ -142,4 +142,27 @@ async function get_user_by_cookies(all_cookies:string|undefined):Promise<false|U
     }
 }
 
-export { insert_user, is_correct_login, get_user_by_cookies };
+async function remove_user_cookie(user_cookies:string|undefined):Promise<boolean>{
+    const cookie:string|undefined = await get_auth_cookie(user_cookies);
+    if (!cookie)return false;
+
+    if (pool===undefined){
+        throw "remove_user_cookie: not connected to the db";
+    }
+    let conn:mariadb.PoolConnection|undefined;
+    try {
+        //query
+        const sql = "DELETE FROM `auth_cookie` WHERE `auth_cookie`.`cookie` = ?";
+        //request
+        conn = await pool.getConnection();
+        const res = await conn.query(sql, [cookie]);
+        if (res.length===0)return false;
+        return true;
+    }catch (error){
+        throw error;
+    }finally {
+        if (conn!==undefined)conn.release();
+    }
+}
+
+export { insert_user, is_correct_login, get_user_by_cookies, remove_user_cookie };
