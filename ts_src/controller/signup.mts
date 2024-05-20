@@ -25,7 +25,7 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
             const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
             await UserModel.insert_user(username, password);
             res.writeHead(307, {
-                Location: `http://localhost:8080/login`
+                Location: `./login`
             }).end();
             return;
         }catch (error){

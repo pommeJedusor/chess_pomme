@@ -23,7 +23,6 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
             const datas:Array<string> = text_response.split("&");
             let user:User;
             try {
-                console.log(datas);
                 const username:string = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
                 const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
                 user = await UserModel.is_correct_login(username, password);
@@ -36,7 +35,7 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
 
 			res.setHeader("Set-Cookie", `auth_cookie=${auth_cookie}`);
 			res.writeHead(301, {
-				Location: `http://localhost:8080/`
+				Location: `./`
 			}).end();
             return;
         }catch (error){
