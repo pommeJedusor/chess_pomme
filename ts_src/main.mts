@@ -44,7 +44,9 @@ function get_waiting_games(number:number=10):(number|string)[][]{
 	const minutes_from_timestamp = (timestamp:number)=>(timestamp/60000);
 	return results.map((id:number)=>[
         id,
-        `./game?id_game=${id}&minutes=${minutes_from_timestamp(id_games[id].player_1.total_timestamp)}&seconds=${seconds_from_timestamp(id_games[id].player_1.total_timestamp)}`
+        `./game?id_game=${id}`,
+        minutes_from_timestamp(id_games[id].player_1?.total_timestamp),
+        seconds_from_timestamp(id_games[id].player_1?.total_timestamp),
     ]);
 }
 
