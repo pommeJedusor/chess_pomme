@@ -18,7 +18,23 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
   if (/^ID:\d{1,5}$/.test(msg)){
     const id:number = Number(msg.match(/ID:(\d*)$/)![1]);
     const game = id_games[id]
-    game?.spectators.push(socket);
+    if (game === undefined){
+      socket.send("E: the game you're trying to join doesn't exists yet, go back to the menu and create it");
+      return;
+    }
+    game.spectators.push(socket);
+    socket.send("DATAS:"+JSON.stringify({
+      "white_username": game.player_1?.user ? game.player_1.user.username : "Anonyme",
+      "black_username": game.player_2?.user ? game.player_2.user.username : "Anonyme",
+      "color": "white",
+      "timestamp": game.timestamp,
+      "moves": game.moves.map((move)=>{
+        return {
+          "move": move.move,
+          "timestamp": move.timestamp,
+        }
+      }),
+    }));
     return;
   }
   if (!/^ID:\d{1,5}|player_id_game:[a-zA-Z0-9]{10}$/.test(msg)){
