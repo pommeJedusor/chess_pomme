@@ -32,16 +32,35 @@ function return_http_result(code:number, res:http.ServerResponse<http.IncomingMe
 	res.end();
 }
 function get_waiting_games(number:number=10):(number|string)[][]{
+  console.log(get_playing_games());
 	let results:number[] = [];
 	id_games.forEach((game:any, key:number)=>{
 		if (game && game.player_1 && !game.player_2){
-			console.log(id_games[key].player_1.total_timestamp)
+			console.log(id_games[key].player_1?.total_timestamp)
 			results.push(key);
 		}
 		if (results.length>=number)return;
 	});
-	const seconds_from_timestamp = (timestamp:number)=>(timestamp/1000)%60;
-	const minutes_from_timestamp = (timestamp:number)=>(timestamp/60000);
+	const seconds_from_timestamp = (timestamp?:number)=>timestamp === undefined ? 0 : (timestamp/1000)%60;
+	const minutes_from_timestamp = (timestamp?:number)=>timestamp === undefined ? 0 : (timestamp/60000);
+	return results.map((id:number)=>[
+        id,
+        `./game?id_game=${id}`,
+        minutes_from_timestamp(id_games[id].player_1?.total_timestamp),
+        seconds_from_timestamp(id_games[id].player_1?.total_timestamp),
+    ]);
+}
+function get_playing_games(number:number=10):(number|string)[][]{
+	let results:number[] = [];
+	id_games.forEach((game:any, key:number)=>{
+		if (game && game.player_1 && game.player_2 && !game.results){
+			console.log(id_games[key].player_1?.total_timestamp)
+			results.push(key);
+		}
+		if (results.length>=number)return;
+	});
+	const seconds_from_timestamp = (timestamp?:number)=>timestamp === undefined ? 0 : (timestamp/1000)%60;
+	const minutes_from_timestamp = (timestamp?:number)=>timestamp === undefined ? 0 : (timestamp/60000);
 	return results.map((id:number)=>[
         id,
         `./game?id_game=${id}`,
@@ -75,9 +94,13 @@ const server = http.createServer(async function (req, res){
 		case "/game":
 			game_controller.main(req, res, user);
 			return;
-		case "/get_games":
-			const games:(string|number)[][] = get_waiting_games();
-			return_http_result(200, res, {'Content-Type':'json'}, JSON.stringify(games));
+		case "/get_waiting_games":
+			const waiting_games:(string|number)[][] = get_waiting_games();
+			return_http_result(200, res, {'Content-Type':'json'}, JSON.stringify(waiting_games));
+			return
+		case "/get_playing_games":
+			const playing_games:(string|number)[][] = get_playing_games();
+			return_http_result(200, res, {'Content-Type':'json'}, JSON.stringify(playing_games));
 			return
 		case "/old_games":
 			async function send_response(){

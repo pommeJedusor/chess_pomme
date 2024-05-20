@@ -1,23 +1,40 @@
-async function get_games(){
-    const url = "./get_games";
+async function get_waiting_games(){
+    const url = "./get_waiting_games";
+    const results = await fetch(url).then((res)=>res.json()).then((res)=>res);
+    return results;
+}
+async function get_playing_games(){
+    const url = "./get_playing_games";
     const results = await fetch(url).then((res)=>res.json()).then((res)=>res);
     return results;
 }
 
 async function update_games(){
-    const games = await get_games();
+    const waiting_games = await get_waiting_games();
+    const playing_games = await get_playing_games();
 
     for (const game of document.querySelectorAll(".waiting-game")){
         game.remove();
     }
+    for (const game of document.querySelectorAll(".playing-game")){
+        game.remove();
+    }
 
-    const games_section = document.querySelector("#waiting-games");
-    for (const game of games){
+    const waiting_games_section = document.querySelector("#waiting-games");
+    for (const game of waiting_games){
         let game_a = document.createElement("a");
         game_a.textContent = "partie numero : "+game[0];
         game_a.href = game[1];
         game_a.classList.add("waiting-game")
-        games_section.insertAdjacentElement("beforeend", game_a);
+        waiting_games_section.insertAdjacentElement("beforeend", game_a);
+    }
+    const playing_games_section = document.querySelector("#playing-games");
+    for (const game of playing_games){
+        let game_a = document.createElement("a");
+        game_a.textContent = "partie numero : "+game[0];
+        game_a.href = game[1];
+        game_a.classList.add("playing-game")
+        playing_games_section.insertAdjacentElement("beforeend", game_a);
     }
 }
 
