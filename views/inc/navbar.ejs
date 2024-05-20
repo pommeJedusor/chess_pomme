@@ -1,0 +1,28 @@
+<nav id="navbar">
+    <ul>
+        <li>
+            <a href="./">Home</a>
+        </li>
+        <li>
+            <a href="./old_games">View Games</a>
+        </li>
+        <li>
+            <% if (user) { %>
+            <a id="username-nav-bar"><%= user.username %></a>
+            <a id="logout-button">Logout</a>
+            <script>
+              document.querySelector("#logout-button").addEventListener("click", (event)=>{
+                event.preventDefault();
+                fetch("./logout")
+                .then(()=>{
+                  console.log("test");
+                  location.reload();
+                });
+              });
+            </script>
+            <% }else { %>
+            <a href="./login">Login</a>
+            <% } %>
+        </li>
+    </ul>
+</nav>

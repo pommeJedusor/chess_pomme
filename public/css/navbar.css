@@ -1,0 +1,53 @@
+#navbar > ul {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 4fr 1fr 1fr;
+}
+#navbar > ul {
+    list-style-type: none;
+    text-align: center;
+    padding: 0;
+}
+/* home link*/
+#navbar > ul > li:first-child {
+    grid-column: 2 / 3;
+}
+/* view games link*/
+#navbar > ul > li:nth-child(2) {
+    grid-column: 3 / 4;
+}
+/* login link*/
+#navbar > ul > li:nth-child(3) {
+    grid-column: 5 / 6;
+}
+#navbar a {
+    color: var(--dark-light);
+    font-size: 1.4em;
+    text-decoration: none;
+    text-wrap: nowrap;
+}
+#navbar a:hover {
+    color: var(--user-name);
+    cursor: pointer;
+}
+@media (max-width: 800px) {
+    #navbar > ul {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
+}
+@media (max-width: 500px) {
+    #navbar > ul {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    /* home link*/
+    #navbar > ul > li:first-child {
+        grid-column: 1 / 2;
+    }
+    /* view games link*/
+    #navbar > ul > li:nth-child(2) {
+        grid-column: 2 / 3;
+    }
+    /* login link*/
+    #navbar > ul > li:nth-child(3) {
+        grid-column: 3 / 4;
+    }
+}

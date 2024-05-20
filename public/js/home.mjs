@@ -1,23 +1,40 @@
-async function get_games(){
-    const url = "./get_games";
+async function get_waiting_games(){
+    const url = "./get_waiting_games";
+    const results = await fetch(url).then((res)=>res.json()).then((res)=>res);
+    return results;
+}
+async function get_playing_games(){
+    const url = "./get_playing_games";
     const results = await fetch(url).then((res)=>res.json()).then((res)=>res);
     return results;
 }
 
 async function update_games(){
-    const games = await get_games();
+    const waiting_games = await get_waiting_games();
+    const playing_games = await get_playing_games();
 
     for (const game of document.querySelectorAll(".waiting-game")){
         game.remove();
     }
+    for (const game of document.querySelectorAll(".playing-game")){
+        game.remove();
+    }
 
-    const games_section = document.querySelector("#waiting-games");
-    for (const game of games){
+    const waiting_games_section = document.querySelector("#waiting-games");
+    for (const game of waiting_games){
         let game_a = document.createElement("a");
         game_a.textContent = "partie numero : "+game[0];
         game_a.href = game[1];
         game_a.classList.add("waiting-game")
-        games_section.insertAdjacentElement("beforeend", game_a);
+        waiting_games_section.insertAdjacentElement("beforeend", game_a);
+    }
+    const playing_games_section = document.querySelector("#playing-games");
+    for (const game of playing_games){
+        let game_a = document.createElement("a");
+        game_a.textContent = "partie numero : "+game[0];
+        game_a.href = game[1];
+        game_a.classList.add("playing-game")
+        playing_games_section.insertAdjacentElement("beforeend", game_a);
     }
 }
 
@@ -55,15 +72,28 @@ function stockfish_popup(){
 }
 
 function launch_game(){
-    const minutes = Number(document.querySelector("#minutes-game").value);
-    const seconds = Number(document.querySelector("#seconds-game").value);
-    if (seconds<0 || seconds>59 || minutes<0 || minutes>60){
-        alert("cadence invalide");
-        return;
-    }
-    const id_game = Math.floor(Math.random()*1000);
-    const url = "./game?id_game="+id_game+"&minutes="+minutes+"&seconds="+seconds;
-    location.href = url;
+  const minutes = Number(document.querySelector("#minutes-game").value);
+  const seconds = Number(document.querySelector("#seconds-game").value);
+  if (seconds<0 || seconds>59 || minutes<0 || minutes>60){
+    alert("cadence invalide");
+    return;
+  }
+
+  const timer = (minutes * 60 + seconds) * 1000;
+  const url = "./api/init_game";
+
+  fetch(url, {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": JSON.stringify({"timer": timer}),
+  }).then(async (res)=>{
+    const datas = await res.json();
+    const id_game = datas.id_game;
+    const target_url = `./game?id_game=${id_game}`;
+    location.href = target_url;
+  });
 }
 
 function create_game_popup(){

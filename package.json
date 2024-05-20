@@ -1,7 +1,13 @@
 {
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "ejs": "^3.1.9",
     "mariadb": "^3.3.0",
     "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/ejs": "^3.1.5",
+    "@types/ws": "^8.5.10"
   }
 }

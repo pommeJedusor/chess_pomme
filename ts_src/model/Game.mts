@@ -31,11 +31,16 @@ async function get_all_games(limit:number=Infinity):Promise<Game[]>{
         //query
         const limit_sql:string = limit === Infinity ? "" : ` LIMIT ${limit}`;
         const sql:string = `
-            SELECT id, white_player, black_player, pgn, winner,
+            SELECT chess_game.id,
+            u_white.username AS white_player,
+            u_black.username AS black_player,
+            pgn, winner,
             date AS date_timestamp,
             DATE_FORMAT(date, "%d/%m/%y %H:%i") AS date,
             status
             FROM chess_game
+            LEFT JOIN user u_white ON u_white.id = chess_game.white_player
+            LEFT JOIN user u_black ON u_black.id = chess_game.black_player
             ORDER BY date_timestamp DESC, id DESC
             ${limit_sql};
         `;
@@ -51,17 +56,17 @@ async function get_all_games(limit:number=Infinity):Promise<Game[]>{
     }
 }
 
-async function insert_game(pgn:string, winner:string, status:string){
+async function insert_game(pgn:string, winner:string, status:string, white_player_id:number|null, black_player_id:number|null){
     if (pool===undefined){
         throw Error("get_all_games: not connected to the db");
     }
     let conn:mariadb.PoolConnection|undefined;
     try {
         //query
-        const sql:string = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`) VALUES(?,?,?)";
+        const sql:string = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`, `white_player`, `black_player`) VALUES(?,?,?,?,?)";
         //request
         conn = await pool.getConnection();
-        await conn.query(sql, [pgn, winner, status]);
+        await conn.query(sql, [pgn, winner, status, white_player_id, black_player_id]);
     }catch (error) {
         console.error("Error insering game:", error);
         console.log(`pgn: ${pgn}`);
@@ -70,4 +75,4 @@ async function insert_game(pgn:string, winner:string, status:string){
     }
 }
 
-export { get_all_games, insert_game };
+export { get_all_games, insert_game, Game };

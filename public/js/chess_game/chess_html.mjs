@@ -18,7 +18,7 @@ function get_xy_from_piece(piece){
     return [x, y];
 }
 
-function move_piece(start_x, start_y, target_x , target_y, player_number){
+function move_piece(start_x, start_y, target_x , target_y, player_number, animation_delay=300){
     const chessboard_sens = sessionStorage.getItem("chessboard_sens") ?? 1;
     const sens_move = chessboard_sens==="1" ? 1 : -1;
     const piece = get_html_piece(start_x, start_y);
@@ -29,12 +29,17 @@ function move_piece(start_x, start_y, target_x , target_y, player_number){
     const trans_y = ((-target_y+start_y)*width_squares*sens_move).toString()+"px";
     piece.style.transitionDuration = "300ms";
     piece.style.transform = "translate("+trans_x+", "+trans_y+")";
-    setTimeout(function (){
+    const make_final_insert = function (){
         if (piece_to_take)piece_to_take.remove();
         square.insertAdjacentElement("beforeend", piece);
         piece.style.transform = "translate(0, 0)";
         piece.style.transitionDuration = "0ms";
-    }, 300);
+    }
+    if (animation_delay === 0){
+        make_final_insert();
+        return;
+    }
+    setTimeout(make_final_insert, animation_delay);
 }
 
 function insert_move(move_notation){
@@ -117,14 +122,14 @@ function reset_red_squares(events_listeners){
 }
 
 //makes changes on the html board for special moves (castle, promotion, en-passant)
-function special_change(the_move, piece_to_move, data_board){
+function special_change(the_move, piece_to_move, data_board, animation_delay=undefined){
         const notation_move = the_move.get_notation_move();
         if (/^O-O(-O)?[#+]?$/.test(notation_move)){
             //castle
             const y = data_board.moves.length%2===0 ? 0 : 7;
             const x = /O-O-O/.test(notation_move) ? 0 : 7;
             const target_x = x===0 ? 3 : 5;
-            move_piece(x, y, target_x, y);
+            move_piece(x, y, target_x, y, undefined, animation_delay);
         }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
             //promotion
             //update the class
@@ -176,7 +181,23 @@ function get_piece_set(){
     return  "cburnett";
 }
 
+// board_sens == 1 for white and 2 for black
+function update_usernames(white_username, black_username, board_sens){
+  const usernames_html = document.querySelectorAll(".user-name");
+  console.log(white_username);
+  console.log(black_username);
+  console.log(board_sens);
+  console.log(usernames_html);
+  if (board_sens === 1){
+    usernames_html[0].textContent = black_username;
+    usernames_html[1].textContent = white_username;
+  }else {
+    usernames_html[0].textContent = white_username;
+    usernames_html[1].textContent = black_username;
+  }
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, insert_move,
          get_width_squares, close_end_message, remove_draw_proposal, invert_board,
          update_board_sens, reset_red_squares, special_change, event_moves_buttons,
-         get_piece_set };
+         get_piece_set, update_usernames };

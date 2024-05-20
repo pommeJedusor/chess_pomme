@@ -16,7 +16,7 @@ main {
     align-items: center;
 }
 /*home page*/
-section#waiting-games {
+section#waiting-games, section#playing-games {
     display: flex;
     flex-direction: column;
 }

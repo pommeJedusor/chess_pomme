@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>chess pomme</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/navbar.css">
 </head>
 <body>
+    <%- include("./views/inc/navbar.ejs") %>
     <main>
         <div id="chat">
             <div id="messages">
@@ -23,7 +25,11 @@
             </div>
             <div id="chessboard"></div>
             <div id="user-infos">
-                <p><span class="user-name">Vous</span></p>
+                <% if (user){ %>
+                    <p><span class="user-name"><%=user.username%></span></p>
+                <% }else{ %>
+                    <p><span class="user-name">Vous</span></p>
+                <% } %>
                 <p id="timer1">20:00</p>
             </div>
         </div>

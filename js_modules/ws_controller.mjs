@@ -7,18 +7,8 @@ function close(sockets, socket_games, id_games, socket, socket_id){
         sockets = sockets.filter(s => s !== socket);
         return;
     }
-    //if game was still playing
-    if (game.player_1 && game.player_2 && !game.result){
-        if (game.player_1.socket===socket){
-            game.finish(game.player_2, "by quit", id_games, socket_games, sockets);
-            game.player_1 = null;
-        }else{
-            game.finish(game.player_1, "by quit", id_games, socket_games, sockets);
-            game.player_2 = null;
-        }
-    }
     //if game was finished
-    else if (game.player_1 && game.player_2 && game.result){
+    if (game.player_1 && game.player_2 && game.result){
         if (game.player_1===socket){
             game.player_1 = null;
         }else{
@@ -26,7 +16,7 @@ function close(sockets, socket_games, id_games, socket, socket_id){
         }
     }
     //if only one player left
-    else {
+    else if(!game.player_1 === !!game.player_2){
         game.close(id_games, socket_games, sockets);
     }
 }
@@ -42,13 +32,19 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
     }
     //messages
     else if (/^M:/.test(msg)){
+        const message = msg.substring(2);
         let game = socket_games[socket_id];
         if (!game.player_2){
             socket.send("E:l'autre joueur n'as pas encore rejoint");
             return;
         }
-        game.player_1.socket.send(msg);
-        if (game.player_2)game.player_2.socket.send(msg);
+        if (game.player_1.socket_id === socket_id){
+          game.player_1.socket.send(`M:You|${message}`);
+          game.player_2.socket.send(`M:${game.player_1.user?.username || "Opponent"}|${message}`);
+        }else if (game.player_2.socket_id === socket_id){
+          game.player_1.socket.send(`M:${game.player_2.user?.username || "Opponent"}|${message}`);
+          game.player_2.socket.send(`M:You|${message}`);
+        }
     }
     //remactch proposal
     else if (/^RP:/.test(msg)){
@@ -67,13 +63,16 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
             current_player.total_timestamp = game.timestamp;
             other_player.total_timestamp = game.timestamp;
 
-            let new_game = new Game.Game(current_player, game.id);
+            let new_game = new Game.Game(game.id, game.timestamp);
+            new_game.player_1 = game.player_2;
+            new_game.player_2 = game.player_1;
             socket_games[current_player.socket_id] = new_game;
             socket_games[other_player.socket_id] = new_game;
             id_games[new_game.id] = new_game
-            ws_chess.chose_first_player(new_game, current_player, other_player);
-            new_game.player_1.socket.send("S:1");
-            new_game.player_2.socket.send("S:2");
+            const white_username = new_game.player_1.user?.username || "Opponent";
+            const black_username = new_game.player_2.user?.username || "Opponent";
+            new_game.player_1.socket.send(`S:1|${black_username}`);
+            new_game.player_2.socket.send(`S:2|${white_username}`);
 
             //check timer
             const check_timeout_id = setInterval(function (){
@@ -153,7 +152,16 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
                 game.finish(winner, "timeout", id_games, socket_games, sockets);
                 return;
             }
+            // send move
             (current_player===game.player_1 ? game.player_2 : game.player_1).socket.send(msg);
+            for (const spectator of game.spectators){
+              try {
+                spectator.send(msg);
+              }catch (error){
+                console.log("tried to send the move to a spectator and got an error");
+                console.log(error);
+              }
+            }
             if (msg[msg.length-1]==="#"){
                 const winner = current_player;
                 game.finish(winner, "checkmate", id_games, socket_games, sockets);

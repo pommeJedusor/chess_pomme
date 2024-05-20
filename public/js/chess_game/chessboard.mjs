@@ -7,6 +7,7 @@ let cursor_x = 0;
 let cursor_y = 0;
 let player_number = [];
 let events_listeners = [];
+let global_is_spectator;
 
 function moveMouse(e){
     cursor_x = e.pageX;
@@ -15,6 +16,8 @@ function moveMouse(e){
 let messageSend = null;
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
+    console.log("player_number")
+    console.log(player_number)
     html_chess.reset_red_squares(events_listeners);
     //other player's turn
     if (data_board.moves.length%2===player_number[0]%2){
@@ -52,8 +55,7 @@ function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
             html_chess.move_piece(move.x, move.y, move.target_x, move.target_y, player_number[0]);
             //update datas board
             const data_piece = data_board.board[move.y][move.x];
-            data_board.moves.push(move);
-            data_board.board = data_piece.do_move(data_board.board, move, data_piece.edit_func);
+            data_board.make_move(data_piece, move);
             //send move to server
             ws.send(move.get_notation_move());
             clearInterval(animation_piece_cursor);
@@ -116,8 +118,7 @@ function drop(event, ws, piece_origin_pos, piece, mouseup_event, animation_piece
         html_chess.special_change(move_found, piece, data_board)
         //datas
         const data_piece = data_board.board[old_y][old_x];
-        data_board.board = data_piece.do_move(data_board.board, move_found, data_piece.edit_func);
-        data_board.moves.push(move_found);
+        data_board.make_move(data_piece, move_found);
         ws.send(move_found.get_notation_move());
         html_chess.remove_draw_proposal();
     }
@@ -165,6 +166,8 @@ function make_board(board, data_board, ws){
             //y is invered in the data_board
             piece.draggable = true;
             piece.addEventListener("mousedown", function (e){
+                if (global_is_spectator[0])return;
+
                 const piece_origin_pos = piece.getBoundingClientRect();
                 const animation_piece_cursor = setInterval(()=>html_chessboard.instant_move_piece(piece, piece_origin_pos, cursor_x, cursor_y),10)
                 e.preventDefault();
@@ -179,10 +182,13 @@ function make_board(board, data_board, ws){
     }
 }
 
-function chessboard(href, ws ,data_board, player_num, events){
+function chessboard(href, ws ,data_board, player_num, events, is_spectator=false){
     //init global variables
     player_number = player_num;
+    console.log("player_number");
+    console.log(player_number);
     events_listeners = events;
+    global_is_spectator = is_spectator;
 
     const board = document.querySelector("#chessboard");
     if (!board)return;
@@ -195,7 +201,7 @@ function chessboard(href, ws ,data_board, player_num, events){
         const message_input = document.querySelector("#send-message");
         const message = message_input.value;
         message_input.value = "";
-        if (message!=="")ws.send("M:Anonyme|"+message);
+        if (message!=="")ws.send("M:"+message);
     }
     document.querySelector("#message-form > input[type=submit]").addEventListener("click", messageSend);
     html_chess.event_moves_buttons(ws);

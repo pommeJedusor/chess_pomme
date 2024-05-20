@@ -10,34 +10,63 @@ let timer_interval_id;
 let global_minutes = [null, null];
 let global_seconds = [null, null];
 let global_ms = [null, null];
+let global_timestamp;
+let is_spectator = [false];
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 const level = /[?&]level=([0-9]|1[0-9]|20)(\&|$)/.test(location.search) ? location.search.match(/level=(\d\d?)(\&|$)/)[1] : 20;
 console.log(bot);
 
 function get_minutes(){return document.URL.match(/[?&]minutes=(\d*)/)[1];};
 function get_seconds(){return document.URL.match(/[?&]seconds=(\d*)/)[1];};
+function get_minutes_from_timestamp(timestamp){return Math.floor(timestamp / 1000 / 60)}
+function get_seconds_from_timestamp(timestamp){return Math.floor(timestamp / 1000) % 60}
 
 function open(ws, bot=""){
+  //against bot
+  if (bot.length!==0){
     const minutes = get_minutes();
     const seconds = get_seconds();
     init_timer(minutes, seconds)
-    //against bot
     console.log(bot);
-    if (bot.length!==0){
-        console.log(bot+level);
-        ws.send(bot+level+"|minutes:"+minutes+"|seconds:"+seconds);
-        return;
-    }
-    //against other player
-    const id = document.URL.match(/[?&]id_game=(\d*)/)[1];
-    console.log("ID:"+id);
+    console.log(bot+level);
+    ws.send(bot+level+"|minutes:"+minutes+"|seconds:"+seconds);
+    return;
+  }
+  // against other player
+  const url = "./api/join_game";
+  const id_game = document.URL.match(/[?&]id_game=(\d*)/)[1];
+  console.log(id_game);
+  fetch(url, {
+    "method": "post",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": JSON.stringify({"id": id_game, "player_id_game": sessionStorage.getItem(id_game)}),
+  }).then(async (res)=>{
+    const datas = await res.json();
+    const player_id_game = datas.player_id_game;
+    sessionStorage.setItem(id_game, player_id_game);
+    const timestamp = datas.timestamp;
+    global_timestamp = timestamp;
+    const minutes = Math.floor(timestamp / 60 / 1000);
+    const seconds = Math.floor(timestamp / 1000) % 60;
+    console.log("ID:"+id_game);
     console.log("minutes:"+minutes);
     console.log("seconds:"+seconds);
-    ws.send("ID:"+id+"|minutes:"+minutes+"|seconds:"+seconds);
+    init_timer(minutes, seconds)
+    if (player_id_game !== "null"){
+      ws.send(`ID:${id_game}|player_id_game:${player_id_game}`);
+    }else{
+      ws.send(`ID:${id_game}`);
+      is_spectator[0] = true;
+    }
+  });
+  return;
 }
 
 function message(event, ws, player, events_listeners_red_squares){
     console.log("recieve: "+event.data);
+    console.log(player);
     //remove last error message
     const last_error = document.querySelector(".error");
     if (last_error)last_error.remove();
@@ -61,20 +90,24 @@ function message(event, ws, player, events_listeners_red_squares){
         if (player){
             //reset timer
             if (timer_interval_id)clearInterval(timer_interval_id);
-            init_timer(get_minutes(), get_seconds());
+            init_timer(get_minutes_from_timestamp(global_timestamp), get_seconds_from_timestamp(global_timestamp));
 
             data_board = new Board.Board();
             chessboard(location.href, ws, data_board, player_number, events_listeners);
             chess_ws_html.switch_moves_buttons(ws);
         }
         player = Number(event.data[2]);
-        let result = player===1 ? "Le deuxième joueur a rejoint" : "La partie commence";
+        let result = "The game has started";
         console.log("player : "+player)
         sessionStorage.setItem("chessboard_sens", player);
         chess_html.update_board_sens(player);
 
         chess_ws_html.insert_message(false, result);
         timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
+        // update opponent username
+        const opponent_username = event.data.substring(4);
+        document.querySelector(".user-name").textContent = opponent_username;
+        
     }
     //if recieve message
     else if (/^M:/.test(event.data)){
@@ -87,9 +120,26 @@ function message(event, ws, player, events_listeners_red_squares){
     else if (/^DP$/.test(event.data)){
         chess_ws_html.insert_draw_proposal(ws);
     }
+    // rematch proposal
     else if (/^RP:/.test(event.data)){
         chess_ws_html.insert_rematch_proposal(ws);
     }
+    // got datas game init
+    else if (/^DATAS:/.test(event.data)){
+      const datas = JSON.parse(event.data.substring(6));
+      console.log(datas);
+      player_number[0] = datas.color === "white" ? 1 : 2;
+      player = player_number[0];
+      chess_html.update_board_sens(player_number[0]);
+      chess_html.update_usernames(datas.white_username, datas.black_username, player_number[0])
+
+      timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
+      for (let i=0;i<datas.moves.length;i++){
+        const move = datas.moves[i]
+        chess_ws_html.make_move(data_board, move.move, events_listeners_red_squares, player, 0);
+      }
+    }
+    // insert move
     else {
         chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
     }
@@ -140,7 +190,7 @@ function ws_init(){
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
-    chessboard(href, ws, data_board, player_number, events_listeners);
+    chessboard(href, ws, data_board, player_number, events_listeners, is_spectator);
 }
 
 ws_init()

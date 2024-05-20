@@ -107,7 +107,7 @@ function insert_message(username, message, separator=" : "){
 }
 
 //when recieve move
-function make_move(data_board, notation_move, events_listeners, player_number){
+function make_move(data_board, notation_move, events_listeners, player_number, animation_delay=undefined){
     chess_html.insert_move(notation_move);
     chess_html.reset_red_squares(events_listeners);
     //get the move
@@ -120,15 +120,16 @@ function make_move(data_board, notation_move, events_listeners, player_number){
     }
     if (!the_move){
         console.log("move : "+notation_move+" non trouvé")
+        console.log(data_board.get_every_moves().map(move=>move.get_notation_move()));
+        console.log(data_board);
         return;
     }
     //make the html move
-    chess_html.move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number);
-    chess_html.special_change(the_move, chess_html.get_html_piece(the_move.x, the_move.y), data_board);
+    chess_html.special_change(the_move, chess_html.get_html_piece(the_move.x, the_move.y), data_board,animation_delay);
+    chess_html.move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number, animation_delay);
     //make the move in the datas
     const piece = data_board.board[the_move.y][the_move.x];
-    data_board.board = piece.do_move(data_board.board, the_move, piece.edit_func);
-    data_board.moves.push(the_move);
+    data_board.make_move(piece, the_move);
 }
 
 function switch_moves_buttons(ws){
