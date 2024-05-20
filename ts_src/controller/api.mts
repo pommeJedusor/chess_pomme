@@ -75,24 +75,11 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
         const game:game = id_games[id_game];
 
         // reconnect an user to the game from a different device (or if sessionStorage has been reset)
-        console.log(game.player_1?.user?.id);
-        console.log(game.player_2?.user?.id);
-        console.log(user);
-        console.log(player_id_game);
-        console.log("test");
-        console.log(player_id_game===null);
-        console.log(!!user);
-        console.log(game.player_1?.user?.id === user.id);
-        console.log("test2");
-        console.log(player_id_game===null);
-        console.log(!!user);
-        console.log(game.player_2?.user?.id === user.id);
         if ((!player_id_game || player_id_game==="null") && user && game.player_1?.user?.id === user.id){
           player_id_game = game.player_1.player_id_game;
         }else if ((!player_id_game || player_id_game==="null") && user && game.player_2?.user?.id === user.id){
           player_id_game = game.player_2.player_id_game;
         }
-        console.log(player_id_game);
 
         if (!game){
           return return_http_error(400, res, "the id of the game does not corresponsd with any of the games currently existing");
