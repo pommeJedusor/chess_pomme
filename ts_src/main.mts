@@ -34,11 +34,9 @@ function return_http_result(code:number, res:http.ServerResponse<http.IncomingMe
 function return_http_redirection(code:number, res:http.ServerResponse<http.IncomingMessage>):void{
 }
 function get_waiting_games(number:number=10):(number|string)[][]{
-  console.log(get_playing_games());
 	let results:number[] = [];
 	id_games.forEach((game:any, key:number)=>{
 		if (game && game.player_1 && !game.player_2){
-			console.log(id_games[key].player_1?.total_timestamp)
 			results.push(key);
 		}
 		if (results.length>=number)return;
@@ -56,7 +54,6 @@ function get_playing_games(number:number=10):(number|string)[][]{
 	let results:number[] = [];
 	id_games.forEach((game:any, key:number)=>{
 		if (game && game.player_1 && game.player_2 && !game.results){
-			console.log(id_games[key].player_1?.total_timestamp)
 			results.push(key);
 		}
 		if (results.length>=number)return;
