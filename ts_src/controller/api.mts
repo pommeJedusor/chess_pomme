@@ -74,6 +74,13 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
         const id_game:number = Number(datas.id);
         const game:game = id_games[id_game];
 
+        // reconnect an user to the game from a different device (or if sessionStorage has been reset)
+        if (!player_id_game && user && game.player_1?.user?.id === user.id){
+          player_id_game = game.player_1.player_id_game;
+        }else if (!player_id_game && user && game.player_2?.user?.id === user.id){
+          player_id_game = game.player_2.player_id_game;
+        }
+
         if (!game){
           return return_http_error(400, res, "the id of the game does not corresponsd with any of the games currently existing");
         }
