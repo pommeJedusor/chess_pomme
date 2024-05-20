@@ -42,6 +42,8 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     if (joined_back){
       // send game datas
       socket.send("DATAS:"+JSON.stringify({
+        "white_username": game.player_1?.user ? game.player_1.user.username : "You",
+        "black_username": game.player_2?.user ? game.player_2.user.username : "Opponent",
         "color": "white",
         "timestamp": game.timestamp,
         "moves": game.moves.map((move)=>{
@@ -62,6 +64,8 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     if (joined_back){
       // send game datas
       socket.send("DATAS:"+JSON.stringify({
+        "white_username": game.player_1?.user ? game.player_1.user.username : "Opponent",
+        "black_username": game.player_2?.user ? game.player_2.user.username : "You",
         "color": "black",
         "timestamp": game.timestamp,
         "moves": game.moves.map((move)=>{

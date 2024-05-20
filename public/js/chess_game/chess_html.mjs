@@ -181,7 +181,23 @@ function get_piece_set(){
     return  "cburnett";
 }
 
+// board_sens == 1 for white and 2 for black
+function update_usernames(white_username, black_username, board_sens){
+  const usernames_html = document.querySelectorAll(".user-name");
+  console.log(white_username);
+  console.log(black_username);
+  console.log(board_sens);
+  console.log(usernames_html);
+  if (board_sens === 1){
+    usernames_html[0].textContent = black_username;
+    usernames_html[1].textContent = white_username;
+  }else {
+    usernames_html[0].textContent = white_username;
+    usernames_html[1].textContent = black_username;
+  }
+}
+
 export { get_html_square, get_html_piece, get_xy_from_piece, move_piece, insert_move,
          get_width_squares, close_end_message, remove_draw_proposal, invert_board,
          update_board_sens, reset_red_squares, special_change, event_moves_buttons,
-         get_piece_set };
+         get_piece_set, update_usernames };

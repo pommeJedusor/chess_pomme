@@ -121,6 +121,7 @@ function message(event, ws, player, events_listeners_red_squares){
       player_number[0] = datas.color === "white" ? 1 : 2;
       player = player_number[0];
       chess_html.update_board_sens(player_number[0]);
+      chess_html.update_usernames(datas.white_username, datas.black_username, player_number[0])
 
       timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
       for (let i=0;i<datas.moves.length;i++){
