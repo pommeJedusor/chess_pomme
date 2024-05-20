@@ -98,6 +98,10 @@ function message(event, ws, player, events_listeners_red_squares){
 
         chess_ws_html.insert_message(false, result);
         timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
+        // update opponent username
+        const opponent_username = event.data.substring(4);
+        document.querySelector(".user-name").textContent = opponent_username;
+        
     }
     //if recieve message
     else if (/^M:/.test(event.data)){

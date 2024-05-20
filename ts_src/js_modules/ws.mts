@@ -87,8 +87,12 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     console.log(game.player_1 === game.player_2);
     chose_first_player(game)
     console.log(game.player_1 === game.player_2);
-    game.player_1.socket.send("S:1");
-    game.player_2.socket.send("S:2");
+
+    const white_username = game.player_1.user?.username || "Opponent";
+    const black_username = game.player_2.user?.username || "Opponent";
+    game.player_1.socket.send(`S:1|${black_username}`);
+    game.player_2.socket.send(`S:2|${white_username}`);
+
     // check if there is a timeout
     const check_timeout_id = setInterval(function (){
       game.check_timeout();

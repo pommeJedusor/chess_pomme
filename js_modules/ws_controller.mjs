@@ -63,8 +63,10 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
             socket_games[current_player.socket_id] = new_game;
             socket_games[other_player.socket_id] = new_game;
             id_games[new_game.id] = new_game
-            new_game.player_1.socket.send("S:1");
-            new_game.player_2.socket.send("S:2");
+            const white_username = new_game.player_1.user?.username || "Opponent";
+            const black_username = new_game.player_2.user?.username || "Opponent";
+            new_game.player_1.socket.send(`S:1|${black_username}`);
+            new_game.player_2.socket.send(`S:2|${white_username}`);
 
             //check timer
             const check_timeout_id = setInterval(function (){
