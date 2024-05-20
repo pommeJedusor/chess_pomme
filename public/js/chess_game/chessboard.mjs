@@ -197,7 +197,7 @@ function chessboard(href, ws ,data_board, player_num, events){
         const message_input = document.querySelector("#send-message");
         const message = message_input.value;
         message_input.value = "";
-        if (message!=="")ws.send("M:Anonyme|"+message);
+        if (message!=="")ws.send("M:"+message);
     }
     document.querySelector("#message-form > input[type=submit]").addEventListener("click", messageSend);
     html_chess.event_moves_buttons(ws);

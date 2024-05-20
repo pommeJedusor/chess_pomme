@@ -32,13 +32,19 @@ function ws_controller(sockets, socket_games, id_games, socket, socket_id, msg){
     }
     //messages
     else if (/^M:/.test(msg)){
+        const message = msg.substring(2);
         let game = socket_games[socket_id];
         if (!game.player_2){
             socket.send("E:l'autre joueur n'as pas encore rejoint");
             return;
         }
-        game.player_1.socket.send(msg);
-        if (game.player_2)game.player_2.socket.send(msg);
+        if (game.player_1.socket_id === socket_id){
+          game.player_1.socket.send(`M:You|${message}`);
+          game.player_2.socket.send(`M:${game.player_1.user?.username || "Opponent"}|${message}`);
+        }else if (game.player_2.socket_id === socket_id){
+          game.player_1.socket.send(`M:${game.player_2.user?.username || "Opponent"}|${message}`);
+          game.player_2.socket.send(`M:You|${message}`);
+        }
     }
     //remactch proposal
     else if (/^RP:/.test(msg)){
