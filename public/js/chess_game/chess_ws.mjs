@@ -135,7 +135,7 @@ function message(event, ws, player, events_listeners_red_squares){
     }
     // insert move
     else {
-        chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player, 0);
+        chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
     }
     return player;
 }
