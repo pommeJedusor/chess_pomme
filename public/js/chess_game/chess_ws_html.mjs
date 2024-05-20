@@ -125,8 +125,8 @@ function make_move(data_board, notation_move, events_listeners, player_number, a
         return;
     }
     //make the html move
+    chess_html.special_change(the_move, chess_html.get_html_piece(the_move.x, the_move.y), data_board,animation_delay);
     chess_html.move_piece(the_move.x, the_move.y, the_move.target_x, the_move.target_y, player_number, animation_delay);
-    chess_html.special_change(the_move, chess_html.get_html_piece(the_move.x, the_move.y), data_board);
     //make the move in the datas
     const piece = data_board.board[the_move.y][the_move.x];
     data_board.make_move(piece, the_move);

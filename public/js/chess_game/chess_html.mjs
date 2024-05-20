@@ -122,14 +122,14 @@ function reset_red_squares(events_listeners){
 }
 
 //makes changes on the html board for special moves (castle, promotion, en-passant)
-function special_change(the_move, piece_to_move, data_board){
+function special_change(the_move, piece_to_move, data_board, animation_delay=undefined){
         const notation_move = the_move.get_notation_move();
         if (/^O-O(-O)?[#+]?$/.test(notation_move)){
             //castle
             const y = data_board.moves.length%2===0 ? 0 : 7;
             const x = /O-O-O/.test(notation_move) ? 0 : 7;
             const target_x = x===0 ? 3 : 5;
-            move_piece(x, y, target_x, y);
+            move_piece(x, y, target_x, y, undefined, animation_delay);
         }else if (the_move.piece==="P" && (the_move.target_y===7 || the_move.target_y===0)){
             //promotion
             //update the class
