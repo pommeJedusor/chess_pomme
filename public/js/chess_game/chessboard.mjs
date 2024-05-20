@@ -15,6 +15,8 @@ function moveMouse(e){
 let messageSend = null;
 
 function no_drag_move(event, ws, piece, animation_piece_cursor, data_board){
+    console.log("player_number")
+    console.log(player_number)
     html_chess.reset_red_squares(events_listeners);
     //other player's turn
     if (data_board.moves.length%2===player_number[0]%2){
@@ -180,6 +182,8 @@ function make_board(board, data_board, ws){
 function chessboard(href, ws ,data_board, player_num, events){
     //init global variables
     player_number = player_num;
+    console.log("player_number");
+    console.log(player_number);
     events_listeners = events;
 
     const board = document.querySelector("#chessboard");

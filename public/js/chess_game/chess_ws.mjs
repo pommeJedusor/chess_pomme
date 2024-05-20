@@ -119,18 +119,18 @@ function message(event, ws, player, events_listeners_red_squares){
       const datas = JSON.parse(event.data.substring(6));
       console.log(datas);
       player_number[0] = datas.color === "white" ? 1 : 2;
-      player = player_number;
-      chess_html.update_board_sens(player);
+      player = player_number[0];
+      chess_html.update_board_sens(player_number[0]);
 
       timer_interval_id = setInterval(()=>update_timer(data_board.moves, 10), 10);
       for (let i=0;i<datas.moves.length;i++){
         const move = datas.moves[i]
-        chess_ws_html.make_move(data_board, move.move, events_listeners_red_squares, player);
+        chess_ws_html.make_move(data_board, move.move, events_listeners_red_squares, player, 0);
       }
     }
     // insert move
     else {
-        chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
+        chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player, 0);
     }
     return player;
 }

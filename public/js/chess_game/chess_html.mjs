@@ -18,7 +18,7 @@ function get_xy_from_piece(piece){
     return [x, y];
 }
 
-function move_piece(start_x, start_y, target_x , target_y, player_number){
+function move_piece(start_x, start_y, target_x , target_y, player_number, animation_delay=300){
     const chessboard_sens = sessionStorage.getItem("chessboard_sens") ?? 1;
     const sens_move = chessboard_sens==="1" ? 1 : -1;
     const piece = get_html_piece(start_x, start_y);
@@ -29,12 +29,17 @@ function move_piece(start_x, start_y, target_x , target_y, player_number){
     const trans_y = ((-target_y+start_y)*width_squares*sens_move).toString()+"px";
     piece.style.transitionDuration = "300ms";
     piece.style.transform = "translate("+trans_x+", "+trans_y+")";
-    setTimeout(function (){
+    const make_final_insert = function (){
         if (piece_to_take)piece_to_take.remove();
         square.insertAdjacentElement("beforeend", piece);
         piece.style.transform = "translate(0, 0)";
         piece.style.transitionDuration = "0ms";
-    }, 300);
+    }
+    if (animation_delay === 0){
+        make_final_insert();
+        return;
+    }
+    setTimeout(make_final_insert, animation_delay);
 }
 
 function insert_move(move_notation){
