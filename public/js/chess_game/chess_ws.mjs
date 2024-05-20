@@ -11,6 +11,7 @@ let global_minutes = [null, null];
 let global_seconds = [null, null];
 let global_ms = [null, null];
 let global_timestamp;
+let is_spectator = [false];
 const bot = location.pathname==="/stockfish" ? "stockfish:" : "";
 const level = /[?&]level=([0-9]|1[0-9]|20)(\&|$)/.test(location.search) ? location.search.match(/level=(\d\d?)(\&|$)/)[1] : 20;
 console.log(bot);
@@ -57,6 +58,7 @@ function open(ws, bot=""){
       ws.send(`ID:${id_game}|player_id_game:${player_id_game}`);
     }else{
       ws.send(`ID:${id_game}`);
+      is_spectator[0] = true;
     }
   });
   return;
@@ -188,7 +190,7 @@ function ws_init(){
     ws.onclose = (event) => console.log("WebSocket connection closed");
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
-    chessboard(href, ws, data_board, player_number, events_listeners);
+    chessboard(href, ws, data_board, player_number, events_listeners, is_spectator);
 }
 
 ws_init()

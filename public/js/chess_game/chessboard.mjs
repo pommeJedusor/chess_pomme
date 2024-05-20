@@ -7,6 +7,7 @@ let cursor_x = 0;
 let cursor_y = 0;
 let player_number = [];
 let events_listeners = [];
+let global_is_spectator;
 
 function moveMouse(e){
     cursor_x = e.pageX;
@@ -165,6 +166,8 @@ function make_board(board, data_board, ws){
             //y is invered in the data_board
             piece.draggable = true;
             piece.addEventListener("mousedown", function (e){
+                if (global_is_spectator[0])return;
+
                 const piece_origin_pos = piece.getBoundingClientRect();
                 const animation_piece_cursor = setInterval(()=>html_chessboard.instant_move_piece(piece, piece_origin_pos, cursor_x, cursor_y),10)
                 e.preventDefault();
@@ -179,12 +182,13 @@ function make_board(board, data_board, ws){
     }
 }
 
-function chessboard(href, ws ,data_board, player_num, events){
+function chessboard(href, ws ,data_board, player_num, events, is_spectator=false){
     //init global variables
     player_number = player_num;
     console.log("player_number");
     console.log(player_number);
     events_listeners = events;
+    global_is_spectator = is_spectator;
 
     const board = document.querySelector("#chessboard");
     if (!board)return;
