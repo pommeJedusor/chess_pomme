@@ -183,7 +183,7 @@ function ws_init(){
     const href = location.href;
     data_board = new Board.Board();
 
-    let ws = new WebSocket(href.replace(/^https?/, "ws").replace(/:8080/, ":3000"))
+    let ws = new WebSocket(href.replace(/^https?/, "wss").replace(/:8080/, ":8080"))
 
     ws.onopen = (event)=>open(ws, bot);
     ws.onmessage = (event) => player_number[0] = message(event, ws, player_number[0], events_listeners);

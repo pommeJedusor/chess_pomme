@@ -2,6 +2,7 @@ node_modules/
 package-lock.json
 stockfish/stockfish
 config.json
+.https
 model/*.mjs
 main.mjs
 js_modules/Board.mjs

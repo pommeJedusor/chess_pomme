@@ -1,5 +1,5 @@
 import fs from "fs";
-import http from "http";
+import https from "https";
 import * as ws from "ws";
 import * as ejs from "ejs";
 
@@ -22,16 +22,14 @@ const DEFAULT_STOCKFISH_LEVEL:number = 20;
 const MAX_STOCKFISH_LEVEL:number = 20;
 const MIN_STOCKFISH_LEVEL:number = 0;
 
-function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
+function return_http_error(error_code:number, res:https.ServerResponse<https.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
 	res.end();
 }
-function return_http_result(code:number, res:http.ServerResponse<http.IncomingMessage>, headers:http.OutgoingHttpHeaders, data:string|Buffer):void{
+function return_http_result(code:number, res:https.ServerResponse<https.IncomingMessage>, headers:https.OutgoinghttpsHeaders, data:string|Buffer):void{
 	res.writeHead(code, headers);
 	res.write(data);
 	res.end();
-}
-function return_http_redirection(code:number, res:http.ServerResponse<http.IncomingMessage>):void{
 }
 function get_waiting_games(number:number=10):(number|string)[][]{
 	let results:number[] = [];
@@ -68,7 +66,12 @@ function get_playing_games(number:number=10):(number|string)[][]{
     ]);
 }
 
-const server = http.createServer(async function (req, res){
+const options = {
+  key: fs.readFileSync("./.https/key.pem"),
+  cert: fs.readFileSync("./.https/cert.pem")
+}
+
+const server = https.createServer(options, async function (req, res){
 	const url:string = req.url || "";
 	const parameters:string = url.replace(/\?.*/gm, "");
 	let user:User|false;
@@ -184,7 +187,7 @@ server.listen(port, ():void=>{
 
 
 const ws_server = new ws.WebSocketServer({
-	port: 3000
+  server: server
 });
 
 let sockets:ws.WebSocket[] = [];
