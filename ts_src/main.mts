@@ -21,6 +21,7 @@ const port:number = 8080;
 const DEFAULT_STOCKFISH_LEVEL:number = 20;
 const MAX_STOCKFISH_LEVEL:number = 20;
 const MIN_STOCKFISH_LEVEL:number = 0;
+const config = JSON.parse(fs.readFileSync("./config.json"))
 
 function return_http_error(error_code:number, res:https.ServerResponse<https.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
@@ -67,8 +68,8 @@ function get_playing_games(number:number=10):(number|string)[][]{
 }
 
 const options = {
-  key: fs.readFileSync("./.https/key.pem"),
-  cert: fs.readFileSync("./.https/cert.pem")
+  key: fs.readFileSync(config.key_path),
+  cert: fs.readFileSync(config.cert_path)
 }
 
 const server = https.createServer(options, async function (req, res){
