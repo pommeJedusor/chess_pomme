@@ -59,6 +59,7 @@ function open(ws, bot=""){
     }else{
       ws.send(`ID:${id_game}`);
       is_spectator[0] = true;
+      sessionStorage.setItem("chessboard_sens", 1);
     }
   });
   return;
