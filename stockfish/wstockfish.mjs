@@ -10,52 +10,55 @@ async function get_stockfish_move(game, bot_level){
 }
 
 async function join_game(socket, socket_id, msg, id_games, socket_games, sockets){
-    //find the lowest id game as possible
-    let id = id_games.length;
-    for (let i=0;i<id_games.length;i++){
-        if (id_games[i]===undefined){
-            id = i;
-            break;
-        }
+  //find the lowest id game as possible
+  let id = id_games.length;
+  for (let i=0;i<id_games.length;i++){
+    if (id_games[i]===undefined){
+      id = i;
+      break;
     }
-    //const id = msg.match(/(?<=ID:)\d*$/)[0];
-    const minutes = Number(msg.match(/minutes:(\d*)\|/)[1]);
-    const seconds = Number(msg.match(/seconds:(\d*)$/)[1]);
-    const timer = minutes * 60 * 1000 + seconds * 1000 //minutes * seconds * ms + (seconds * ms)
-    if (id_games[id]!==undefined){
-        socket.send("E:la partie est déjà complète");
-        return;
-    }
-    console.log("player against stockfish");
-    let player = new Game.Player(socket, socket_id, timer);
-    let stockfish = new Game.Player(null, -1, timer);
-    let game = new Game.Game(player, id);
-    socket_games[socket_id] = game;
-    id_games[game.id] = game;
-    //chose first player
-    const pile_face = Math.floor(Math.random()*2);
-    if (pile_face===0){
-        game.player_1 = stockfish;
-        game.player_2 = player;
+  }
+  //const id = msg.match(/(?<=ID:)\d*$/)[0];
+  const minutes = Number(msg.match(/minutes:(\d*)\|/)[1]);
+  const seconds = Number(msg.match(/seconds:(\d*)$/)[1]);
+  const timer = minutes * 60 * 1000 + seconds * 1000 //minutes * seconds * ms + (seconds * ms)
+  if (id_games[id]!==undefined){
+    socket.send("E:la partie est déjà complète");
+    return;
+  }
+  console.log("player against stockfish");
+  let player = new Game.Player(timer);
+  player.socket = socket;
+  player.socket_id = socket_id;
+  let stockfish = new Game.Player(timer);
+  stockfish.socket_id = -1;
+  let game = new Game.Game(player, id);
+  socket_games[socket_id] = game;
+  id_games[game.id] = game;
+  //chose first player
+  const pile_face = Math.floor(Math.random()*2);
+  if (pile_face===0){
+    game.player_1 = stockfish;
+    game.player_2 = player;
 
-        game.player_2.socket.send("S:2");
-        const move = await get_stockfish_move(game);
-        socket.send(move);
-        game.moves.push(new Game.Move(move, Date.now(), 1));
-    }
-    else {
-        game.player_1 = player;
-        game.player_2 = stockfish;
+    game.player_2.socket.send("S:2");
+    const move = await get_stockfish_move(game);
+    socket.send(move);
+    game.moves.push(new Game.Move(move, Date.now(), 1));
+  }
+  else {
+    game.player_1 = player;
+    game.player_2 = stockfish;
 
-        game.player_1.socket.send("S:1");
+    game.player_1.socket.send("S:1");
+  }
+  
+  const check_timeout_id = setInterval(function (){
+    game.check_timeout(id_games, socket_games, sockets)
+    if (game.result){
+      clearInterval(check_timeout_id);
     }
-    
-    const check_timeout_id = setInterval(function (){
-        game.check_timeout(id_games, socket_games, sockets)
-        if (game.result){
-            clearInterval(check_timeout_id);
-        }
-    }, 1000);
+  }, 1000);
 }
 
 function close(sockets, socket_games, id_games, socket, socket_id){
