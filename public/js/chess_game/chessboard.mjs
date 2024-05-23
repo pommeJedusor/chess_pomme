@@ -10,8 +10,8 @@ let events_listeners = [];
 let global_is_spectator;
 
 function moveMouse(e){
-    cursor_x = e.pageX;
-    cursor_y = e.pageY;
+    cursor_x = e.screenX;
+    cursor_y = e.screenY - 95;
 }
 let messageSend = null;
 
