@@ -3,7 +3,7 @@ h1 {
 }
 .launch-game {
   width: 80%;
-  margin: .5em auto;
+  margin: 1em auto 1em auto;
 }
 .launch-game img, .launch-game a {
   vertical-align: middle;
@@ -15,4 +15,12 @@ h1 {
 }
 .icons {
   width: 60px;
+}
+#waiting-games, #playing-games {
+  width: 80%;
+  margin: auto;
+}
+#last-games {
+  width: 80%;
+  margin: auto;
 }
