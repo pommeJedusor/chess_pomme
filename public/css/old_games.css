@@ -3,14 +3,22 @@
     margin: auto;
 }
 .old-game {
-    width: 80%;
-    margin: auto;
-    margin-bottom: 3em;
-    margin-top: 3em;
+  width: 80%;
+  margin: auto;
+  margin-bottom: 3em;
+  margin-top: 3em;
+  padding: 1em 3em;
+  border-radius: 3em;
+  background-color: var(--light-dark);
+  box-shadow: 0 5px 1px rgba(00, 00, 00, 0.3);
 }
 .old-game span {
     color: var(--user-name);
 }
 .old-game span:hover {
     cursor: pointer;
+}
+#see-more-link {
+  display: flex;
+  justify-content: center;
 }
