@@ -121,7 +121,7 @@ function create_game_popup(){
 function main(){
     update_games();
     setInterval(update_games, 5000);
-    const link_stockfish = document.querySelector("#stockfish-games > h3 > a:first-child");
+    const link_stockfish = document.querySelector("h2:nth-child(4) > a");
     link_stockfish.addEventListener("click", (event)=>{
         event.preventDefault();
         stockfish_popup();
