@@ -24,3 +24,7 @@ h1 {
   width: 80%;
   margin: auto;
 }
+/*popup*/
+#bot-parameters.hidden, #game-parameters.hidden{
+  display: none;
+}

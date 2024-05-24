@@ -10,6 +10,33 @@
     <link rel="stylesheet" href="/css/old_games.css">
 </head>
 <body>
+    <div id="bot-parameters" class="hidden">
+        <h2>Stockfish</h2>
+        <form>
+            <p>Level : <span id="level-bot">10</span></p>
+            <label>Choix du level</label>
+            <input type="range" name="" id="bot-level" min="0" max="20" oninput="document.querySelector('#level-bot').textContent=document.querySelector('#bot-level').value">
+            <h3>Choix de la cadence</h3>
+            <label for="minutes-game">minutes</label>
+            <input type="number" name="minutes-game" id="minutes-game" value="20" min="0" max="59">
+            <label for="seconds-game">minutes</label>
+            <input type="number" name="seconds-game" id="seconds-game" value="0" min="0" max="59">
+        </form>
+        <button id="stockfish-games-button">Lancer la partie</button>
+        <button class="close-button"></button>
+    </div>
+    <div id="game-parameters" class="hidden">
+        <h2>Créer une partie</h2>
+        <form>
+            <h3>Choix de la cadence</h3>
+            <label for="minutes-game">minutes</label>
+            <input type="number" name="minutes-game" id="minutes-game" value="20" min="0" max="59">
+            <label for="seconds-game">minutes</label>
+            <input type="number" name="seconds-game" id="seconds-game" value="0" min="0" max="59">
+        </form>
+        <button id="launch-games-button">Lancer la partie</button>
+        <button class="close-button"></button>
+    </div>
     <%- include("./views/inc/navbar.ejs") %>
     <h1>Home</h1>
     <h2 class="launch-game"><img class="icons" src="./img/create.svg"><a href="#">Create a Game</a></h2>
