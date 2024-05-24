@@ -1,6 +1,37 @@
-h1 {
-  text-align: center;
+/*waiting/playing games*/
+section#waiting-games, section#playing-games {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
 }
+/*popup*/
+#bot-parameters, #game-parameters {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    z-index: 10;
+    left: 10vw;
+    top: 10vh;
+    width: 80vw;
+    height: 80vh;
+    background-color: var(--light-dark);
+    border-radius: 25px;
+}
+#bot-parameters > h2 {
+    text-align: center;
+    font-size: 2em;
+}
+#bot-parameters > form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#bot-parameters.hidden, #game-parameters.hidden{
+  display: none;
+}
+/*game creation*/
 .launch-game {
   width: 80%;
   margin: 1em auto 1em auto;
@@ -13,18 +44,8 @@ h1 {
 .launch-game > a:hover {
   text-decoration: underline;
 }
-.icons {
-  width: 60px;
-}
-#waiting-games, #playing-games {
+/*last games*/
+section#last-games {
   width: 80%;
   margin: auto;
-}
-#last-games {
-  width: 80%;
-  margin: auto;
-}
-/*popup*/
-#bot-parameters.hidden, #game-parameters.hidden{
-  display: none;
 }

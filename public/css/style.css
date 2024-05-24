@@ -1,3 +1,4 @@
+/*general*/
 :root {
     --dark-dark : #27374D;
     --light-dark : #526D82;
@@ -15,69 +16,15 @@ main {
     justify-content: space-around;
     align-items: center;
 }
-/*home page*/
-section#waiting-games, section#playing-games {
-    display: flex;
-    flex-direction: column;
-}
-#game-form {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-}
-input#create-game {
-    width: 7%;
-    padding: 0 64px 0 20px;
-    background-color: var(--dark-dark);
-    color: var(--light-light);
-    border: 1px solid var(--light-dark);
-    border-radius: 15px;
-    text-wrap: wrap;
-}
-input#create-game:focus {
-    background-color: var(--light-dark);
-    outline: none;
-}
-input#create-game:focus::placeholder {
-    color: var(--light-dark);
-}
-input#send-game-id {
-    border: none;
-    border-radius: 15px;
-    background-color: var(--dark-dark);
-    color: var(--dark-light);
-    font-weight: 600;
-    font-size: 1.2em;
-}
-input#send-game-id:hover {
-    cursor: pointer;
+h1 {
+  text-align: center;
 }
 a {
     font-size: 1.2em;
     color: var(--user-name);
 }
-/*bot parameters*/
-#bot-parameters, #game-parameters {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: fixed;
-    z-index: 10;
-    left: 10vw;
-    top: 10vh;
-    width: 80vw;
-    height: 80vh;
-    background-color: var(--light-dark);
-    border-radius: 25px;
-}
-#bot-parameters > h2 {
-    text-align: center;
-    font-size: 2em;
-}
-#bot-parameters > form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.icons {
+  width: 60px;
 }
 /*chessboard*/
 #opponent-infos, #user-infos {
