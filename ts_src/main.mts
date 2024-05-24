@@ -165,6 +165,9 @@ const server = https.createServer(options, async function (req, res){
 		case "svg":
 			headers = {'Content-Type':'image/svg+xml'};
 			break;
+		case "png":
+			headers = {'Content-Type':'image/png'};
+			break;
 		case "css":
 			headers = {'Content-Type':'text/css'};
 			break;

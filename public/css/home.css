@@ -1,0 +1,18 @@
+h1 {
+  text-align: center;
+}
+.launch-game {
+  width: 80%;
+  margin: .5em auto;
+}
+.launch-game img, .launch-game a {
+  vertical-align: middle;
+  text-decoration: none;
+  margin-right: 0.2em;
+}
+.launch-game > a:hover {
+  text-decoration: underline;
+}
+.icons {
+  width: 60px;
+}
