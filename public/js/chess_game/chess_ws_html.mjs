@@ -21,7 +21,7 @@ function insert_end_message(result, reason){
     reason_message.textContent = reason;
     //button to close
     let close_button = document.createElement("button");
-    close_button.id = "close-button";
+    close_button.classList.add("close-button");
     close_button.addEventListener("click", chess_html.close_end_message);
 
     alert_div.insertAdjacentElement("afterbegin", result_h3);

@@ -82,7 +82,7 @@ function stockfish_popup(){
   stockfish_button.addEventListener("click", launch_stockfish_game);
 
   const close_button = document.querySelector("#bot-parameters .close-button");
-  close_button.addEventListener("click", ()=>document.querySelector("#bot-parameters").remove());
+  close_button.addEventListener("click", ()=>popup.classList.add("hidden"));
 }
 
 function create_game_popup(){

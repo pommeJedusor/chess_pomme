@@ -23,6 +23,18 @@ a {
     font-size: 1.2em;
     color: var(--user-name);
 }
+.close-button {
+    position: absolute;
+    right: 18px;
+    top: 14px;
+    width: 30px;
+    height: 30px;
+    background-color: inherit;
+    background-image: url("../img/cross.svg");
+    background-size: contain;
+    border: none;
+    cursor: pointer;
+}
 .icons {
   width: 60px;
 }
@@ -109,20 +121,8 @@ a {
 #alert-message.draw {
     background-color: var(--dark-dark);
 }
-#alert-message.draw > #close-button {
+#alert-message.draw > .close-button {
     background-image: url("../img/white_cross.svg");
-}
-#close-button {
-    position: absolute;
-    right: 18px;
-    top: 14px;
-    width: 30px;
-    height: 30px;
-    background-color: inherit;
-    background-image: url("../img/cross.svg");
-    background-size: contain;
-    border: none;
-    cursor: pointer;
 }
 #alert-message > p {
     text-align: center;

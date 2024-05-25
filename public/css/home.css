@@ -7,26 +7,26 @@ section#waiting-games, section#playing-games {
 }
 /*popup*/
 #bot-parameters, #game-parameters {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: fixed;
-    z-index: 10;
-    left: 10vw;
-    top: 10vh;
-    width: 80vw;
-    height: 80vh;
-    background-color: var(--light-dark);
-    border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: fixed;
+  z-index: 10;
+  left: 10vw;
+  top: 10vh;
+  width: 80vw;
+  height: 80vh;
+  background-color: var(--light-dark);
+  border-radius: 25px;
 }
 #bot-parameters > h2 {
-    text-align: center;
-    font-size: 2em;
+  text-align: center;
+  font-size: 2em;
 }
 #bot-parameters > form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 #bot-parameters.hidden, #game-parameters.hidden{
   display: none;
