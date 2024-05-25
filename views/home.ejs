@@ -1,75 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/navbar.css">
-    <link rel="stylesheet" href="/css/home.css">
-    <link rel="stylesheet" href="/css/old_games.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <link rel="stylesheet" href="/css/home.css">
+  <link rel="stylesheet" href="/css/old_games.css">
 </head>
 <body>
-    <div id="bot-parameters" class="hidden">
-        <h2>Stockfish</h2>
-        <form>
-            <p>Level : <span id="level-bot">10</span></p>
-            <label>Choix du level</label>
-            <input type="range" name="" id="bot-level" min="0" max="20" oninput="document.querySelector('#level-bot').textContent=document.querySelector('#bot-level').value">
-            <h3>Choix de la cadence</h3>
+  <div id="bot-parameters" class="hidden">
+    <h2>Stockfish</h2>
+      <form>
+        <p>Level : <span id="level-bot">10</span></p>
+        <label>Choix du level</label>
+        <input type="range" name="" id="bot-level" min="0" max="20" oninput="document.querySelector('#level-bot').textContent=document.querySelector('#bot-level').value">
+        <h3>Choix de la cadence</h3>
+        <div class="cadence">
+          <div>
             <label for="minutes-game">minutes</label>
             <input type="number" name="minutes-game" id="minutes-game" value="20" min="0" max="59">
-            <label for="seconds-game">minutes</label>
+          </div>
+          <div>
+            <label for="seconds-game">seconds</label>
             <input type="number" name="seconds-game" id="seconds-game" value="0" min="0" max="59">
-        </form>
-        <button id="stockfish-games-button">Lancer la partie</button>
-        <button class="close-button"></button>
+          </div>
+        </div>
+      </form>
+      <button id="stockfish-games-button">Lancer la partie</button>
+      <button class="close-button"></button>
     </div>
     <div id="game-parameters" class="hidden">
-        <h2>Créer une partie</h2>
-        <form>
-            <h3>Choix de la cadence</h3>
+      <h2>Créer une partie</h2>
+      <form>
+        <h3>Choix de la cadence</h3>
+        <div class="cadence">
+          <div>
             <label for="minutes-game">minutes</label>
             <input type="number" name="minutes-game" id="minutes-game" value="20" min="0" max="59">
-            <label for="seconds-game">minutes</label>
+          </div>
+          <div>
+            <label for="seconds-game">seconds</label>
             <input type="number" name="seconds-game" id="seconds-game" value="0" min="0" max="59">
-        </form>
-        <button id="launch-games-button">Lancer la partie</button>
-        <button class="close-button"></button>
+          </div>
+        </div>
+      </form>
+      <button id="launch-games-button">Lancer la partie</button>
+      <button class="close-button"></button>
     </div>
     <%- include("./views/inc/navbar.ejs") %>
     <h1>Home</h1>
     <h2 class="launch-game"><img class="icons" src="./img/create.svg"><a href="#">Create a Game</a></h2>
     <h2 class="launch-game"><img class="icons" src="./img/stockfish_logo.png"><a href="#">Play against Stockfish</a></h2>
     <section id="waiting-games">
-        <h2>Join Games : </h2>
+      <h2>Join Games : </h2>
     </section>
     <section id="playing-games">
-        <h2>Watch Games : </h2>
+      <h2>Watch Games : </h2>
     </section>
     <section id="last-games">
-        <h2>Last Games :</h2>
-            <% games.forEach(game => { %>
-              <div class="old-game">
-                <!-- players and the colors they played -->
-                <% if (game.winner=="white") { %>
-                <!--if white victory-->
-                <h2>Victory of <span><%=game.white_player || "Anonyme"%></span> with white against <span><%=game.black_player || "Anonyme"%></span> by <%=game.status%>.</h2>
-                <% } else if (game.winner=="black") { %>
-                <!--if black victory-->
-                <h2>Victory of <span><%=game.black_player || "Anonyme"%></span> with black against <span><%=game.white_player || "Anonyme"%></span> by <%=game.status%>.</h2>
-                <% } else if (game.winner=="draw") { %>
-                <!--if draw-->
-                <h2>draw between <span><%=game.white_player || "Anonyme"%></span> with white against <span><%=game.black_player || "Anonyme"%></span> by <%=game.status%>.</h2>
-                <% } %>
-            <!-- date of the game -->
-                <h3><%=game.date%></h3>
-            <!-- pgn -->
-                <p><%=game.pgn%></p>
-              </div>
-            <% }) %>
-        <h3 id="see-more-link"><a href="./old_games">See more</a></h3>
+      <h2>Last Games :</h2>
+        <% games.forEach(game => { %>
+          <div class="old-game">
+            <!-- players and the colors they played -->
+            <% if (game.winner=="white") { %>
+            <!--if white victory-->
+            <h2>Victory of <span><%=game.white_player || "Anonyme"%></span> with white against <span><%=game.black_player || "Anonyme"%></span> by <%=game.status%>.</h2>
+            <% } else if (game.winner=="black") { %>
+            <!--if black victory-->
+            <h2>Victory of <span><%=game.black_player || "Anonyme"%></span> with black against <span><%=game.white_player || "Anonyme"%></span> by <%=game.status%>.</h2>
+            <% } else if (game.winner=="draw") { %>
+            <!--if draw-->
+            <h2>draw between <span><%=game.white_player || "Anonyme"%></span> with white against <span><%=game.black_player || "Anonyme"%></span> by <%=game.status%>.</h2>
+            <% } %>
+        <!-- date of the game -->
+            <h3><%=game.date%></h3>
+        <!-- pgn -->
+            <p><%=game.pgn%></p>
+          </div>
+          <% }) %>
+          <h3 id="see-more-link"><a href="./old_games">See more</a></h3>
     </section>
-    <script type="module" src="../js/home.mjs"></script>
+  <script type="module" src="../js/home.mjs"></script>
 </body>
 </html>

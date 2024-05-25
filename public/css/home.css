@@ -1,3 +1,10 @@
+/*
+--dark-dark : #27374D;
+--light-dark : #526D82;
+--dark-light : #9DB2BF;
+--light-light : #DDE6ED;
+--user-name : #D90429;
+*/
 /*waiting/playing games*/
 section#waiting-games, section#playing-games {
   display: flex;
@@ -19,17 +26,56 @@ section#waiting-games, section#playing-games {
   background-color: var(--light-dark);
   border-radius: 25px;
 }
-#bot-parameters > h2 {
+#bot-parameters > #game-parameters h2 {
   text-align: center;
   font-size: 2em;
 }
-#bot-parameters > form {
+#bot-parameters h3, #game-parameters h3 {
+  text-align: center;
+}
+#bot-parameters > form, #game-parameters > form {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 #bot-parameters.hidden, #game-parameters.hidden{
   display: none;
+}
+.cadence {
+  display: flex;
+  flex-direction: row;
+}
+.cadence > div {
+  display: flex;
+  flex-direction: column;
+  margin: 0 10px;
+}
+.cadence label {
+  text-align: center;
+}
+#stockfish-games-button, #launch-games-button {
+  width: 20em;
+  height: 3em;
+  background-color: #62c400;
+  color: var(--dark-dark);
+  border: none;
+  border-radius: 15px;
+  margin-top: 3em;
+}
+#stockfish-games-button:hover, #launch-games-button:hover {
+  cursor: pointer;
+  background-color: #51a100;
+}
+#bot-parameters input, #game-parameters input {
+  width: 5em;
+  background-color: var(--dark-dark);
+  color: var(--light-light);
+  border: none;
+  text-wrap: wrap;
+  text-align: center;
+}
+#bot-parameters input:focus, #game-parameters input:focus {
+  outline: none;
 }
 /*game creation*/
 .launch-game {
