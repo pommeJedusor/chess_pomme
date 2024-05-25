@@ -6,23 +6,31 @@
         <li>
             <a href="./old_games">View Games</a>
         </li>
+        <% if (user) { %>
         <li>
-            <% if (user) { %>
-            <a id="username-nav-bar"><%= user.username %></a>
-            <a id="logout-button">Logout</a>
-            <script>
-              document.querySelector("#logout-button").addEventListener("click", (event)=>{
-                event.preventDefault();
-                fetch("./logout")
-                .then(()=>{
-                  console.log("test");
-                  location.reload();
-                });
+          <a id="username-nav-bar"><%= user.username %></a>
+        </li>
+        <li>
+          <a id="logout-button">Logout</a>
+          <script>
+            document.querySelector("#logout-button").addEventListener("click", (event)=>{
+              event.preventDefault();
+              fetch("./logout")
+              .then(()=>{
+                console.log("test");
+                location.reload();
               });
-            </script>
-            <% }else { %>
-            <a href="./login">Login</a>
-            <% } %>
+            });
+          </script>
+        </li>
+        <% }else { %>
+        <li>
+          <a href="./login">Login</a>
+        </li>
+        <li>
+          <a href="./signup">Signup</a>
+        </li>
+        <% } %>
         </li>
     </ul>
 </nav>
