@@ -254,3 +254,18 @@ ws_server.on('connection', function(socket:ws.WebSocket) {
 		}
 	});
 });
+
+function heartbeat(()=>{
+  let pintInterval:number = setInterval(()=>{
+    for (const socket:ws.WebSocket of sockets){
+      if (socket.isAlive() === false){
+        socket.terminate();
+        continue;
+      }
+      ws.isAlive = false;
+      ws.ping(null, false, true);
+    }
+  }, 30000);
+});
+
+heartbeat();
