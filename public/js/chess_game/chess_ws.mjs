@@ -140,6 +140,9 @@ function message(event, ws, player, events_listeners_red_squares){
         chess_ws_html.make_move(data_board, move.move, events_listeners_red_squares, player, 0);
       }
     }
+    else if (/^pomme$/.test(event.data)){
+      //ping
+    }
     // insert move
     else {
         chess_ws_html.make_move(data_board, event.data, events_listeners_red_squares, player);
