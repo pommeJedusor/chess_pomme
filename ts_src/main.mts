@@ -1,5 +1,5 @@
 import fs from "fs";
-import https from "https";
+import http from "http";
 import * as ws from "ws";
 import * as ejs from "ejs";
 
@@ -23,11 +23,11 @@ const MAX_STOCKFISH_LEVEL:number = 20;
 const MIN_STOCKFISH_LEVEL:number = 0;
 const config = JSON.parse(fs.readFileSync("./config.json"))
 
-function return_http_error(error_code:number, res:https.ServerResponse<https.IncomingMessage>, status_message:string|undefined):void{
+function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
 	res.end();
 }
-function return_http_result(code:number, res:https.ServerResponse<https.IncomingMessage>, headers:https.OutgoinghttpsHeaders, data:string|Buffer):void{
+function return_http_result(code:number, res:http.ServerResponse<http.IncomingMessage>, headers:http.OutgoinghttpsHeaders, data:string|Buffer):void{
 	res.writeHead(code, headers);
 	res.write(data);
 	res.end();
@@ -67,12 +67,7 @@ function get_playing_games(number:number=10):(number|string)[][]{
     ]);
 }
 
-const options = {
-  key: fs.readFileSync(config.key_path),
-  cert: fs.readFileSync(config.cert_path)
-}
-
-const server = https.createServer(options, async function (req, res){
+const server = http.createServer(async function (req, res){
 	const url:string = req.url || "";
 	const parameters:string = url.replace(/\?.*/gm, "");
 	let user:User|false;
