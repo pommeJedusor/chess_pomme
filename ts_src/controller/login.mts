@@ -1,8 +1,7 @@
 import fs from "fs";
 import http from "http";
 import * as ejs from "ejs";
-import * as UserModel from "../model/User.mjs";
-import { User } from "../types";
+import { User } from "../model/User.mjs";
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
@@ -21,17 +20,17 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
         try {
             if (!text_response)throw "";
             const datas:Array<string> = text_response.split("&");
-            let user:User;
+            let user:User|false;
             try {
                 const username:string = datas.filter((el)=>/^username=/.test(el))[0].substring("username=".length);
                 const password:string = datas.filter((el)=>/^password=/.test(el))[0].substring("password=".length);
-                user = await UserModel.is_correct_login(username, password);
+                user = await User.connectUser(username, password);
                 if (!user)throw "";
             }catch (error){
                 throw error;
             }
 
-			const auth_cookie:string = await user.set_cookie();
+			const auth_cookie:string = await user.setCookie();
 
 			res.setHeader("Set-Cookie", `auth_cookie=${auth_cookie}`);
 			res.writeHead(301, {

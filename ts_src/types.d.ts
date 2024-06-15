@@ -91,9 +91,3 @@ export interface Move {
   timestamp:number;
   player:Player;
 }
-
-export interface User {
-    username:string;
-    id:number;
-    set_cookie:()=>Promise<string>;
-}

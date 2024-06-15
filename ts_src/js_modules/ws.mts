@@ -24,8 +24,8 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     }
     game.spectators.push(socket);
     socket.send("DATAS:"+JSON.stringify({
-      "white_username": game.player_1?.user ? game.player_1.user.username : "Anonyme",
-      "black_username": game.player_2?.user ? game.player_2.user.username : "Anonyme",
+      "white_username": game.player_1?.user ? game.player_1.user.getUsername() : "Anonyme",
+      "black_username": game.player_2?.user ? game.player_2.user.getUsername() : "Anonyme",
       "color": "white",
       "timestamp": game.timestamp,
       "moves": game.moves.map((move)=>{
@@ -60,8 +60,8 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     if (joined_back){
       // send game datas
       socket.send("DATAS:"+JSON.stringify({
-        "white_username": game.player_1?.user ? game.player_1.user.username : "You",
-        "black_username": game.player_2?.user ? game.player_2.user.username : "Opponent",
+        "white_username": game.player_1?.user ? game.player_1.user.getUsername() : "You",
+        "black_username": game.player_2?.user ? game.player_2.user.getUsername() : "Opponent",
         "color": "white",
         "timestamp": game.timestamp,
         "moves": game.moves.map((move)=>{
@@ -82,8 +82,8 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     if (joined_back){
       // send game datas
       socket.send("DATAS:"+JSON.stringify({
-        "white_username": game.player_1?.user ? game.player_1.user.username : "Opponent",
-        "black_username": game.player_2?.user ? game.player_2.user.username : "You",
+        "white_username": game.player_1?.user ? game.player_1.user.getUsername() : "Opponent",
+        "black_username": game.player_2?.user ? game.player_2.user.getUsername() : "You",
         "color": "black",
         "timestamp": game.timestamp,
         "moves": game.moves.map((move)=>{
@@ -106,8 +106,8 @@ function join_create_game(socket:ws.WebSocket, socket_id:number, msg:string, id_
     chose_first_player(game)
     console.log(game.player_1 === game.player_2);
 
-    const white_username = game.player_1.user?.username || "Opponent";
-    const black_username = game.player_2.user?.username || "Opponent";
+    const white_username = game.player_1.user?.getUsername() || "Opponent";
+    const black_username = game.player_2.user?.getUsername() || "Opponent";
     game.player_1.socket.send(`S:1|${black_username}`);
     game.player_2.socket.send(`S:2|${white_username}`);
 

@@ -1,4 +1,4 @@
-import { board, color, game, move, piece, User, player } from "../types";
+import { board, color, game, move, piece, player } from "../types";
 
 import * as Board from "./Board.mjs";
 import * as ModelGame from "../model/Game.mjs";
@@ -56,7 +56,7 @@ class Game implements game{
 
         //insert in db
         const winner_db = this.result === "D" ? "draw" : this.result === "W" ? "white" : "black";
-        if (this.moves.length>1)ModelGame.insert_game(this.get_pgn(), winner_db, message, this.player_1?.user?.id || null, this.player_2?.user?.id || null);
+        if (this.moves.length>1)ModelGame.insert_game(this.get_pgn(), winner_db, message, this.player_1?.user?.getId() || null, this.player_2?.user?.getId() || null);
     }
     close(id_games:(game|undefined)[], socket_games:(game|undefined)[], sockets:(ws.WebSocket|undefined)[]):void{
         id_games[this.id] = undefined;

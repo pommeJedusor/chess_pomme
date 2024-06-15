@@ -1,8 +1,7 @@
 import fs from "fs";
 import http from "http";
 import * as ejs from "ejs";
-import * as UserModel from "../model/User.mjs";
-import { User } from "../types";
+import { User } from "../model/User.mjs";
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);

@@ -7,7 +7,7 @@ import * as ws_chess from "./js_modules/ws.mjs";
 import * as wstockfish from "./stockfish/wstockfish.mjs";
 import * as ws_controller from "./js_modules/ws_controller.mjs";
 import * as Game from "./model/Game.mjs";
-import * as UserModel from "./model/User.mjs";
+import { User } from "./model/User.mjs";
 
 //controller
 import * as login_controller from "./controller/login.mjs";
@@ -15,19 +15,18 @@ import * as signup_controller from "./controller/signup.mjs";
 import * as game_controller from "./controller/game.mjs";
 import * as api_controller from "./controller/api.mjs";
 
-import { game, User } from "./types";
+import { game } from "./types";
 
 const port:number = 8080;
 const DEFAULT_STOCKFISH_LEVEL:number = 20;
 const MAX_STOCKFISH_LEVEL:number = 20;
 const MIN_STOCKFISH_LEVEL:number = 0;
-const config = JSON.parse(fs.readFileSync("./config.json"))
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
 	res.end();
 }
-function return_http_result(code:number, res:http.ServerResponse<http.IncomingMessage>, headers:http.OutgoinghttpsHeaders, data:string|Buffer):void{
+function return_http_result(code:number, res:http.ServerResponse<http.IncomingMessage>, headers:http.OutgoingHttpHeaders, data:string|Buffer):void{
 	res.writeHead(code, headers);
 	res.write(data);
 	res.end();
@@ -70,9 +69,11 @@ function get_playing_games(number:number=10):(number|string)[][]{
 const server = http.createServer(async function (req, res){
 	const url:string = req.url || "";
 	const parameters:string = url.replace(/\?.*/gm, "");
-	let user:User|false;
+	let user:User|false = false;
 	try {
-		user = await UserModel.get_user_by_cookies(req.headers.cookie);
+    if (req.headers.cookie){
+      user = await User.getUserByCookies(req.headers.cookie);
+    }
 	}catch(error){
 		console.log(error);
 		return return_http_error(500, res, "error intern");
@@ -116,7 +117,9 @@ const server = http.createServer(async function (req, res){
 			signup_controller.main(req, res, user);
 			return
 		case "/logout":
-      UserModel.remove_user_cookie(req.headers.cookie);
+      if (req.headers.cookie){
+        User.deleteCookie(req.headers.cookie);
+      }
 			return return_http_error(302, res, "logout achieved");
 		case "/js/chess_game/Board.mjs":
 			fs.readFile("./js_modules/Board.mjs",function(err, data){
