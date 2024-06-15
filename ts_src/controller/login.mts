@@ -32,7 +32,7 @@ async function main(req:http.IncomingMessage, res:http.ServerResponse<http.Incom
 
 			const auth_cookie:string = await user.setCookie();
 
-			res.setHeader("Set-Cookie", `auth_cookie=${auth_cookie}`);
+			res.setHeader("Set-Cookie", `auth_cookie=${auth_cookie}; Max-Age=31536000`);
 			res.writeHead(301, {
 				Location: `./`
 			}).end();
