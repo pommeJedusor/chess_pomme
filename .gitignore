@@ -1,6 +1,5 @@
 node_modules/
 package-lock.json
-stockfish/stockfish
 config.json
 .https
 model/*.mjs
@@ -11,3 +10,4 @@ js_modules/chesstypes.mjs
 js_modules/Game.mjs
 js_modules/ws.mjs
 controller/*.mjs
+db/
