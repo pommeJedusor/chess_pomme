@@ -122,17 +122,27 @@ async function update_elo(white_player_id:number, black_player_id:number, winner
   */
 }
 
+async function get_player_elo(id:number):Promise<number|null>{
+  const player = await User.getUserById(id);
+  if (!player)return null;
+  return player.getElo();
+}
+
 async function insert_game(pgn:string, winner:string, status:string, white_player_id:number|null, black_player_id:number|null):Promise<void>{
   if (pool===undefined){
     throw Error("get_all_games: not connected to the db");
   }
   let conn:mariadb.PoolConnection|undefined;
+
+  let white_elo:number|null = white_player_id ? await get_player_elo(white_player_id) : null;
+  let black_elo:number|null = black_player_id ? await get_player_elo(black_player_id) : null;
+
   try {
     //query
-    const sql:string = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`, `white_player`, `black_player`) VALUES(?,?,?,?,?)";
+    const sql:string = "INSERT INTO `chess_game` (`pgn`, `winner`, `status`, `white_player`, `black_player`, `white_elo`, `black_elo`) VALUES(?,?,?,?,?,?,?)";
     //request
     conn = await pool.getConnection();
-    await conn.query(sql, [pgn, winner, status, white_player_id, black_player_id]);
+    await conn.query(sql, [pgn, winner, status, white_player_id, black_player_id, white_elo, black_elo]);
   }catch (error) {
     console.error("Error insering game:", error);
     console.log(`pgn: ${pgn}`);
