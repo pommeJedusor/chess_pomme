@@ -254,6 +254,28 @@ class User {
 
     return cookie;
   }
+
+  public async update(){
+    const sql:string = `
+      UPDATE user
+      SET username = ?,
+          elo = ?
+      WHERE id = ?;
+    `;
+    let conn:mariadb.PoolConnection|undefined;
+
+    try {
+      if (pool===undefined)throw "not connected to the db";
+      conn = await pool.getConnection();
+      await conn.query(sql, [this.getUsername(), this.elo, this.getId()])
+    }catch (error){
+      console.log(`Error while insering the cookie: ${error}`);
+    }finally {
+      if (conn!==undefined)conn.release();
+    }
+
+    return this;
+ }
 }
 
 export { User };

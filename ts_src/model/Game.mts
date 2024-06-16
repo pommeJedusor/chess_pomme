@@ -116,10 +116,8 @@ async function update_elo(white_player_id:number, black_player_id:number, winner
   const new_elos = await get_new_elos(player_a, player_b, winner);
   player_a.setElo(new_elos.white);
   player_b.setElo(new_elos.black);
-  /*
   await player_a.update();
   await player_b.update();
-  */
 }
 
 async function get_player_elo(id:number):Promise<number|null>{
