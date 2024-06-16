@@ -256,6 +256,7 @@ ws_server.on('connection', function(socket:ws.WebSocket) {
 const heartbeat = ()=>{
   let pintInterval = setInterval(()=>{
     for (const socket of sockets){
+      if (socket === undefined)continue;
       // ping
       socket.send("pomme");
     }
