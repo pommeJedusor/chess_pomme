@@ -62,24 +62,60 @@
     <section id="last-games">
       <h2>Last Games :</h2>
         <% games.forEach(game => { %>
-          <div class="old-game">
             <!-- players and the colors they played -->
-            <% if (game.winner=="white") { %>
-            <!--if white victory-->
-            <h2>Victory of <span><%=game.white_player || "Anonyme"%></span> with white against <span><%=game.black_player || "Anonyme"%></span> by <%=game.status%>.</h2>
-            <% } else if (game.winner=="black") { %>
-            <!--if black victory-->
-            <h2>Victory of <span><%=game.black_player || "Anonyme"%></span> with black against <span><%=game.white_player || "Anonyme"%></span> by <%=game.status%>.</h2>
-            <% } else if (game.winner=="draw") { %>
-            <!--if draw-->
-            <h2>draw between <span><%=game.white_player || "Anonyme"%></span> with white against <span><%=game.black_player || "Anonyme"%></span> by <%=game.status%>.</h2>
-            <% } %>
-        <!-- date of the game -->
-            <h3><%=game.date%></h3>
-        <!-- pgn -->
-            <p><%=game.pgn%></p>
-          </div>
-          <% }) %>
+            <div class="old-game">
+                <!--if white victory-->
+                <% if (game.winner=="white") { %>
+                    <!--if white has elo -->
+                    <% if (game.white_elo) { %>
+                        <h2>Victory of <span><%= game.white_player %></span> (<span><%= game.white_elo %></span>) with white
+                    <!--if white has no elo -->
+                    <% }else { %>
+                        <h2>Victory of <span><%= game.white_player || "Anonymous" %></span> with white
+                    <!--if black has elo -->
+                    <% }if (game.black_elo) { %>
+                    against <span><%= game.black_player %></span> (<span><%= game.black_elo %></span>) by <%=game.status%>.</h2>
+                    <!--if black no elo -->
+                    <% }else { %>
+                        against <span><%=game.black_player || "Anonymous"%></span> by <%=game.status%>.</h2>
+                    <% } %>
+                <!--if black victory-->
+                <% } else if (game.winner=="black") { %>
+                    <!--if black has elo -->
+                    <% if (game.black_elo) { %>
+                        <h2>Victory of <span><%= game.black_player %></span> (<span><%= game.black_elo %></span>) with black
+                    <!--if black has no elo -->
+                    <% }else { %>
+                        <h2>Victory of <span><%= game.black_player || "Anonymous" %></span> with black
+                    <!--if white has elo -->
+                    <% }if (game.white_elo) { %>
+                    against <span><%= game.white_player %></span> (<span><%= game.white_elo %></span>) by <%=game.status%>.</h2>
+                    <!--if white no elo -->
+                    <% }else { %>
+                        against <span><%=game.white_player || "Anonymous"%></span> by <%=game.status%>.</h2>
+                    <% } %>
+                <!--if draw -->
+                <% } else { %>
+                    <!--if white has elo -->
+                    <% if (game.white_elo) { %>
+                        <h2>Draw between <span><%= game.white_player %></span> (<span><%= game.white_elo %></span>) with white
+                    <!--if white has no elo -->
+                    <% }else { %>
+                        <h2>Victory of <span><%= game.white_player || "Anonymous" %></span> with white
+                    <!--if black has elo -->
+                    <% }if (game.black_elo) { %>
+                    and <span><%= game.black_player %></span> (<span><%= game.black_elo %></span>) by <%=game.status%>.</h2>
+                    <!--if black no elo -->
+                    <% }else { %>
+                        and <span><%=game.black_player || "Anonymous"%></span> by <%=game.status%>.</h2>
+                    <% } %>
+                <% } %>
+                <!-- date of the game -->
+                <h3><%=game.date%></h3>
+                <!-- pgn -->
+                <p><%=game.pgn%></p>
+            </div>
+        <% }) %>
           <h3 id="see-more-link"><a href="./old_games">See more</a></h3>
     </section>
   <script type="module" src="../js/home.mjs"></script>

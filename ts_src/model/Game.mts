@@ -6,6 +6,8 @@ interface Game {
     id:number;
     white_player:number|null;
     black_player:number|null;
+    white_elo:number|null;
+    black_elo:number|null;
     pgn:string|null;
     winner:string;
     date:string;
@@ -35,7 +37,7 @@ async function get_all_games(limit:number=Infinity):Promise<Game[]>{
             SELECT chess_game.id,
             u_white.username AS white_player,
             u_black.username AS black_player,
-            pgn, winner,
+            pgn, winner, white_elo, black_elo,
             date AS date_timestamp,
             DATE_FORMAT(date, "%d/%m/%y %H:%i") AS date,
             status

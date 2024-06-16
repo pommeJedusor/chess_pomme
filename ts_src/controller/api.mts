@@ -4,7 +4,8 @@ import * as ws from "ws";
 import * as ejs from "ejs";
 import * as UserModel from "../model/User.mjs";
 import * as Game from "../js_modules/Game.mjs"
-import { User, game, Move } from "../types";
+import { User } from "../model/User.mjs";
+import { game, Move } from "../types";
 
 function return_http_error(error_code:number, res:http.ServerResponse<http.IncomingMessage>, status_message:string|undefined):void{
 	res.writeHead(error_code, status_message);
