@@ -203,6 +203,22 @@ class User {
   public getElo():number{
     return Math.floor(this.elo / 100);
   }
+  public async getLastElos(number:number=20):Promise<Array<number>>{
+    if (pool===undefined){
+      throw "not connected to the db";
+    }
+    let conn:mariadb.PoolConnection|undefined;
+    try {
+      const sql:string = "SELECT date, (CASE WHEN `white_player` = ? THEN `white_elo` ELSE `black_elo` END) AS elo FROM `chess_game` WHERE ? IN (`white_player`, `black_player`) AND (`white_player` IS NOT NULL AND `black_player` IS NOT NULL)  ORDER BY `date` DESC LIMIT ?;";
+      conn = await pool.getConnection();
+      const res = await conn.query(sql, [this.id, this.id, number]);
+      return res.map((line:{elo:number})=>line.elo);
+    }catch (error){
+      throw error;
+    }finally {
+      if (conn!==undefined)conn.release();
+    }
+  }
 
   public setUsername(username:string):User|string{
     const is_not_valid_username = User.isNotValidUsername(username);
