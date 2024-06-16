@@ -230,7 +230,7 @@ class User {
     return this;
   }
   public setElo(elo:number):User{
-    this.elo = elo;
+    this.elo = elo * 100;
     if (elo < 0){
       this.elo = 0;
     }
