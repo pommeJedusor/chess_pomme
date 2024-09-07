@@ -228,10 +228,12 @@ ws_server.on('connection', function(socket:ws.WebSocket) {
 			const str_level:string = msg.slice("stockfish:".length);
 			let level:number = DEFAULT_STOCKFISH_LEVEL;
 			//if level is number
-			if (/^\d+$/.test(str_level))level = Number(str_level);
+			if (/^\d+$/.test(str_level.slice(0, 2)))level = Number(str_level.slice(0, 2));
+      else if (/^\d+$/.test(str_level.slice(0, 1)))level = Number(str_level.slice(0, 1));
 			if (level>MAX_STOCKFISH_LEVEL || level<MIN_STOCKFISH_LEVEL)level = DEFAULT_STOCKFISH_LEVEL;
+      bot_level = level;
 
-			wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg);
+			wstockfish.controller(sockets, socket_games, bot_id_games, socket, socket_id, msg, level);
 			is_against_bot = true;
 			return;
 		}
